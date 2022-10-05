@@ -791,7 +791,7 @@ func createFieldConfig(defaults FieldDefaults, fieldOptions []FieldOptions) graf
 			}
 		}
 
-		if len(fieldConfig.Mappings) > 0 {
+		if len(mappings) > 0 {
 			fieldConfig.Mappings = mappings
 		}
 
