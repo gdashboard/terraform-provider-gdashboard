@@ -24,7 +24,7 @@
     in
     flake-utils.lib.simpleFlake { # todo use forEachSystem to keep flake crossplatform
       inherit self nixpkgs;
-      name = "grafana-dashboard-builder";
+      name = "gdashboard";
       overlay = hestia.overlays.default;
       preOverlays = [terraform-overrides];
       shell = ./shell-impl.nix;

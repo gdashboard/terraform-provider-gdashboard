@@ -501,6 +501,7 @@ func (p *GrafanaDashboardBuilderProvider) DataSources(ctx context.Context) []fun
 		NewDashboardDataSource,
 		NewBarGaugeDataSource,
 		NewStatDataSource,
+		NewRowDataSource,
 	}
 }
 

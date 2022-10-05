@@ -5,7 +5,7 @@ let
   colored = hestia.ansi.colored;
 in
 hestia.shell.mkShell {
-  name = "grafana-dashboard-builder";
+  name = "gdashboard";
 
   shellScripts = [];
 
