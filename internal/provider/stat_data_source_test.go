@@ -192,8 +192,13 @@ const statProviderCustomSeriesExpectedJson = `{
         "seriesBy": "last"
       },
       "thresholds": {
-        "mode": "",
-        "steps": null
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
       },
       "custom": {
         "axisPlacement": "auto",
@@ -309,8 +314,13 @@ const statProviderCustomDefaultsExpectedJson = `{
         "seriesBy": "last"
       },
       "thresholds": {
-        "mode": "",
-        "steps": null
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
       },
       "custom": {
         "axisPlacement": "",
@@ -407,8 +417,13 @@ const statProviderDefaultsExpectedJson = `{
         "seriesBy": "last"
       },
       "thresholds": {
-        "mode": "",
-        "steps": null
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
       },
       "custom": {
         "axisPlacement": "",

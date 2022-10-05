@@ -88,6 +88,24 @@ provider "gdashboard" {
           fixed_color = "red"
           series_by   = "first"
         }
+
+		thresholds {
+		  mode = "percentage"
+			
+ 		  step {
+			color = "green"
+		  }
+
+		  step {
+			color = "orange"
+			value = 65
+		  }
+
+		  step {
+			color = "red"
+			value = 90
+		  }
+		}
       }
 
 	  graph {
@@ -152,8 +170,21 @@ const gaugeProviderCustomDefaultsExpectedJson = `{
         "seriesBy": "first"
       },
       "thresholds": {
-        "mode": "",
-        "steps": null
+        "mode": "percentage",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "orange",
+            "value": 65
+          },
+          {
+            "color": "red",
+            "value": 90
+          }
+        ]
       },
       "custom": {
         "axisPlacement": "",
@@ -234,8 +265,13 @@ const gaugeProviderDefaultsExpectedJson = `{
         "seriesBy": "last"
       },
       "thresholds": {
-        "mode": "",
-        "steps": null
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
       },
       "custom": {
         "axisPlacement": "",

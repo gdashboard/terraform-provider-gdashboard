@@ -470,6 +470,29 @@ func updateFieldDefaults(defaults *FieldDefaults, opts []FieldOptions) {
 				defaults.Color.SeriesBy = color.SeriesBy.Value
 			}
 		}
+
+		for _, threshold := range field.Thresholds {
+			steps := make([]ThresholdStepDefaults, len(threshold.Steps))
+
+			if !threshold.Mode.Null {
+				defaults.Thresholds.Mode = threshold.Mode.Value
+			}
+
+			for i, step := range threshold.Steps {
+				s := ThresholdStepDefaults{
+					Color: step.Color.Value,
+				}
+
+				if !step.Value.Null {
+					value := step.Value.Value
+					s.Value = &value
+				}
+
+				steps[i] = s
+			}
+
+			defaults.Thresholds.Steps = steps
+		}
 	}
 }
 

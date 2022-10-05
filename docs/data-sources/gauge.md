@@ -18,6 +18,24 @@ data "gdashboard_gauge" "jobs_processed" {
 
   field {
     unit = "percent"
+
+    thresholds {
+      mode = "percentage"
+
+      step {
+        color = "green"
+      }
+
+      step {
+        color = "orange"
+        value = 65
+      }
+
+      step {
+        color = "red"
+        value = 90
+      }
+    }
   }
 
   graph {
@@ -71,6 +89,7 @@ Optional:
 - `max` (Number)
 - `min` (Number)
 - `no_value` (Number)
+- `thresholds` (Block List, Max: 1) (see [below for nested schema](#nestedblock--field--thresholds))
 - `unit` (String)
 
 <a id="nestedblock--field--color"></a>
@@ -141,6 +160,27 @@ Optional:
 
 - `color` (String)
 - `display_text` (String)
+
+
+
+<a id="nestedblock--field--thresholds"></a>
+### Nested Schema for `field.thresholds`
+
+Optional:
+
+- `mode` (String)
+- `step` (Block List, Max: 20) (see [below for nested schema](#nestedblock--field--thresholds--step))
+
+<a id="nestedblock--field--thresholds--step"></a>
+### Nested Schema for `field.thresholds.step`
+
+Required:
+
+- `color` (String)
+
+Optional:
+
+- `value` (Number)
 
 
 

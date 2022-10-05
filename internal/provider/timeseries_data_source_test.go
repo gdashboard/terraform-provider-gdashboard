@@ -192,8 +192,13 @@ const timeseriesProviderCustomSeriesExpectedJson = `{
         "seriesBy": "last"
       },
       "thresholds": {
-        "mode": "",
-        "steps": null
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
       },
       "custom": {
         "axisPlacement": "auto",
@@ -313,8 +318,13 @@ const timeseriesProviderCustomDefaultsExpectedJson = `{
         "seriesBy": "first"
       },
       "thresholds": {
-        "mode": "",
-        "steps": null
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
       },
       "custom": {
         "axisPlacement": "auto",
@@ -385,8 +395,13 @@ const timeseriesProviderDefaultsExpectedJson = `{
         "seriesBy": "last"
       },
       "thresholds": {
-        "mode": "",
-        "steps": null
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
       },
       "custom": {
         "axisPlacement": "auto",

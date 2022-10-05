@@ -11,12 +11,13 @@ import (
 // defaults
 
 type FieldDefaults struct {
-	Unit     string
-	Decimals *int
-	Min      *float64
-	Max      *float64
-	NoValue  *float64
-	Color    ColorDefaults
+	Unit       string
+	Decimals   *int
+	Min        *float64
+	Max        *float64
+	NoValue    *float64
+	Color      ColorDefaults
+	Thresholds ThresholdDefaults
 }
 
 func NewFieldDefaults() FieldDefaults {
@@ -30,6 +31,15 @@ func NewFieldDefaults() FieldDefaults {
 			FixedColor: "green",
 			SeriesBy:   "last",
 		},
+		Thresholds: ThresholdDefaults{
+			Mode: "absolute",
+			Steps: []ThresholdStepDefaults{
+				{
+					Color: "green",
+					Value: nil,
+				},
+			},
+		},
 	}
 }
 
@@ -37,6 +47,16 @@ type ColorDefaults struct {
 	Mode       string
 	FixedColor string
 	SeriesBy   string
+}
+
+type ThresholdDefaults struct {
+	Mode  string
+	Steps []ThresholdStepDefaults
+}
+
+type ThresholdStepDefaults struct {
+	Color string
+	Value *float64
 }
 
 type ReduceOptionDefaults struct {
@@ -120,20 +140,31 @@ type SpecialMappingOptions struct {
 }
 
 type FieldOptions struct {
-	Unit     types.String     `tfsdk:"unit"`
-	Decimals types.Int64      `tfsdk:"decimals"`
-	Min      types.Float64    `tfsdk:"min"`
-	Max      types.Float64    `tfsdk:"max"`
-	NoValue  types.Float64    `tfsdk:"no_value"`
-	Color    []ColorOptions   `tfsdk:"color"`
-	Mappings []MappingOptions `tfsdk:"mappings"`
-	// todo thresholds, links
+	Unit       types.String       `tfsdk:"unit"`
+	Decimals   types.Int64        `tfsdk:"decimals"`
+	Min        types.Float64      `tfsdk:"min"`
+	Max        types.Float64      `tfsdk:"max"`
+	NoValue    types.Float64      `tfsdk:"no_value"`
+	Color      []ColorOptions     `tfsdk:"color"`
+	Mappings   []MappingOptions   `tfsdk:"mappings"`
+	Thresholds []ThresholdOptions `tfsdk:"thresholds"`
+	// todo links
 }
 
 type ColorOptions struct {
 	Mode       types.String `tfsdk:"mode"`
 	FixedColor types.String `tfsdk:"fixed_color"`
 	SeriesBy   types.String `tfsdk:"series_by"`
+}
+
+type ThresholdOptions struct {
+	Mode  types.String    `tfsdk:"mode"`
+	Steps []ThresholdStep `tfsdk:"step"`
+}
+
+type ThresholdStep struct {
+	Color types.String  `tfsdk:"color"`
+	Value types.Float64 `tfsdk:"value"`
 }
 
 type ReduceOptions struct {
@@ -261,6 +292,36 @@ func fieldBlock() tfsdk.Block {
 					"series_by": {
 						Type:     types.StringType,
 						Optional: true,
+					},
+				},
+			},
+			"thresholds": {
+				NestingMode: tfsdk.BlockNestingModeList,
+				MinItems:    0,
+				MaxItems:    1,
+				Blocks: map[string]tfsdk.Block{
+					"step": {
+						NestingMode: tfsdk.BlockNestingModeList,
+						MaxItems:    20,
+						Attributes: map[string]tfsdk.Attribute{
+							"color": {
+								Type:     types.StringType,
+								Required: true,
+							},
+							"value": {
+								Type:     types.Float64Type,
+								Optional: true,
+							},
+						},
+					},
+				},
+				Attributes: map[string]tfsdk.Attribute{
+					"mode": {
+						Type:     types.StringType,
+						Optional: true,
+						Validators: []tfsdk.AttributeValidator{
+							stringvalidator.OneOf("absolute", "percentage"),
+						},
 					},
 				},
 			},
@@ -590,6 +651,15 @@ type ValueMappingResult struct {
 }
 
 func createFieldConfig(defaults FieldDefaults, fieldOptions []FieldOptions) grafana.FieldConfigDefaults {
+	thresholdStep := make([]grafana.ThresholdStep, len(defaults.Thresholds.Steps))
+
+	for i, step := range defaults.Thresholds.Steps {
+		thresholdStep[i] = grafana.ThresholdStep{
+			Color: step.Color,
+			Value: step.Value,
+		}
+	}
+
 	fieldConfig := grafana.FieldConfigDefaults{
 		Unit:     defaults.Unit,
 		Decimals: defaults.Decimals,
@@ -599,6 +669,10 @@ func createFieldConfig(defaults FieldDefaults, fieldOptions []FieldOptions) graf
 			Mode:       defaults.Color.Mode,
 			FixedColor: defaults.Color.FixedColor,
 			SeriesBy:   defaults.Color.SeriesBy,
+		},
+		Thresholds: grafana.Thresholds{
+			Mode:  defaults.Thresholds.Mode,
+			Steps: thresholdStep,
 		},
 	}
 
@@ -717,7 +791,34 @@ func createFieldConfig(defaults FieldDefaults, fieldOptions []FieldOptions) graf
 			}
 		}
 
-		fieldConfig.Mappings = mappings
+		if len(fieldConfig.Mappings) > 0 {
+			fieldConfig.Mappings = mappings
+		}
+
+		for _, threshold := range field.Thresholds {
+			steps := make([]grafana.ThresholdStep, len(threshold.Steps))
+
+			if !threshold.Mode.Null {
+				fieldConfig.Thresholds.Mode = threshold.Mode.Value
+			}
+
+			for i, step := range threshold.Steps {
+				s := grafana.ThresholdStep{
+					Color: step.Color.Value,
+				}
+
+				if !step.Value.Null {
+					value := step.Value.Value
+					s.Value = &value
+				}
+
+				steps[i] = s
+			}
+
+			if len(steps) > 0 {
+				fieldConfig.Thresholds.Steps = steps
+			}
+		}
 	}
 
 	return fieldConfig

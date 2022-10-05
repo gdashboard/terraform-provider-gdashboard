@@ -3,6 +3,24 @@ data "gdashboard_gauge" "jobs_processed" {
 
   field {
     unit = "percent"
+
+    thresholds {
+      mode = "percentage"
+
+      step {
+        color = "green"
+      }
+
+      step {
+        color = "orange"
+        value = 65
+      }
+
+      step {
+        color = "red"
+        value = 90
+      }
+    }
   }
 
   graph {

@@ -145,6 +145,7 @@ Optional:
 - `max` (Number)
 - `min` (Number)
 - `no_value` (Number)
+- `thresholds` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--thresholds))
 - `unit` (String)
 
 <a id="nestedblock--defaults--bar_gauge--field--color"></a>
@@ -215,6 +216,27 @@ Optional:
 
 - `color` (String)
 - `display_text` (String)
+
+
+
+<a id="nestedblock--defaults--bar_gauge--field--thresholds"></a>
+### Nested Schema for `defaults.bar_gauge.field.thresholds`
+
+Optional:
+
+- `mode` (String)
+- `step` (Block List, Max: 20) (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--thresholds--step))
+
+<a id="nestedblock--defaults--bar_gauge--field--thresholds--step"></a>
+### Nested Schema for `defaults.bar_gauge.field.thresholds.step`
+
+Required:
+
+- `color` (String)
+
+Optional:
+
+- `value` (Number)
 
 
 
@@ -291,6 +313,7 @@ Optional:
 - `max` (Number)
 - `min` (Number)
 - `no_value` (Number)
+- `thresholds` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--gauge--field--thresholds))
 - `unit` (String)
 
 <a id="nestedblock--defaults--gauge--field--color"></a>
@@ -364,6 +387,27 @@ Optional:
 
 
 
+<a id="nestedblock--defaults--gauge--field--thresholds"></a>
+### Nested Schema for `defaults.gauge.field.thresholds`
+
+Optional:
+
+- `mode` (String)
+- `step` (Block List, Max: 20) (see [below for nested schema](#nestedblock--defaults--gauge--field--thresholds--step))
+
+<a id="nestedblock--defaults--gauge--field--thresholds--step"></a>
+### Nested Schema for `defaults.gauge.field.thresholds.step`
+
+Required:
+
+- `color` (String)
+
+Optional:
+
+- `value` (Number)
+
+
+
 
 <a id="nestedblock--defaults--gauge--graph"></a>
 ### Nested Schema for `defaults.gauge.graph`
@@ -417,6 +461,7 @@ Optional:
 - `max` (Number)
 - `min` (Number)
 - `no_value` (Number)
+- `thresholds` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--stat--field--thresholds))
 - `unit` (String)
 
 <a id="nestedblock--defaults--stat--field--color"></a>
@@ -487,6 +532,27 @@ Optional:
 
 - `color` (String)
 - `display_text` (String)
+
+
+
+<a id="nestedblock--defaults--stat--field--thresholds"></a>
+### Nested Schema for `defaults.stat.field.thresholds`
+
+Optional:
+
+- `mode` (String)
+- `step` (Block List, Max: 20) (see [below for nested schema](#nestedblock--defaults--stat--field--thresholds--step))
+
+<a id="nestedblock--defaults--stat--field--thresholds--step"></a>
+### Nested Schema for `defaults.stat.field.thresholds.step`
+
+Required:
+
+- `color` (String)
+
+Optional:
+
+- `value` (Number)
 
 
 
@@ -572,6 +638,7 @@ Optional:
 - `max` (Number)
 - `min` (Number)
 - `no_value` (Number)
+- `thresholds` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--timeseries--field--thresholds))
 - `unit` (String)
 
 <a id="nestedblock--defaults--timeseries--field--color"></a>
@@ -642,6 +709,27 @@ Optional:
 
 - `color` (String)
 - `display_text` (String)
+
+
+
+<a id="nestedblock--defaults--timeseries--field--thresholds"></a>
+### Nested Schema for `defaults.timeseries.field.thresholds`
+
+Optional:
+
+- `mode` (String)
+- `step` (Block List, Max: 20) (see [below for nested schema](#nestedblock--defaults--timeseries--field--thresholds--step))
+
+<a id="nestedblock--defaults--timeseries--field--thresholds--step"></a>
+### Nested Schema for `defaults.timeseries.field.thresholds.step`
+
+Required:
+
+- `color` (String)
+
+Optional:
+
+- `value` (Number)
 
 
 

@@ -192,8 +192,13 @@ const barGaugeProviderCustomSeriesExpectedJson = `{
         "seriesBy": "last"
       },
       "thresholds": {
-        "mode": "",
-        "steps": null
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
       },
       "custom": {
         "axisPlacement": "auto",
@@ -305,8 +310,13 @@ const barGaugeProviderCustomDefaultsExpectedJson = `{
         "seriesBy": "first"
       },
       "thresholds": {
-        "mode": "",
-        "steps": null
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
       },
       "custom": {
         "axisPlacement": "",
@@ -385,8 +395,13 @@ const barGaugeProviderDefaultsExpectedJson = `{
         "seriesBy": "last"
       },
       "thresholds": {
-        "mode": "",
-        "steps": null
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
       },
       "custom": {
         "axisPlacement": "",
