@@ -42,7 +42,7 @@ type ColorDefaults struct {
 type ReduceOptionDefaults struct {
 	Values      bool
 	Fields      string
-	Limit       int64
+	Limit       *int
 	Calculation string
 }
 
@@ -721,6 +721,42 @@ func createFieldConfig(defaults FieldDefaults, fieldOptions []FieldOptions) graf
 	}
 
 	return fieldConfig
+}
+
+// updaters
+func updateTextSize(options *grafana.TextSize, opts []TextSizeOptions) {
+	for _, textSize := range opts {
+		if !textSize.Title.Null {
+			size := int(textSize.Title.Value)
+			options.TitleSize = &size
+		}
+
+		if !textSize.Value.Null {
+			size := int(textSize.Value.Value)
+			options.ValueSize = &size
+		}
+	}
+}
+
+func updateReduceOptions(options *grafana.ReduceOptions, opts []ReduceOptions) {
+	for _, reducer := range opts {
+		if !reducer.Values.Null {
+			options.Values = reducer.Values.Value
+		}
+
+		if !reducer.Fields.Null {
+			options.Fields = reducer.Fields.Value
+		}
+
+		if !reducer.Limit.Null {
+			limit := int(reducer.Limit.Value)
+			options.Limit = &limit
+		}
+
+		if !reducer.Calculation.Null {
+			options.Calcs = []string{reducer.Calculation.Value}
+		}
+	}
 }
 
 // etc

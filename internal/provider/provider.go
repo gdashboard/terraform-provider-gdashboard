@@ -27,6 +27,7 @@ type Defaults struct {
 	Timeseries TimeseriesDefaults
 	BarGauge   BarGaugeDefaults
 	Stat       StatDefaults
+	Gauge      GaugeDefaults
 }
 
 // GrafanaDashboardBuilderProviderModel describes the provider data model.
@@ -39,6 +40,7 @@ type DefaultsModel struct {
 	Timeseries []TimeseriesDefaultsModel `tfsdk:"timeseries"`
 	BarGuage   []BarGaugeDefaultsModel   `tfsdk:"bar_gauge"`
 	Stat       []StatDefaultsModel       `tfsdk:"stat"`
+	Gauge      []GaugeDefaultsModel      `tfsdk:"gauge"`
 }
 
 type DashboardDefaultsModel struct {
@@ -64,6 +66,11 @@ type BarGaugeDefaultsModel struct {
 type StatDefaultsModel struct {
 	Field []FieldOptions `tfsdk:"field"`
 	Graph []StatOptions  `tfsdk:"graph"`
+}
+
+type GaugeDefaultsModel struct {
+	Field []FieldOptions `tfsdk:"field"`
+	Graph []GaugeOptions `tfsdk:"graph"`
 }
 
 type TimeModel struct {
@@ -125,6 +132,15 @@ func (p *GrafanaDashboardBuilderProvider) GetSchema(ctx context.Context) (tfsdk.
 						Blocks: map[string]tfsdk.Block{
 							"field": fieldBlock(),
 							"graph": statGraphBlock(),
+						},
+					},
+					"gauge": {
+						NestingMode: tfsdk.BlockNestingModeList,
+						MinItems:    0,
+						MaxItems:    1,
+						Blocks: map[string]tfsdk.Block{
+							"field": fieldBlock(),
+							"graph": gaugeGraphBlock(),
 						},
 					},
 				},
@@ -201,6 +217,15 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 				ColorMode:     "value",
 				GraphMode:     "area",
 				ReduceOptions: NewReduceOptionDefaults(),
+			},
+		},
+		Gauge: GaugeDefaults{
+			Field: NewFieldDefaults(),
+			Graph: GaugeGraphDefault{
+				Orientation:          "auto",
+				ShowThresholdLabels:  false,
+				ShowThresholdMarkers: true,
+				ReduceOptions:        NewReduceOptionDefaults(),
 			},
 		},
 	}
@@ -382,6 +407,29 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 		}
 	}
 
+	if len(data.Defaults) > 0 && len(data.Defaults[0].Gauge) > 0 {
+		opts := data.Defaults[0].Gauge[0]
+
+		updateFieldDefaults(&defaults.Gauge.Field, opts.Field)
+
+		for _, graph := range opts.Graph {
+			if !graph.Orientation.Null {
+				defaults.Gauge.Graph.Orientation = graph.Orientation.Value
+			}
+
+			if !graph.ShowThresholdLabels.Null {
+				defaults.Gauge.Graph.ShowThresholdLabels = graph.ShowThresholdLabels.Value
+			}
+
+			if !graph.ShowThresholdMarkers.Null {
+				defaults.Gauge.Graph.ShowThresholdMarkers = graph.ShowThresholdMarkers.Value
+			}
+
+			updateTextSizeDefaults(&defaults.Stat.Graph.TextSize, graph.TextSize)
+			updateReduceOptionsDefaults(&defaults.Stat.Graph.ReduceOptions, graph.ReduceOptions)
+		}
+	}
+
 	resp.DataSourceData = defaults
 	resp.ResourceData = defaults
 }
@@ -449,6 +497,11 @@ func updateReduceOptionsDefaults(defaults *ReduceOptionDefaults, opts []ReduceOp
 			defaults.Fields = reducer.Fields.Value
 		}
 
+		if !reducer.Limit.Null {
+			limit := int(reducer.Limit.Value)
+			defaults.Limit = &limit
+		}
+
 		if !reducer.Calculation.Null {
 			defaults.Calculation = reducer.Calculation.Value
 		}
@@ -466,6 +519,7 @@ func (p *GrafanaDashboardBuilderProvider) DataSources(ctx context.Context) []fun
 		NewBarGaugeDataSource,
 		NewStatDataSource,
 		NewRowDataSource,
+		NewGaugeDataSource,
 	}
 }
 

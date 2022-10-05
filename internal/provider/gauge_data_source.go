@@ -15,57 +15,53 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ datasource.DataSource = &StatDataSource{}
+var _ datasource.DataSource = &GaugeDataSource{}
 
-func NewStatDataSource() datasource.DataSource {
-	return &StatDataSource{}
+func NewGaugeDataSource() datasource.DataSource {
+	return &GaugeDataSource{}
 }
 
-// StatDataSource defines the data source implementation.
-type StatDataSource struct {
-	Defaults StatDefaults
+// GaugeDataSource defines the data source implementation.
+type GaugeDataSource struct {
+	Defaults GaugeDefaults
 }
 
-type StatDefaults struct {
+type GaugeDefaults struct {
 	Field FieldDefaults
-	Graph StatGraphDefaults
+	Graph GaugeGraphDefault
 }
 
-type StatGraphDefaults struct {
-	Orientation   string
-	TextMode      string
-	ColorMode     string
-	GraphMode     string
-	TextAlignment string
-	ReduceOptions ReduceOptionDefaults
-	TextSize      TextSizeDefaults
+type GaugeGraphDefault struct {
+	Orientation          string
+	ShowThresholdLabels  bool
+	ShowThresholdMarkers bool
+	TextSize             TextSizeDefaults
+	ReduceOptions        ReduceOptionDefaults
 }
 
-// StatDataSourceModel describes the data source data model.
-type StatDataSourceModel struct {
+// GaugeDataSourceModel describes the data source data model.
+type GaugeDataSourceModel struct {
 	Id      types.String   `tfsdk:"id"`
 	Json    types.String   `tfsdk:"json"`
 	Title   types.String   `tfsdk:"title"`
 	Targets []Target       `tfsdk:"targets"`
 	Field   []FieldOptions `tfsdk:"field"`
-	Graph   []StatOptions  `tfsdk:"graph"`
+	Graph   []GaugeOptions `tfsdk:"graph"`
 }
 
-type StatOptions struct {
-	Orientation   types.String      `tfsdk:"orientation"`
-	TextMode      types.String      `tfsdk:"text_mode"`
-	ColorMode     types.String      `tfsdk:"color_mode"`
-	GraphMode     types.String      `tfsdk:"graph_mode"`
-	TextAlignment types.String      `tfsdk:"text_alignment"`
-	TextSize      []TextSizeOptions `tfsdk:"text_size"`
-	ReduceOptions []ReduceOptions   `tfsdk:"options"`
+type GaugeOptions struct {
+	Orientation          types.String      `tfsdk:"orientation"`
+	ShowThresholdLabels  types.Bool        `tfsdk:"show_threshold_labels"`
+	ShowThresholdMarkers types.Bool        `tfsdk:"show_threshold_markers"`
+	TextSize             []TextSizeOptions `tfsdk:"text_size"`
+	ReduceOptions        []ReduceOptions   `tfsdk:"options"`
 }
 
-func (d *StatDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_stat"
+func (d *GaugeDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_gauge"
 }
 
-func statGraphBlock() tfsdk.Block {
+func gaugeGraphBlock() tfsdk.Block {
 	return tfsdk.Block{
 		NestingMode: tfsdk.BlockNestingModeList,
 		MinItems:    0,
@@ -83,47 +79,29 @@ func statGraphBlock() tfsdk.Block {
 					stringvalidator.OneOf("auto", "horizontal", "vertical"),
 				},
 			},
-			"text_mode": {
-				Type:     types.StringType,
-				Optional: true,
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("auto", "value", "value_and_name", "name", "none"),
-				},
+			"show_threshold_labels": {
+				Type:        types.BoolType,
+				Optional:    true,
+				Description: "Render the threshold values around the gauge bar",
 			},
-			"color_mode": {
-				Type:     types.StringType,
-				Optional: true,
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("none", "value", "background"),
-				},
-			},
-			"graph_mode": {
-				Type:     types.StringType,
-				Optional: true,
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("none", "area"),
-				},
-			},
-			"text_alignment": {
-				Type:     types.StringType,
-				Optional: true,
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("auto", "center"),
-				},
+			"show_threshold_markers": {
+				Type:        types.BoolType,
+				Optional:    true,
+				Description: "Renders the thresholds as an outer bar",
 			},
 		},
 	}
 }
 
-func (d *StatDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *GaugeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Stat panel data source",
+		MarkdownDescription: "Gauge panel data source",
 
 		Blocks: map[string]tfsdk.Block{
 			"targets": targetBlock(),
 			"field":   fieldBlock(),
-			"graph":   statGraphBlock(),
+			"graph":   gaugeGraphBlock(),
 		},
 
 		Attributes: map[string]tfsdk.Attribute{
@@ -144,7 +122,7 @@ func (d *StatDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diag
 	}, nil
 }
 
-func (d *StatDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *GaugeDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -159,11 +137,11 @@ func (d *StatDataSource) Configure(ctx context.Context, req datasource.Configure
 		)
 	}
 
-	d.Defaults = defaults.Stat
+	d.Defaults = defaults.Gauge
 }
 
-func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data StatDataSourceModel
+func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data GaugeDataSourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -176,11 +154,9 @@ func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	fieldConfig := createFieldConfig(d.Defaults.Field, data.Field)
 
 	options := grafana.Options{
-		Orientation: d.Defaults.Graph.Orientation,
-		TextMode:    d.Defaults.Graph.TextMode,
-		ColorMode:   d.Defaults.Graph.ColorMode,
-		GraphMode:   d.Defaults.Graph.GraphMode,
-		JustifyMode: d.Defaults.Graph.TextAlignment,
+		Orientation:          d.Defaults.Graph.Orientation,
+		ShowThresholdLabels:  &d.Defaults.Graph.ShowThresholdLabels,
+		ShowThresholdMarkers: &d.Defaults.Graph.ShowThresholdMarkers,
 		ReduceOptions: grafana.ReduceOptions{
 			Values: d.Defaults.Graph.ReduceOptions.Values,
 			Fields: d.Defaults.Graph.ReduceOptions.Fields,
@@ -198,20 +174,12 @@ func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 			options.Orientation = graph.Orientation.Value
 		}
 
-		if !graph.TextMode.Null {
-			options.TextMode = graph.TextMode.Value
+		if !graph.ShowThresholdLabels.Null {
+			options.ShowThresholdLabels = &graph.ShowThresholdLabels.Value
 		}
 
-		if !graph.ColorMode.Null {
-			options.ColorMode = graph.ColorMode.Value
-		}
-
-		if !graph.GraphMode.Null {
-			options.GraphMode = graph.GraphMode.Value
-		}
-
-		if !graph.TextAlignment.Null {
-			options.JustifyMode = graph.TextAlignment.Value
+		if !graph.ShowThresholdMarkers.Null {
+			options.ShowThresholdMarkers = &graph.ShowThresholdMarkers.Value
 		}
 
 		updateTextSize(&options.TextSize, graph.TextSize)
@@ -220,13 +188,13 @@ func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	panel := &grafana.Panel{
 		CommonPanel: grafana.CommonPanel{
-			OfType: grafana.StatType,
+			OfType: grafana.GaugeType,
 			Title:  data.Title.Value,
-			Type:   "stat",
+			Type:   "gauge",
 			Span:   12,
 			IsNew:  true,
 		},
-		StatPanel: &grafana.StatPanel{
+		GaugePanel: &grafana.GaugePanel{
 			Targets: targets,
 			Options: options,
 			FieldConfig: grafana.FieldConfig{

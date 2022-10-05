@@ -122,6 +122,7 @@ Optional:
 
 - `bar_gauge` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--bar_gauge))
 - `dashboard` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--dashboard))
+- `gauge` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--gauge))
 - `stat` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--stat))
 - `timeseries` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--timeseries))
 
@@ -225,7 +226,7 @@ Optional:
 
 - `display_mode` (String)
 - `options` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph--options))
-- `orientation` (String)
+- `orientation` (String) Layout orientation
 - `text_alignment` (String)
 - `text_size` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph--text_size))
 
@@ -268,6 +269,132 @@ Required:
 
 - `from` (String)
 - `to` (String)
+
+
+
+<a id="nestedblock--defaults--gauge"></a>
+### Nested Schema for `defaults.gauge`
+
+Optional:
+
+- `field` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--gauge--field))
+- `graph` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--gauge--graph))
+
+<a id="nestedblock--defaults--gauge--field"></a>
+### Nested Schema for `defaults.gauge.field`
+
+Optional:
+
+- `color` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--gauge--field--color))
+- `decimals` (Number)
+- `mappings` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings))
+- `max` (Number)
+- `min` (Number)
+- `no_value` (Number)
+- `unit` (String)
+
+<a id="nestedblock--defaults--gauge--field--color"></a>
+### Nested Schema for `defaults.gauge.field.color`
+
+Optional:
+
+- `fixed_color` (String)
+- `mode` (String)
+- `series_by` (String)
+
+
+<a id="nestedblock--defaults--gauge--field--mappings"></a>
+### Nested Schema for `defaults.gauge.field.mappings`
+
+Optional:
+
+- `range` (Block List, Max: 10) (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings--range))
+- `regex` (Block List, Max: 10) (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings--regex))
+- `special` (Block List, Max: 10) (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings--special))
+- `value` (Block List, Max: 10) (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings--value))
+
+<a id="nestedblock--defaults--gauge--field--mappings--range"></a>
+### Nested Schema for `defaults.gauge.field.mappings.range`
+
+Required:
+
+- `from` (String)
+- `to` (String)
+
+Optional:
+
+- `color` (String)
+- `display_text` (String)
+
+
+<a id="nestedblock--defaults--gauge--field--mappings--regex"></a>
+### Nested Schema for `defaults.gauge.field.mappings.regex`
+
+Required:
+
+- `pattern` (String)
+
+Optional:
+
+- `color` (String)
+- `display_text` (String)
+
+
+<a id="nestedblock--defaults--gauge--field--mappings--special"></a>
+### Nested Schema for `defaults.gauge.field.mappings.special`
+
+Optional:
+
+- `color` (String)
+- `display_text` (String)
+- `match` (String)
+
+
+<a id="nestedblock--defaults--gauge--field--mappings--value"></a>
+### Nested Schema for `defaults.gauge.field.mappings.value`
+
+Required:
+
+- `value` (String)
+
+Optional:
+
+- `color` (String)
+- `display_text` (String)
+
+
+
+
+<a id="nestedblock--defaults--gauge--graph"></a>
+### Nested Schema for `defaults.gauge.graph`
+
+Optional:
+
+- `options` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--gauge--graph--options))
+- `orientation` (String) Layout orientation
+- `show_threshold_labels` (Boolean) Render the threshold values around the gauge bar
+- `show_threshold_markers` (Boolean) Renders the thresholds as an outer bar
+- `text_size` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--gauge--graph--text_size))
+
+<a id="nestedblock--defaults--gauge--graph--options"></a>
+### Nested Schema for `defaults.gauge.graph.options`
+
+Optional:
+
+- `calculation` (String)
+- `fields` (String)
+- `limit` (Number)
+- `values` (Boolean)
+
+
+<a id="nestedblock--defaults--gauge--graph--text_size"></a>
+### Nested Schema for `defaults.gauge.graph.text_size`
+
+Optional:
+
+- `title` (Number)
+- `value` (Number)
+
 
 
 
@@ -372,7 +499,7 @@ Optional:
 - `color_mode` (String)
 - `graph_mode` (String)
 - `options` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--stat--graph--options))
-- `orientation` (String)
+- `orientation` (String) Layout orientation
 - `text_alignment` (String)
 - `text_mode` (String)
 - `text_size` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--stat--graph--text_size))

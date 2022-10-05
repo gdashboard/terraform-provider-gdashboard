@@ -21,6 +21,7 @@ const (
 	StatType
 	RowType
 	BarGaugeType
+	GaugeType
 	HeatmapType
 	TimeseriesType
 )
@@ -41,6 +42,7 @@ type (
 		*RowPanel
 		*AlertlistPanel
 		*BarGaugePanel
+		*GaugePanel
 		*HeatmapPanel
 		*TimeseriesPanel
 		*CustomPanel
@@ -149,6 +151,16 @@ type (
 	FieldConfig struct {
 		Defaults FieldConfigDefaults `json:"defaults"`
 	}
+	TextSize struct {
+		TitleSize *int `json:"titleSize,omitempty"`
+		ValueSize *int `json:"valueSize,omitempty"`
+	}
+	ReduceOptions struct {
+		Values bool     `json:"values"`
+		Fields string   `json:"fields"`
+		Limit  *int     `json:"limit,omitempty"`
+		Calcs  []string `json:"calcs"`
+	}
 	Options struct {
 		Orientation string `json:"orientation"`
 		TextMode    string `json:"textMode"`
@@ -158,15 +170,12 @@ type (
 		DisplayMode string `json:"displayMode"`
 		Content     string `json:"content"`
 		Mode        string `json:"mode"`
-		Text        struct {
-			TitleSize *int `json:"titleSize,omitempty"`
-			ValueSize *int `json:"valueSize,omitempty"`
-		} `json:"text"`
-		ReduceOptions struct {
-			Values bool     `json:"values"`
-			Fields string   `json:"fields"`
-			Calcs  []string `json:"calcs"`
-		} `json:"reduceOptions"`
+		// gauge specific
+		ShowThresholdLabels  *bool `json:"showThresholdLabels,omitempty"`
+		ShowThresholdMarkers *bool `json:"ShowThresholdMarkers,omitempty"`
+		// etc
+		TextSize      TextSize      `json:"text"`
+		ReduceOptions ReduceOptions `json:"reduceOptions"`
 	}
 	Threshold struct {
 		// the alert threshold value, we do not omitempty, since 0 is a valid
@@ -236,6 +245,11 @@ type (
 		ValueFontSize   string      `json:"valueFontSize"`
 		ValueMaps       []ValueMap  `json:"valueMaps"`
 		ValueName       string      `json:"valueName"`
+	}
+	GaugePanel struct {
+		Options     Options     `json:"options"`
+		Targets     []Target    `json:"targets,omitempty"`
+		FieldConfig FieldConfig `json:"fieldConfig"`
 	}
 	StatPanel struct {
 		Colors          []string   `json:"colors"`
@@ -612,6 +626,12 @@ func (p *Panel) UnmarshalJSON(b []byte) (err error) {
 		if err = json.Unmarshal(b, &bargauge); err == nil {
 			p.BarGaugePanel = &bargauge
 		}
+	case "gauge":
+		var gauge GaugePanel
+		p.OfType = GaugeType
+		if err = json.Unmarshal(b, &gauge); err == nil {
+			p.GaugePanel = &gauge
+		}
 	case "heatmap":
 		var heatmap HeatmapPanel
 		p.OfType = HeatmapType
@@ -689,6 +709,12 @@ func (p *Panel) MarshalJSON() ([]byte, error) {
 			BarGaugePanel
 		}{p.CommonPanel, *p.BarGaugePanel}
 		return json.Marshal(outBarGauge)
+	case GaugeType:
+		var outGauge = struct {
+			CommonPanel
+			GaugePanel
+		}{p.CommonPanel, *p.GaugePanel}
+		return json.Marshal(outGauge)
 	case PluginlistType:
 		var outPluginlist = struct {
 			CommonPanel

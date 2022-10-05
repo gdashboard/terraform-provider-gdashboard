@@ -72,8 +72,9 @@ func barGaugeGraphBlock() tfsdk.Block {
 		},
 		Attributes: map[string]tfsdk.Attribute{
 			"orientation": {
-				Type:     types.StringType,
-				Optional: true,
+				Type:        types.StringType,
+				Optional:    true,
+				Description: "Layout orientation",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("auto", "horizontal", "vertical"),
 				},
@@ -160,14 +161,17 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 		Orientation: d.Defaults.Graph.Orientation,
 		DisplayMode: d.Defaults.Graph.DisplayMode,
 		JustifyMode: d.Defaults.Graph.TextAlignment,
+		ReduceOptions: grafana.ReduceOptions{
+			Values: d.Defaults.Graph.ReduceOptions.Values,
+			Fields: d.Defaults.Graph.ReduceOptions.Fields,
+			Limit:  d.Defaults.Graph.ReduceOptions.Limit,
+			Calcs:  []string{d.Defaults.Graph.ReduceOptions.Calculation},
+		},
+		TextSize: grafana.TextSize{
+			TitleSize: d.Defaults.Graph.TextSize.Title,
+			ValueSize: d.Defaults.Graph.TextSize.Value,
+		},
 	}
-
-	options.ReduceOptions.Values = d.Defaults.Graph.ReduceOptions.Values
-	options.ReduceOptions.Fields = d.Defaults.Graph.ReduceOptions.Fields
-	options.ReduceOptions.Calcs = []string{d.Defaults.Graph.ReduceOptions.Calculation}
-
-	options.Text.TitleSize = d.Defaults.Graph.TextSize.Title
-	options.Text.ValueSize = d.Defaults.Graph.TextSize.Value
 
 	for _, graph := range data.Graph {
 		if !graph.Orientation.Null {
@@ -182,31 +186,8 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 			options.JustifyMode = graph.TextAlignment.Value
 		}
 
-		for _, textSize := range graph.TextSize {
-			if !textSize.Title.Null {
-				size := int(textSize.Title.Value)
-				options.Text.TitleSize = &size
-			}
-
-			if !textSize.Value.Null {
-				size := int(textSize.Value.Value)
-				options.Text.ValueSize = &size
-			}
-		}
-
-		for _, reducer := range graph.ReduceOptions {
-			if !reducer.Values.Null {
-				options.ReduceOptions.Values = reducer.Values.Value
-			}
-
-			if !reducer.Fields.Null {
-				options.ReduceOptions.Fields = reducer.Fields.Value
-			}
-
-			if !reducer.Calculation.Null {
-				options.ReduceOptions.Calcs = []string{reducer.Calculation.Value}
-			}
-		}
+		updateTextSize(&options.TextSize, graph.TextSize)
+		updateReduceOptions(&options.ReduceOptions, graph.ReduceOptions)
 	}
 
 	panel := &grafana.Panel{

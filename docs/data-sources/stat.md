@@ -153,7 +153,7 @@ Optional:
 - `color_mode` (String)
 - `graph_mode` (String)
 - `options` (Block List, Max: 1) (see [below for nested schema](#nestedblock--graph--options))
-- `orientation` (String)
+- `orientation` (String) Layout orientation
 - `text_alignment` (String)
 - `text_mode` (String)
 - `text_size` (Block List, Max: 1) (see [below for nested schema](#nestedblock--graph--text_size))
