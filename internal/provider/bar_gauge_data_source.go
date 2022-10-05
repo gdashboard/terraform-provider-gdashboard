@@ -35,15 +35,8 @@ type BarGaugeGraphDefault struct {
 	Orientation   string
 	DisplayMode   string
 	TextAlignment string
-	TextSize      TextSizeDefault
-	ReduceOptions BarGaugeReduceOptionDefault
-}
-
-type BarGaugeReduceOptionDefault struct {
-	Values      bool
-	Fields      string
-	Limit       int64
-	Calculation string
+	TextSize      TextSizeDefaults
+	ReduceOptions ReduceOptionDefaults
 }
 
 // BarGaugeDataSourceModel describes the data source data model.
@@ -57,18 +50,11 @@ type BarGaugeDataSourceModel struct {
 }
 
 type BarGaugeOptions struct {
-	Orientation   types.String            `tfsdk:"orientation"`
-	DisplayMode   types.String            `tfsdk:"display_mode"`
-	TextAlignment types.String            `tfsdk:"text_alignment"`
-	TextSize      []TextSizeOptions       `tfsdk:"text_size"`
-	ReduceOptions []BarGaugeReduceOptions `tfsdk:"options"`
-}
-
-type BarGaugeReduceOptions struct {
-	Values      types.Bool   `tfsdk:"values"`
-	Fields      types.String `tfsdk:"fields"`
-	Limit       types.Int64  `tfsdk:"limit"`
-	Calculation types.String `tfsdk:"calculation"`
+	Orientation   types.String      `tfsdk:"orientation"`
+	DisplayMode   types.String      `tfsdk:"display_mode"`
+	TextAlignment types.String      `tfsdk:"text_alignment"`
+	TextSize      []TextSizeOptions `tfsdk:"text_size"`
+	ReduceOptions []ReduceOptions   `tfsdk:"options"`
 }
 
 func (d *BarGaugeDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -81,44 +67,8 @@ func barGaugeGraphBlock() tfsdk.Block {
 		MinItems:    0,
 		MaxItems:    1,
 		Blocks: map[string]tfsdk.Block{
-			"options": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MinItems:    0,
-				MaxItems:    1,
-				Attributes: map[string]tfsdk.Attribute{
-					"values": {
-						Type:     types.BoolType,
-						Optional: true,
-					},
-					"fields": {
-						Type:     types.StringType,
-						Optional: true,
-					},
-					"limit": {
-						Type:     types.Int64Type,
-						Optional: true,
-					},
-					"calculation": {
-						Type:     types.StringType,
-						Optional: true,
-					},
-				},
-			},
-			"text_size": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MinItems:    0,
-				MaxItems:    1,
-				Attributes: map[string]tfsdk.Attribute{
-					"title": {
-						Type:     types.Int64Type,
-						Optional: true,
-					},
-					"value": {
-						Type:     types.Int64Type,
-						Optional: true,
-					},
-				},
-			},
+			"options":   reduceOptionsBlock(),
+			"text_size": textSizeBlock(),
 		},
 		Attributes: map[string]tfsdk.Attribute{
 			"orientation": {

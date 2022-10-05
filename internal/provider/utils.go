@@ -19,10 +19,44 @@ type FieldDefaults struct {
 	Color    ColorDefaults
 }
 
+func NewFieldDefaults() FieldDefaults {
+	return FieldDefaults{
+		Unit:     "",
+		Decimals: nil,
+		Min:      nil,
+		Max:      nil,
+		Color: ColorDefaults{
+			Mode:       "palette-classic",
+			FixedColor: "green",
+			SeriesBy:   "last",
+		},
+	}
+}
+
 type ColorDefaults struct {
 	Mode       string
 	FixedColor string
 	SeriesBy   string
+}
+
+type ReduceOptionDefaults struct {
+	Values      bool
+	Fields      string
+	Limit       int64
+	Calculation string
+}
+
+func NewReduceOptionDefaults() ReduceOptionDefaults {
+	return ReduceOptionDefaults{
+		Values:      false,
+		Fields:      "",
+		Calculation: "lastNotNull",
+	}
+}
+
+type TextSizeDefaults struct {
+	Title *int
+	Value *int
 }
 
 type AxisDefaults struct {
@@ -100,6 +134,18 @@ type ColorOptions struct {
 	Mode       types.String `tfsdk:"mode"`
 	FixedColor types.String `tfsdk:"fixed_color"`
 	SeriesBy   types.String `tfsdk:"series_by"`
+}
+
+type ReduceOptions struct {
+	Values      types.Bool   `tfsdk:"values"`
+	Fields      types.String `tfsdk:"fields"`
+	Limit       types.Int64  `tfsdk:"limit"`
+	Calculation types.String `tfsdk:"calculation"`
+}
+
+type TextSizeOptions struct {
+	Title types.Int64 `tfsdk:"title"`
+	Value types.Int64 `tfsdk:"value"`
 }
 
 type Target struct {
@@ -239,6 +285,50 @@ func fieldBlock() tfsdk.Block {
 			},
 			"no_value": {
 				Type:     types.Float64Type,
+				Optional: true,
+			},
+		},
+	}
+}
+
+func reduceOptionsBlock() tfsdk.Block {
+	return tfsdk.Block{
+		NestingMode: tfsdk.BlockNestingModeList,
+		MinItems:    0,
+		MaxItems:    1,
+		Attributes: map[string]tfsdk.Attribute{
+			"values": {
+				Type:     types.BoolType,
+				Optional: true,
+			},
+			"fields": {
+				Type:     types.StringType,
+				Optional: true,
+			},
+			"limit": {
+				Type:     types.Int64Type,
+				Optional: true,
+			},
+			"calculation": {
+				Type:     types.StringType,
+				Optional: true,
+			},
+		},
+	}
+}
+
+func textSizeBlock() tfsdk.Block {
+	return tfsdk.Block{
+		NestingMode: tfsdk.BlockNestingModeList,
+		MinItems:    0,
+		MaxItems:    1,
+		Attributes: map[string]tfsdk.Attribute{
+			"title": {
+				Type:     types.Int64Type,
+				Optional: true,
+			},
+			"value": {
+				Type:     types.Int64Type,
 				Optional: true,
 			},
 		},

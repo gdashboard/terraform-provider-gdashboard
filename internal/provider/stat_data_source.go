@@ -28,29 +28,17 @@ type StatDataSource struct {
 
 type StatDefaults struct {
 	Field FieldDefaults
-	Graph StatGraphDefault
+	Graph StatGraphDefaults
 }
 
-type StatGraphDefault struct {
+type StatGraphDefaults struct {
 	Orientation   string
 	TextMode      string
 	ColorMode     string
 	GraphMode     string
 	TextAlignment string
-	ReduceOptions StatReduceOptionDefault
-	TextSize      TextSizeDefault
-}
-
-type StatReduceOptionDefault struct {
-	Values      bool
-	Fields      string
-	Limit       int64
-	Calculation string
-}
-
-type TextSizeDefault struct {
-	Title *int
-	Value *int
+	ReduceOptions ReduceOptionDefaults
+	TextSize      TextSizeDefaults
 }
 
 // StatDataSourceModel describes the data source data model.
@@ -64,25 +52,13 @@ type StatDataSourceModel struct {
 }
 
 type StatOptions struct {
-	Orientation   types.String        `tfsdk:"orientation"`
-	TextMode      types.String        `tfsdk:"text_mode"`
-	ColorMode     types.String        `tfsdk:"color_mode"`
-	GraphMode     types.String        `tfsdk:"graph_mode"`
-	TextAlignment types.String        `tfsdk:"text_alignment"`
-	TextSize      []TextSizeOptions   `tfsdk:"text_size"`
-	ReduceOptions []StatReduceOptions `tfsdk:"options"`
-}
-
-type TextSizeOptions struct {
-	Title types.Int64 `tfsdk:"title"`
-	Value types.Int64 `tfsdk:"value"`
-}
-
-type StatReduceOptions struct {
-	Values      types.Bool   `tfsdk:"values"`
-	Fields      types.String `tfsdk:"fields"`
-	Limit       types.Int64  `tfsdk:"limit"`
-	Calculation types.String `tfsdk:"calculation"`
+	Orientation   types.String      `tfsdk:"orientation"`
+	TextMode      types.String      `tfsdk:"text_mode"`
+	ColorMode     types.String      `tfsdk:"color_mode"`
+	GraphMode     types.String      `tfsdk:"graph_mode"`
+	TextAlignment types.String      `tfsdk:"text_alignment"`
+	TextSize      []TextSizeOptions `tfsdk:"text_size"`
+	ReduceOptions []ReduceOptions   `tfsdk:"options"`
 }
 
 func (d *StatDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -95,44 +71,8 @@ func statGraphBlock() tfsdk.Block {
 		MinItems:    0,
 		MaxItems:    1,
 		Blocks: map[string]tfsdk.Block{
-			"options": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MinItems:    0,
-				MaxItems:    1,
-				Attributes: map[string]tfsdk.Attribute{
-					"values": {
-						Type:     types.BoolType,
-						Optional: true,
-					},
-					"fields": {
-						Type:     types.StringType,
-						Optional: true,
-					},
-					"limit": {
-						Type:     types.Int64Type,
-						Optional: true,
-					},
-					"calculation": {
-						Type:     types.StringType,
-						Optional: true,
-					},
-				},
-			},
-			"text_size": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MinItems:    0,
-				MaxItems:    1,
-				Attributes: map[string]tfsdk.Attribute{
-					"title": {
-						Type:     types.Int64Type,
-						Optional: true,
-					},
-					"value": {
-						Type:     types.Int64Type,
-						Optional: true,
-					},
-				},
-			},
+			"options":   reduceOptionsBlock(),
+			"text_size": textSizeBlock(),
 		},
 		Attributes: map[string]tfsdk.Attribute{
 			"orientation": {

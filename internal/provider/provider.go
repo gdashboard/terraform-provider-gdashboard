@@ -142,18 +142,6 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 		return
 	}
 
-	fieldDefault := FieldDefaults{
-		Unit:     "",
-		Decimals: nil,
-		Min:      nil,
-		Max:      nil,
-		Color: ColorDefaults{
-			Mode:       "palette-classic",
-			FixedColor: "green",
-			SeriesBy:   "last",
-		},
-	}
-
 	defaults := Defaults{
 		Dashboard: DashboardDefaults{
 			Editable:     true,
@@ -173,7 +161,7 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 			Tooltip: TimeseriesTooltipDefaults{
 				Mode: "single",
 			},
-			Field: fieldDefault,
+			Field: NewFieldDefaults(),
 			Axis: AxisDefaults{
 				Label:     "",
 				Placement: "auto",
@@ -198,29 +186,21 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 			},
 		},
 		BarGauge: BarGaugeDefaults{
-			Field: fieldDefault,
+			Field: NewFieldDefaults(),
 			Graph: BarGaugeGraphDefault{
-				Orientation: "auto",
-				DisplayMode: "gradient",
-				ReduceOptions: BarGaugeReduceOptionDefault{
-					Values:      false,
-					Fields:      "",
-					Calculation: "lastNotNull",
-				},
+				Orientation:   "auto",
+				DisplayMode:   "gradient",
+				ReduceOptions: NewReduceOptionDefaults(),
 			},
 		},
 		Stat: StatDefaults{
-			Field: fieldDefault,
-			Graph: StatGraphDefault{
-				Orientation: "auto",
-				TextMode:    "auto",
-				ColorMode:   "value",
-				GraphMode:   "area",
-				ReduceOptions: StatReduceOptionDefault{
-					Values:      false,
-					Fields:      "",
-					Calculation: "lastNotNull",
-				},
+			Field: NewFieldDefaults(),
+			Graph: StatGraphDefaults{
+				Orientation:   "auto",
+				TextMode:      "auto",
+				ColorMode:     "value",
+				GraphMode:     "area",
+				ReduceOptions: NewReduceOptionDefaults(),
 			},
 		},
 	}
@@ -366,31 +346,8 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 				defaults.BarGauge.Graph.TextAlignment = graph.TextAlignment.Value
 			}
 
-			for _, textSize := range graph.TextSize {
-				if !textSize.Title.Null {
-					size := int(textSize.Title.Value)
-					defaults.BarGauge.Graph.TextSize.Title = &size
-				}
-
-				if !textSize.Value.Null {
-					size := int(textSize.Value.Value)
-					defaults.BarGauge.Graph.TextSize.Value = &size
-				}
-			}
-
-			for _, reducer := range graph.ReduceOptions {
-				if !reducer.Values.Null {
-					defaults.BarGauge.Graph.ReduceOptions.Values = reducer.Values.Value
-				}
-
-				if !reducer.Fields.Null {
-					defaults.BarGauge.Graph.ReduceOptions.Fields = reducer.Fields.Value
-				}
-
-				if !reducer.Calculation.Null {
-					defaults.BarGauge.Graph.ReduceOptions.Calculation = reducer.Calculation.Value
-				}
-			}
+			updateTextSizeDefaults(&defaults.BarGauge.Graph.TextSize, graph.TextSize)
+			updateReduceOptionsDefaults(&defaults.BarGauge.Graph.ReduceOptions, graph.ReduceOptions)
 		}
 	}
 
@@ -420,31 +377,8 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 				defaults.Stat.Graph.TextAlignment = graph.TextAlignment.Value
 			}
 
-			for _, textSize := range graph.TextSize {
-				if !textSize.Title.Null {
-					size := int(textSize.Title.Value)
-					defaults.Stat.Graph.TextSize.Title = &size
-				}
-
-				if !textSize.Value.Null {
-					size := int(textSize.Value.Value)
-					defaults.Stat.Graph.TextSize.Value = &size
-				}
-			}
-
-			for _, reducer := range graph.ReduceOptions {
-				if !reducer.Values.Null {
-					defaults.Stat.Graph.ReduceOptions.Values = reducer.Values.Value
-				}
-
-				if !reducer.Fields.Null {
-					defaults.Stat.Graph.ReduceOptions.Fields = reducer.Fields.Value
-				}
-
-				if !reducer.Calculation.Null {
-					defaults.Stat.Graph.ReduceOptions.Calculation = reducer.Calculation.Value
-				}
-			}
+			updateTextSizeDefaults(&defaults.Stat.Graph.TextSize, graph.TextSize)
+			updateReduceOptionsDefaults(&defaults.Stat.Graph.ReduceOptions, graph.ReduceOptions)
 		}
 	}
 
@@ -487,6 +421,36 @@ func updateFieldDefaults(defaults *FieldDefaults, opts []FieldOptions) {
 			if !color.SeriesBy.Null {
 				defaults.Color.SeriesBy = color.SeriesBy.Value
 			}
+		}
+	}
+}
+
+func updateTextSizeDefaults(defaults *TextSizeDefaults, opts []TextSizeOptions) {
+	for _, textSize := range opts {
+		if !textSize.Title.Null {
+			size := int(textSize.Title.Value)
+			defaults.Title = &size
+		}
+
+		if !textSize.Value.Null {
+			size := int(textSize.Value.Value)
+			defaults.Value = &size
+		}
+	}
+}
+
+func updateReduceOptionsDefaults(defaults *ReduceOptionDefaults, opts []ReduceOptions) {
+	for _, reducer := range opts {
+		if !reducer.Values.Null {
+			defaults.Values = reducer.Values.Value
+		}
+
+		if !reducer.Fields.Null {
+			defaults.Fields = reducer.Fields.Value
+		}
+
+		if !reducer.Calculation.Null {
+			defaults.Calculation = reducer.Calculation.Value
 		}
 	}
 }
