@@ -300,10 +300,10 @@ const testAccGaugeDataSourceProviderCustomDefaultsConfigExpectedJson = `{
       "valueSize": 15
     },
     "reduceOptions": {
-      "values": false,
-      "fields": "",
+      "values": true,
+      "fields": "/.*/",
       "calcs": [
-        "lastNotNull"
+        "first"
       ]
     }
   },
