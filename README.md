@@ -2,6 +2,88 @@
 
 The provider allows building Grafana panels using Terraform syntax.
 
+## Using the provider
+
+Please, see [provider documentation](https://registry.terraform.io/providers/iRevive/gdashboard/latest/docs).  
+The module providers only **data sources**. Each data source emits a JSON that is compatible with Grafana API.    
+In order to create dashboard use [Grafana provider](https://registry.terraform.io/providers/grafana/grafana/latest/docs).
+
+## Examples
+
+```terraform
+terraform {
+  required_providers {
+    grafana = {
+      source  = "grafana/grafana"
+      version = "1.29.0"
+    }
+
+    gdashboard = {
+      source  = "iRevive/gdashboard"
+      version = ">= 0.0.3" # use actual version
+    }
+  }
+
+  required_version = ">= 1.2.0"
+}
+
+data "gdashboard_stat" "status" {
+  title       = "Status"
+  description = "Shows the status of the container"
+
+  field {
+    mappings {
+      value {
+        value        = "1"
+        display_text = "UP"
+        color        = "green"
+      }
+
+      special {
+        match        = "null+nan"
+        display_text = "DOWN"
+        color        = "red"
+      }
+    }
+  }
+
+  targets {
+    prometheus {
+      uid     = "prometheus"
+      expr    = "up{container_name='container'}"
+      instant = true
+    }
+  }
+}
+
+data "gdashboard_dashboard" "dashboard" {
+  title = "My dashboard"
+
+  layout {
+    row {
+      panel {
+        size = {
+          height = 8
+          width  = 10
+        }
+        source = data.gdashboard_stat.status.json
+      }
+    }
+  }
+}
+
+# Define provider
+provider "grafana" {
+  url  = "https://my.grafana.com" # use your API endpoint
+  auth = var.grafana_auth
+}
+
+# Create your dashboard
+resource "grafana_dashboard" "my_dashboard" {
+  config_json = data.gdashboard_dashboard.dashboard.json
+}
+```
+
 ## Requirements
 
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.0
@@ -30,10 +112,6 @@ go mod tidy
 ```
 
 Then commit the changes to `go.mod` and `go.sum`.
-
-## Using the provider
-
-Fill this in for each provider
 
 ## Developing the Provider
 

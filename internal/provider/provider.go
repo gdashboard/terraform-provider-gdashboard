@@ -85,6 +85,9 @@ func (p *GrafanaDashboardBuilderProvider) Metadata(ctx context.Context, req prov
 
 func (p *GrafanaDashboardBuilderProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
+		MarkdownDescription: `The provider defines only **data sources**. Each data source emits a JSON that is compatible with Grafana API.    
+In order to create dashboard use [Grafana provider](https://registry.terraform.io/providers/grafana/grafana/latest/docs).
+`,
 		Blocks: map[string]tfsdk.Block{
 			"defaults": {
 				NestingMode: tfsdk.BlockNestingModeList,
