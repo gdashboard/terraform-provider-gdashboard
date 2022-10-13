@@ -16,21 +16,21 @@ func TestAccTimeseriesDataSource(t *testing.T) {
 				Config: testAccTimeseriesDataSourceConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.gdashboard_timeseries.test", "title", "Test"),
-					resource.TestCheckResourceAttr("data.gdashboard_timeseries.test", "json", timeseriesProviderCustomSeriesExpectedJson),
+					resource.TestCheckResourceAttr("data.gdashboard_timeseries.test", "json", testAccTimeseriesDataSourceConfigExpectedJson),
 				),
 			},
 			{
 				Config: testAccTimeseriesDataSourceProviderCustomDefaultsConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.gdashboard_timeseries.test", "title", "Test"),
-					resource.TestCheckResourceAttr("data.gdashboard_timeseries.test", "json", timeseriesProviderCustomDefaultsExpectedJson),
+					resource.TestCheckResourceAttr("data.gdashboard_timeseries.test", "json", testAccTimeseriesDataSourceProviderCustomDefaultsConfigExpectedJson),
 				),
 			},
 			{
 				Config: testAccTimeseriesDataSourceProviderDefaultsConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.gdashboard_timeseries.test", "title", "Test"),
-					resource.TestCheckResourceAttr("data.gdashboard_timeseries.test", "json", timeseriesProviderDefaultsExpectedJson),
+					resource.TestCheckResourceAttr("data.gdashboard_timeseries.test", "json", testAccTimeseriesDataSourceProviderDefaultsConfigExpectedJson),
 				),
 			},
 		},
@@ -39,7 +39,8 @@ func TestAccTimeseriesDataSource(t *testing.T) {
 
 const testAccTimeseriesDataSourceConfig = `
 data "gdashboard_timeseries" "test" {
-  title = "Test"
+  title       = "Test"
+  description = "Timeseries description"
 
   legend {
 	calculations = ["min", "max", "mean"]
@@ -107,7 +108,7 @@ data "gdashboard_timeseries" "test" {
 }
 `
 
-const timeseriesProviderCustomSeriesExpectedJson = `{
+const testAccTimeseriesDataSourceConfigExpectedJson = `{
   "editable": false,
   "error": false,
   "gridPos": {},
@@ -115,6 +116,7 @@ const timeseriesProviderCustomSeriesExpectedJson = `{
   "isNew": true,
   "span": 12,
   "title": "Test",
+  "description": "Timeseries description",
   "transparent": false,
   "type": "timeseries",
   "targets": [
@@ -282,7 +284,7 @@ data "gdashboard_timeseries" "test" {
 }
 `
 
-const timeseriesProviderCustomDefaultsExpectedJson = `{
+const testAccTimeseriesDataSourceProviderCustomDefaultsConfigExpectedJson = `{
   "editable": false,
   "error": false,
   "gridPos": {},
@@ -366,7 +368,7 @@ data "gdashboard_timeseries" "test" {
 }
 `
 
-const timeseriesProviderDefaultsExpectedJson = `{
+const testAccTimeseriesDataSourceProviderDefaultsConfigExpectedJson = `{
   "editable": false,
   "error": false,
   "gridPos": {},

@@ -51,6 +51,7 @@ data "gdashboard_stat" "status" {
 
 ### Optional
 
+- `description` (String) The description of the panel
 - `field` (Block List, Max: 1) (see [below for nested schema](#nestedblock--field))
 - `graph` (Block List, Max: 1) (see [below for nested schema](#nestedblock--graph))
 - `targets` (Block List, Max: 3) (see [below for nested schema](#nestedblock--targets))

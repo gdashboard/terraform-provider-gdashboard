@@ -43,12 +43,13 @@ type StatGraphDefaults struct {
 
 // StatDataSourceModel describes the data source data model.
 type StatDataSourceModel struct {
-	Id      types.String   `tfsdk:"id"`
-	Json    types.String   `tfsdk:"json"`
-	Title   types.String   `tfsdk:"title"`
-	Targets []Target       `tfsdk:"targets"`
-	Field   []FieldOptions `tfsdk:"field"`
-	Graph   []StatOptions  `tfsdk:"graph"`
+	Id          types.String   `tfsdk:"id"`
+	Json        types.String   `tfsdk:"json"`
+	Title       types.String   `tfsdk:"title"`
+	Description types.String   `tfsdk:"description"`
+	Targets     []Target       `tfsdk:"targets"`
+	Field       []FieldOptions `tfsdk:"field"`
+	Graph       []StatOptions  `tfsdk:"graph"`
 }
 
 type StatOptions struct {
@@ -139,6 +140,11 @@ func (d *StatDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diag
 				Type:        types.StringType,
 				Required:    true,
 				Description: "The title of the panel",
+			},
+			"description": {
+				Type:        types.StringType,
+				Optional:    true,
+				Description: "The description of the panel",
 			},
 		},
 	}, nil
@@ -233,6 +239,10 @@ func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 				Defaults: fieldConfig,
 			},
 		},
+	}
+
+	if !data.Description.Null {
+		panel.CommonPanel.Description = &data.Description.Value
 	}
 
 	jsonData, err := json.MarshalIndent(panel, "", "  ")

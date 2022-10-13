@@ -59,15 +59,16 @@ type TimeseriesLegendDefault struct {
 
 // TimeseriesDataSourceModel describes the data source data model.
 type TimeseriesDataSourceModel struct {
-	Id      types.String               `tfsdk:"id"`
-	Json    types.String               `tfsdk:"json"`
-	Title   types.String               `tfsdk:"title"`
-	Targets []Target                   `tfsdk:"targets"`
-	Legend  []TimeseriesLegendOptions  `tfsdk:"legend"`
-	Tooltip []TimeseriesTooltipOptions `tfsdk:"tooltip"`
-	Field   []FieldOptions             `tfsdk:"field"`
-	Axis    []AxisOptions              `tfsdk:"axis"`
-	Graph   []TimeseriesGraphOptions   `tfsdk:"graph"`
+	Id          types.String               `tfsdk:"id"`
+	Json        types.String               `tfsdk:"json"`
+	Title       types.String               `tfsdk:"title"`
+	Description types.String               `tfsdk:"description"`
+	Targets     []Target                   `tfsdk:"targets"`
+	Legend      []TimeseriesLegendOptions  `tfsdk:"legend"`
+	Tooltip     []TimeseriesTooltipOptions `tfsdk:"tooltip"`
+	Field       []FieldOptions             `tfsdk:"field"`
+	Axis        []AxisOptions              `tfsdk:"axis"`
+	Graph       []TimeseriesGraphOptions   `tfsdk:"graph"`
 }
 
 type TimeseriesLegendOptions struct {
@@ -241,6 +242,11 @@ func (d *TimeseriesDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 				Type:        types.StringType,
 				Required:    true,
 				Description: "The title of the panel",
+			},
+			"description": {
+				Type:        types.StringType,
+				Optional:    true,
+				Description: "The description of the panel",
 			},
 		},
 	}, nil
@@ -423,6 +429,10 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 				Defaults: fieldConfig,
 			},
 		},
+	}
+
+	if !data.Description.Null {
+		panel.CommonPanel.Description = &data.Description.Value
 	}
 
 	jsonData, err := json.MarshalIndent(panel, "", "  ")

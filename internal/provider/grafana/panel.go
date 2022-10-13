@@ -172,7 +172,7 @@ type (
 		Mode        string `json:"mode"`
 		// gauge specific
 		ShowThresholdLabels  *bool `json:"showThresholdLabels,omitempty"`
-		ShowThresholdMarkers *bool `json:"ShowThresholdMarkers,omitempty"`
+		ShowThresholdMarkers *bool `json:"showThresholdMarkers,omitempty"`
 		// etc
 		TextSize      TextSize      `json:"text"`
 		ReduceOptions ReduceOptions `json:"reduceOptions"`
