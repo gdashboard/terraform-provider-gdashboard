@@ -41,12 +41,13 @@ type BarGaugeGraphDefault struct {
 
 // BarGaugeDataSourceModel describes the data source data model.
 type BarGaugeDataSourceModel struct {
-	Id      types.String      `tfsdk:"id"`
-	Json    types.String      `tfsdk:"json"`
-	Title   types.String      `tfsdk:"title"`
-	Targets []Target          `tfsdk:"targets"`
-	Field   []FieldOptions    `tfsdk:"field"`
-	Graph   []BarGaugeOptions `tfsdk:"graph"`
+	Id          types.String      `tfsdk:"id"`
+	Json        types.String      `tfsdk:"json"`
+	Title       types.String      `tfsdk:"title"`
+	Description types.String      `tfsdk:"description"`
+	Targets     []Target          `tfsdk:"targets"`
+	Field       []FieldOptions    `tfsdk:"field"`
+	Graph       []BarGaugeOptions `tfsdk:"graph"`
 }
 
 type BarGaugeOptions struct {
@@ -121,6 +122,11 @@ func (d *BarGaugeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 				Type:        types.StringType,
 				Required:    true,
 				Description: "The title of the panel",
+			},
+			"description": {
+				Type:        types.StringType,
+				Optional:    true,
+				Description: "The description of the panel",
 			},
 		},
 	}, nil
@@ -205,6 +211,10 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 				Defaults: fieldConfig,
 			},
 		},
+	}
+
+	if !data.Description.Null {
+		panel.CommonPanel.Description = &data.Description.Value
 	}
 
 	jsonData, err := json.MarshalIndent(panel, "", "  ")

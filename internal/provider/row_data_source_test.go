@@ -16,14 +16,14 @@ func TestAccRowDataSource(t *testing.T) {
 				Config: testAccRowDataSourceConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.gdashboard_row.test", "title", "Test"),
-					resource.TestCheckResourceAttr("data.gdashboard_row.test", "json", rowProviderCustomSeriesExpectedJson),
+					resource.TestCheckResourceAttr("data.gdashboard_row.test", "json", testAccRowDataSourceExpectedJson),
 				),
 			},
 			{
 				Config: testAccRowDataSourceProviderDefaultsConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.gdashboard_row.test", "title", "Test"),
-					resource.TestCheckResourceAttr("data.gdashboard_row.test", "json", rowProviderDefaultsExpectedJson),
+					resource.TestCheckResourceAttr("data.gdashboard_row.test", "json", testAccRowDataSourceProviderDefaultsConfigExpectedJson),
 				),
 			},
 		},
@@ -40,7 +40,7 @@ data "gdashboard_row" "test" {
 }
 `
 
-const rowProviderCustomSeriesExpectedJson = `{
+const testAccRowDataSourceExpectedJson = `{
   "editable": false,
   "error": false,
   "gridPos": {},
@@ -60,7 +60,7 @@ data "gdashboard_row" "test" {
 }
 `
 
-const rowProviderDefaultsExpectedJson = `{
+const testAccRowDataSourceProviderDefaultsConfigExpectedJson = `{
   "editable": false,
   "error": false,
   "gridPos": {},

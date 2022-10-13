@@ -12,25 +12,25 @@ func TestAccGaugeDataSource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Read testing
-			/*{
+			{
 				Config: testAccGaugeDataSourceConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.gdashboard_gauge.test", "title", "Test"),
-					resource.TestCheckResourceAttr("data.gdashboard_gauge.test", "json", gaugeProviderCustomSeriesExpectedJson),
+					resource.TestCheckResourceAttr("data.gdashboard_gauge.test", "json", testAccGaugeDataSourceConfigExpectedJson),
 				),
-			},*/
+			},
 			{
 				Config: testAccGaugeDataSourceProviderCustomDefaultsConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.gdashboard_gauge.test", "title", "Test"),
-					resource.TestCheckResourceAttr("data.gdashboard_gauge.test", "json", gaugeProviderCustomDefaultsExpectedJson),
+					resource.TestCheckResourceAttr("data.gdashboard_gauge.test", "json", testAccGaugeDataSourceProviderCustomDefaultsConfigExpectedJson),
 				),
 			},
 			{
 				Config: testAccGaugeDataSourceProviderDefaultsConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.gdashboard_gauge.test", "title", "Test"),
-					resource.TestCheckResourceAttr("data.gdashboard_gauge.test", "json", gaugeProviderDefaultsExpectedJson),
+					resource.TestCheckResourceAttr("data.gdashboard_gauge.test", "json", testAccGaugeDataSourceProviderDefaultsConfigExpectedJson),
 				),
 			},
 		},
@@ -39,38 +39,179 @@ func TestAccGaugeDataSource(t *testing.T) {
 
 const testAccGaugeDataSourceConfig = `
 data "gdashboard_gauge" "test" {
-  title = "Test"
+  title       = "Test"
+  description = "Gauge description"
 
-  legend {
-	calculations = ["min", "max", "mean"]
-	display_mode = "table"
-    placement    = "bottom"
-  }
+  graph {
+    orientation 		   = "vertical"
+	show_threshold_labels  = true
+    show_threshold_markers = false
 
-  tooltip {
-	mode = "multi"
+    options {
+      values      = true
+      fields 	  = "/.*/"
+	  calculation = "first"
+    }
+
+	text_size {
+	  title = 10
+	  value = 15
+	}
   }
 
   field {
-    unit     = "bytes"
-    decimals = 1
-    min      = 0
-    max      = 10000
-    
-    color { 
-      mode        = "palette-classic"
-      fixed_color = "green"
-      series_by   = "last"
+    unit = "percent"
+	min  = 0
+	max  = 100
+
+    color {
+      mode = "thresholds"
+    }
+
+    thresholds {
+      mode = "percentage"
+
+      step {
+        color = "green"
+      }
+
+      step {
+        color = "orange"
+        value = 65
+      }
+
+      step {
+        color = "red"
+        value = 90
+      }
+    }
+  }
+
+  targets {
+    prometheus {
+      uid          = "prometheus"
+      expr         = "sum (jvm_memory_bytes_used{container_name='container', area='heap'}) / sum (jvm_memory_bytes_max{container_name='container', area='heap'}) * 100"
+      min_interval = "30"
+      instant      = true
     }
   }
 }
 `
 
-const gaugeProviderCustomSeriesExpectedJson = `{
+const testAccGaugeDataSourceConfigExpectedJson = `{
   "editable": false,
   "error": false,
   "gridPos": {},
-  "id": 0
+  "id": 0,
+  "isNew": true,
+  "span": 12,
+  "title": "Test",
+  "description": "Gauge description",
+  "transparent": false,
+  "type": "gauge",
+  "options": {
+    "orientation": "vertical",
+    "textMode": "",
+    "colorMode": "",
+    "graphMode": "",
+    "justifyMode": "",
+    "displayMode": "",
+    "content": "",
+    "mode": "",
+    "showThresholdLabels": true,
+    "showThresholdMarkers": false,
+    "text": {
+      "titleSize": 10,
+      "valueSize": 15
+    },
+    "reduceOptions": {
+      "values": true,
+      "fields": "/.*/",
+      "calcs": [
+        "first"
+      ]
+    }
+  },
+  "targets": [
+    {
+      "refId": "",
+      "datasource": {
+        "id": 0,
+        "orgId": 0,
+        "uid": "prometheus",
+        "name": "",
+        "type": "prometheus",
+        "typeLogoUrl": "",
+        "access": "",
+        "url": "",
+        "isDefault": false,
+        "jsonData": null,
+        "secureJsonData": null
+      },
+      "expr": "sum (jvm_memory_bytes_used{container_name='container', area='heap'}) / sum (jvm_memory_bytes_max{container_name='container', area='heap'}) * 100",
+      "interval": "30",
+      "instant": true
+    }
+  ],
+  "fieldConfig": {
+    "defaults": {
+      "unit": "percent",
+      "min": 0,
+      "max": 100,
+      "color": {
+        "mode": "thresholds",
+        "fixedColor": "green",
+        "seriesBy": "last"
+      },
+      "thresholds": {
+        "mode": "percentage",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "orange",
+            "value": 65
+          },
+          {
+            "color": "red",
+            "value": 90
+          }
+        ]
+      },
+      "custom": {
+        "axisPlacement": "",
+        "barAlignment": 0,
+        "drawStyle": "",
+        "fillOpacity": 0,
+        "gradientMode": "",
+        "lineInterpolation": "",
+        "lineWidth": 0,
+        "pointSize": 0,
+        "showPoints": "",
+        "spanNulls": false,
+        "hideFrom": {
+          "legend": false,
+          "tooltip": false,
+          "viz": false
+        },
+        "lineStyle": {
+          "fill": ""
+        },
+        "scaleDistribution": {
+          "type": ""
+        },
+        "stacking": {
+          "group": "",
+          "mode": ""
+        },
+        "thresholdsStyle": {
+          "mode": ""
+        }
+      }
+    }
+  }
 }`
 
 const testAccGaugeDataSourceProviderCustomDefaultsConfig = `
@@ -118,6 +259,11 @@ provider "gdashboard" {
           fields 	  = "/.*/"
 		  calculation = "first"
         }
+
+		text_size {
+		  title = 10
+		  value = 15
+		}
       }
 	}
   }
@@ -128,7 +274,7 @@ data "gdashboard_gauge" "test" {
 }
 `
 
-const gaugeProviderCustomDefaultsExpectedJson = `{
+const testAccGaugeDataSourceProviderCustomDefaultsConfigExpectedJson = `{
   "editable": false,
   "error": false,
   "gridPos": {},
@@ -148,13 +294,16 @@ const gaugeProviderCustomDefaultsExpectedJson = `{
     "content": "",
     "mode": "",
     "showThresholdLabels": true,
-    "ShowThresholdMarkers": false,
-    "text": {},
+    "showThresholdMarkers": false,
+    "text": {
+      "titleSize": 10,
+      "valueSize": 15
+    },
     "reduceOptions": {
-      "values": false,
-      "fields": "",
+      "values": true,
+      "fields": "/.*/",
       "calcs": [
-        "lastNotNull"
+        "first"
       ]
     }
   },
@@ -226,7 +375,7 @@ data "gdashboard_gauge" "test" {
 }
 `
 
-const gaugeProviderDefaultsExpectedJson = `{
+const testAccGaugeDataSourceProviderDefaultsConfigExpectedJson = `{
   "editable": false,
   "error": false,
   "gridPos": {},
@@ -246,7 +395,7 @@ const gaugeProviderDefaultsExpectedJson = `{
     "content": "",
     "mode": "",
     "showThresholdLabels": false,
-    "ShowThresholdMarkers": true,
+    "showThresholdMarkers": true,
     "text": {},
     "reduceOptions": {
       "values": false,

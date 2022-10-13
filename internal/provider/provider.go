@@ -425,8 +425,8 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 				defaults.Gauge.Graph.ShowThresholdMarkers = graph.ShowThresholdMarkers.Value
 			}
 
-			updateTextSizeDefaults(&defaults.Stat.Graph.TextSize, graph.TextSize)
-			updateReduceOptionsDefaults(&defaults.Stat.Graph.ReduceOptions, graph.ReduceOptions)
+			updateTextSizeDefaults(&defaults.Gauge.Graph.TextSize, graph.TextSize)
+			updateReduceOptionsDefaults(&defaults.Gauge.Graph.ReduceOptions, graph.ReduceOptions)
 		}
 	}
 

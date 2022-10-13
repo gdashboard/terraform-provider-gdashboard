@@ -92,6 +92,7 @@ data "gdashboard_timeseries" "test" {
 ### Optional
 
 - `axis` (Block List, Max: 1) (see [below for nested schema](#nestedblock--axis))
+- `description` (String) The description of the panel
 - `field` (Block List, Max: 1) (see [below for nested schema](#nestedblock--field))
 - `graph` (Block List, Max: 1) (see [below for nested schema](#nestedblock--graph))
 - `legend` (Block List, Max: 1) (see [below for nested schema](#nestedblock--legend))

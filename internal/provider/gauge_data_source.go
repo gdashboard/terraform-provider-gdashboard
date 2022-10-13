@@ -41,12 +41,13 @@ type GaugeGraphDefault struct {
 
 // GaugeDataSourceModel describes the data source data model.
 type GaugeDataSourceModel struct {
-	Id      types.String   `tfsdk:"id"`
-	Json    types.String   `tfsdk:"json"`
-	Title   types.String   `tfsdk:"title"`
-	Targets []Target       `tfsdk:"targets"`
-	Field   []FieldOptions `tfsdk:"field"`
-	Graph   []GaugeOptions `tfsdk:"graph"`
+	Id          types.String   `tfsdk:"id"`
+	Json        types.String   `tfsdk:"json"`
+	Title       types.String   `tfsdk:"title"`
+	Description types.String   `tfsdk:"description"`
+	Targets     []Target       `tfsdk:"targets"`
+	Field       []FieldOptions `tfsdk:"field"`
+	Graph       []GaugeOptions `tfsdk:"graph"`
 }
 
 type GaugeOptions struct {
@@ -117,6 +118,11 @@ func (d *GaugeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				Type:        types.StringType,
 				Required:    true,
 				Description: "The title of the panel",
+			},
+			"description": {
+				Type:        types.StringType,
+				Optional:    true,
+				Description: "The description of the panel",
 			},
 		},
 	}, nil
@@ -201,6 +207,10 @@ func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 				Defaults: fieldConfig,
 			},
 		},
+	}
+
+	if !data.Description.Null {
+		panel.CommonPanel.Description = &data.Description.Value
 	}
 
 	jsonData, err := json.MarshalIndent(panel, "", "  ")

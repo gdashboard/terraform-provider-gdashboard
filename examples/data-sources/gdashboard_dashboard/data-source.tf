@@ -50,7 +50,7 @@ data "gdashboard_dashboard" "test" {
           height = 8
           width  = 10
         }
-        source = data.gdashboard_timeseries.jvm_memory
+        source = data.gdashboard_timeseries.jvm_memory.json
       }
     }
   }
