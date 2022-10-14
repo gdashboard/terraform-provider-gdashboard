@@ -62,7 +62,7 @@ data "gdashboard_bar_gauge" "test" {
 	}
   }
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sort_desc(sum(increase(data[$__range])) by (job_type))"

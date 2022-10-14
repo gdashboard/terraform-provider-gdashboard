@@ -87,7 +87,7 @@ data "gdashboard_gauge" "test" {
     }
   }
 
-  targets {
+  queries {
     prometheus {
       uid          = "prometheus"
       expr         = "sum (jvm_memory_bytes_used{container_name='container', area='heap'}) / sum (jvm_memory_bytes_max{container_name='container', area='heap'}) * 100"

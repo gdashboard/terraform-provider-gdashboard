@@ -123,7 +123,7 @@ data "gdashboard_bar_gauge" "mails_sent" {
 - `description` (String) The description of this panel.
 - `field` (Block List, Max: 1) The customization of field options. (see [below for nested schema](#nestedblock--field))
 - `graph` (Block List, Max: 1) The visualization options. (see [below for nested schema](#nestedblock--graph))
-- `targets` (Block List, Max: 3) The queries to collect values from data sources. (see [below for nested schema](#nestedblock--targets))
+- `queries` (Block List, Max: 3) The queries to collect values from data sources. (see [below for nested schema](#nestedblock--queries))
 
 ### Read-Only
 
@@ -274,16 +274,16 @@ Optional:
 
 
 
-<a id="nestedblock--targets"></a>
-### Nested Schema for `targets`
+<a id="nestedblock--queries"></a>
+### Nested Schema for `queries`
 
 Optional:
 
-- `cloudwatch` (Block List, Max: 5) The CloudWatch query. (see [below for nested schema](#nestedblock--targets--cloudwatch))
-- `prometheus` (Block List, Max: 5) The Prometheus query. (see [below for nested schema](#nestedblock--targets--prometheus))
+- `cloudwatch` (Block List, Max: 5) The CloudWatch query. (see [below for nested schema](#nestedblock--queries--cloudwatch))
+- `prometheus` (Block List, Max: 5) The Prometheus query. (see [below for nested schema](#nestedblock--queries--prometheus))
 
-<a id="nestedblock--targets--cloudwatch"></a>
-### Nested Schema for `targets.cloudwatch`
+<a id="nestedblock--queries--cloudwatch"></a>
+### Nested Schema for `queries.cloudwatch`
 
 Required:
 
@@ -294,15 +294,15 @@ Required:
 
 Optional:
 
-- `dimension` (Block List, Max: 5) The dimension to filter the metric with. (see [below for nested schema](#nestedblock--targets--cloudwatch--dimension))
+- `dimension` (Block List, Max: 5) The dimension to filter the metric with. (see [below for nested schema](#nestedblock--queries--cloudwatch--dimension))
 - `label` (String) The legend name.
 - `match_exact` (Boolean) If enabled you also need to specify **all** the dimensions of the metric you’re querying.
 - `period` (String) The minimum interval between points in seconds.
 - `ref_id` (String) The ID of the query. The ID can be used to reference queries in math expressions.
 - `region` (String) The AWS region to query the metrics from.
 
-<a id="nestedblock--targets--cloudwatch--dimension"></a>
-### Nested Schema for `targets.cloudwatch.dimension`
+<a id="nestedblock--queries--cloudwatch--dimension"></a>
+### Nested Schema for `queries.cloudwatch.dimension`
 
 Required:
 
@@ -311,8 +311,8 @@ Required:
 
 
 
-<a id="nestedblock--targets--prometheus"></a>
-### Nested Schema for `targets.prometheus`
+<a id="nestedblock--queries--prometheus"></a>
+### Nested Schema for `queries.prometheus`
 
 Required:
 
