@@ -1,12 +1,15 @@
 # Terraform Provider GDashboard
 
-The provider allows building Grafana panels using Terraform syntax.
+The provider offers a handy syntax to define Grafana dashboards: timeseries, gauge, bar, etc.
 
 ## Using the provider
 
-Please, see [provider documentation](https://registry.terraform.io/providers/iRevive/gdashboard/latest/docs).  
-The module providers only **data sources**. Each data source emits a JSON that is compatible with Grafana API.    
-In order to create dashboard use [Grafana provider](https://registry.terraform.io/providers/grafana/grafana/latest/docs).
+Please, see [provider documentation](https://registry.terraform.io/providers/iRevive/gdashboard/latest/docs).
+
+The provider defines only data sources. Each data source computes a JSON that is compatible with Grafana API.
+Therefore, this provider is not particularly useful on its own, but it can be
+used to generate a JSON compatible with Grafana API, which can then be used
+with [Grafana provider](https://registry.terraform.io/providers/grafana/grafana/latest/docs) to provision a dashboard.
 
 ## Examples
 
