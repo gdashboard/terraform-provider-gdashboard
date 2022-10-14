@@ -3,12 +3,12 @@
 page_title: "gdashboard_dashboard Data Source - terraform-provider-gdashboard"
 subcategory: ""
 description: |-
-  Dashboard data source
+  Dashboard data source. See Grafana documentation https://grafana.com/docs/grafana/latest/dashboards/use-dashboards/ for more details.
 ---
 
 # gdashboard_dashboard (Data Source)
 
-Dashboard data source
+Dashboard data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/dashboards/use-dashboards/) for more details.
 
 ## Example Usage
 
@@ -16,7 +16,7 @@ Dashboard data source
 data "gdashboard_timeseries" "jvm_memory" {
   title = "JVM Memory"
 
-  targets {
+  queries {
     prometheus {
       uid  = "prometheus"
       expr = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"

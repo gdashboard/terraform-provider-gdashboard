@@ -1,6 +1,6 @@
 # Terraform Provider GDashboard
 
-The provider offers a handy syntax to define Grafana dashboards: timeseries, gauge, bar, etc.
+The provider offers a handy syntax to define Grafana dashboards: time series, gauge, bar, etc.
 
 ## Using the provider
 

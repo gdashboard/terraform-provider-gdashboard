@@ -2,12 +2,12 @@
 page_title: "gdashboard_bar_gauge Data Source - terraform-provider-gdashboard"
 subcategory: ""
 description: |-
-  Bar Gauge panel data source
+  Bar gauge panel data source. See Grafana documentation https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/bar-gauge/ for more details.
 ---
 
 # gdashboard_bar_gauge (Data Source)
 
-Bar Gauge panel data source
+Bar gauge panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/bar-gauge/) for more details.
 
 ## Minimal Example
 
@@ -15,7 +15,7 @@ Bar Gauge panel data source
 data "gdashboard_bar_gauge" "jobs_processed" {
   title = "Jobs Processed"
 
-  targets {
+  queries {
     prometheus {
       uid     = "prometheus"
       expr    = "sort_desc(sum(increase(jobs_processed_total{container_name='container'}[$__range])) by (job_type))"
@@ -44,7 +44,7 @@ data "gdashboard_bar_gauge" "jobs_processed" {
     }
   }
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sort_desc(sum(increase(jobs_processed_total{container_name='container'}[$__range])) by (job_type))"
@@ -84,7 +84,7 @@ provider "gdashboard" {
 data "gdashboard_bar_gauge" "jobs_processed" {
   title = "Jobs Processed"
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sort_desc(sum(increase(jobs_processed_total{container_name='container'}[$__range])) by (job_type))"
@@ -98,7 +98,7 @@ data "gdashboard_bar_gauge" "jobs_processed" {
 data "gdashboard_bar_gauge" "mails_sent" {
   title = "Mails Sent"
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sort_desc(sum(increase(mails_sent_total{container_name='container'}[$__range])) by (mail_type))"

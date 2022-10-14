@@ -2,12 +2,12 @@
 page_title: "gdashboard_timeseries Data Source - terraform-provider-gdashboard"
 subcategory: ""
 description: |-
-  Timeseries panel data source
+  Time series panel data source. See Grafana documentation https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/time-series/.
 ---
 
 # gdashboard_timeseries (Data Source)
 
-Timeseries panel data source
+Time series panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/time-series/).
 
 ## Minimal Example
 
@@ -15,7 +15,7 @@ Timeseries panel data source
 data "gdashboard_timeseries" "jvm_memory" {
   title = "JVM memory"
 
-  targets {
+  queries {
     prometheus {
       uid  = "prometheus"
       expr = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"
@@ -59,7 +59,7 @@ data "gdashboard_timeseries" "jvm_memory" {
     span_nulls   = true
   }
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"
@@ -119,7 +119,7 @@ data "gdashboard_timeseries" "jvm_memory" {
     max      = 10000
   }
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"
@@ -141,7 +141,7 @@ data "gdashboard_timeseries" "native_memory" {
     max      = 30000
   }
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sum(increase(native_memory_total{container_name='container'}[$__rate_interval]))"

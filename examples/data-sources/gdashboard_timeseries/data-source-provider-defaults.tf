@@ -38,7 +38,7 @@ data "gdashboard_timeseries" "jvm_memory" {
     max      = 10000
   }
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"
@@ -60,7 +60,7 @@ data "gdashboard_timeseries" "native_memory" {
     max      = 30000
   }
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sum(increase(native_memory_total{container_name='container'}[$__rate_interval]))"

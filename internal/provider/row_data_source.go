@@ -58,7 +58,7 @@ func rowGraphBlock() tfsdk.Block {
 func (d *RowDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Row panel data source",
+		MarkdownDescription: "Row panel data source.",
 
 		Blocks: map[string]tfsdk.Block{
 			"graph": rowGraphBlock(),

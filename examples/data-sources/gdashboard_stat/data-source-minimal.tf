@@ -1,7 +1,7 @@
 data "gdashboard_stat" "status" {
   title = "Status"
 
-  targets {
+  queries {
     prometheus {
       uid     = "prometheus"
       expr    = "up{container_name='container'}"

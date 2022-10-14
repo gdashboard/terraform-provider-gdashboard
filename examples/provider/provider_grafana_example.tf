@@ -45,7 +45,7 @@ data "gdashboard_stat" "status" {
     }
   }
 
-  targets {
+  queries {
     prometheus {
       uid     = "prometheus"
       expr    = "up{container_name='container'}"

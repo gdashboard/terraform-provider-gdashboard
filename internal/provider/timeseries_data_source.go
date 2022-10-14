@@ -253,7 +253,8 @@ func timeseriesLegendBlock() tfsdk.Block {
 func (d *TimeseriesDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Timeseries panel data source",
+		Description:         "Time series panel data source.",
+		MarkdownDescription: "Time series panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/time-series/).",
 
 		Blocks: map[string]tfsdk.Block{
 			"queries": queryBlock(),

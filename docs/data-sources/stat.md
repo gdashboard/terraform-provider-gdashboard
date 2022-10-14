@@ -2,12 +2,12 @@
 page_title: "gdashboard_stat Data Source - terraform-provider-gdashboard"
 subcategory: ""
 description: |-
-  Stat panel data source
+  Stat panel data source. See Grafana documentation https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/stat/ for more details.
 ---
 
 # gdashboard_stat (Data Source)
 
-Stat panel data source
+Stat panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/stat/) for more details.
 
 ## Minimal Example
 
@@ -15,7 +15,7 @@ Stat panel data source
 data "gdashboard_stat" "status" {
   title = "Status"
 
-  targets {
+  queries {
     prometheus {
       uid     = "prometheus"
       expr    = "up{container_name='container'}"
@@ -74,7 +74,7 @@ data "gdashboard_stat" "status" {
     }
   }
 
-  targets {
+  queries {
     prometheus {
       uid     = "prometheus"
       expr    = "up{container_name='container'}"
@@ -121,7 +121,7 @@ provider "gdashboard" {
 data "gdashboard_stat" "status_1" {
   title = "Container 1 Status"
 
-  targets {
+  queries {
     prometheus {
       uid     = "prometheus"
       expr    = "up{container_name='container_1'}"
@@ -133,7 +133,7 @@ data "gdashboard_stat" "status_1" {
 data "gdashboard_stat" "status_2" {
   title = "Container 2 Status"
 
-  targets {
+  queries {
     prometheus {
       uid     = "prometheus"
       expr    = "up{container_name='container_2'}"

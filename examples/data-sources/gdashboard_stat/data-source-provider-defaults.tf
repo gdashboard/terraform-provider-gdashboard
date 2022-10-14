@@ -29,7 +29,7 @@ provider "gdashboard" {
 data "gdashboard_stat" "status_1" {
   title = "Container 1 Status"
 
-  targets {
+  queries {
     prometheus {
       uid     = "prometheus"
       expr    = "up{container_name='container_1'}"
@@ -41,7 +41,7 @@ data "gdashboard_stat" "status_1" {
 data "gdashboard_stat" "status_2" {
   title = "Container 2 Status"
 
-  targets {
+  queries {
     prometheus {
       uid     = "prometheus"
       expr    = "up{container_name='container_2'}"

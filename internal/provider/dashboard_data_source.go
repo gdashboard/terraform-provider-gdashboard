@@ -156,7 +156,8 @@ func dashboardGraphTooltipAttribute() tfsdk.Attribute {
 func (d *DashboardDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Dashboard data source",
+		Description:         "Dashboard data source.",
+		MarkdownDescription: "Dashboard data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/dashboards/use-dashboards/) for more details.",
 
 		Blocks: map[string]tfsdk.Block{
 			"time": dashboardTimeBlock(),

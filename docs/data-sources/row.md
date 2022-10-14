@@ -3,12 +3,12 @@
 page_title: "gdashboard_row Data Source - terraform-provider-gdashboard"
 subcategory: ""
 description: |-
-  Row panel data source
+  Row panel data source.
 ---
 
 # gdashboard_row (Data Source)
 
-Row panel data source
+Row panel data source.
 
 ## Example Usage
 

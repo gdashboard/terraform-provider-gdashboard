@@ -129,7 +129,8 @@ func statGraphBlock() tfsdk.Block {
 func (d *StatDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Stat panel data source",
+		Description:         "Stat panel data source.",
+		MarkdownDescription: "Stat panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/stat/) for more details.",
 
 		Blocks: map[string]tfsdk.Block{
 			"queries": queryBlock(),

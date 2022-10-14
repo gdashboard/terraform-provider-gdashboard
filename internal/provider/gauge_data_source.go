@@ -99,7 +99,8 @@ func gaugeGraphBlock() tfsdk.Block {
 func (d *GaugeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Gauge panel data source",
+		Description:         "Gauge panel data source.",
+		MarkdownDescription: "Gauge panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/). for more details",
 
 		Blocks: map[string]tfsdk.Block{
 			"queries": queryBlock(),

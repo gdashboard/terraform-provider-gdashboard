@@ -30,7 +30,7 @@ data "gdashboard_timeseries" "jvm_memory" {
     span_nulls   = true
   }
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"

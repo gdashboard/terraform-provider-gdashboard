@@ -39,7 +39,7 @@ provider "gdashboard" {
 data "gdashboard_gauge" "jvm_memory" {
   title = "JVM Memory"
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"
@@ -53,7 +53,7 @@ data "gdashboard_gauge" "jvm_memory" {
 data "gdashboard_gauge" "native_memory" {
   title = "Native Memory"
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sum(increase(native_total{container_name='container'}[$__rate_interval]))"

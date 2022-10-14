@@ -2,12 +2,12 @@
 page_title: "gdashboard_gauge Data Source - terraform-provider-gdashboard"
 subcategory: ""
 description: |-
-  Gauge panel data source
+  Gauge panel data source. See Grafana documentation https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/. for more details
 ---
 
 # gdashboard_gauge (Data Source)
 
-Gauge panel data source
+Gauge panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/). for more details
 
 ## Minimal Example
 
@@ -15,7 +15,7 @@ Gauge panel data source
 data "gdashboard_gauge" "jvm_memory" {
   title = "JVM Memory"
 
-  targets {
+  queries {
     prometheus {
       uid     = "prometheus"
       expr    = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"
@@ -63,7 +63,7 @@ data "gdashboard_gauge" "jvm_memory" {
     }
   }
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"
@@ -122,7 +122,7 @@ provider "gdashboard" {
 data "gdashboard_gauge" "jvm_memory" {
   title = "JVM Memory"
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"
@@ -136,7 +136,7 @@ data "gdashboard_gauge" "jvm_memory" {
 data "gdashboard_gauge" "native_memory" {
   title = "Native Memory"
 
-  targets {
+  queries {
     prometheus {
       uid           = "prometheus"
       expr          = "sum(increase(native_total{container_name='container'}[$__rate_interval]))"

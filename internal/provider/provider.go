@@ -85,7 +85,7 @@ func (p *GrafanaDashboardBuilderProvider) Metadata(ctx context.Context, req prov
 
 func (p *GrafanaDashboardBuilderProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		Description: "The provider offers a handy syntax to define Grafana dashboards: timeseries, gauge, bar, etc.",
+		Description: "The provider offers a handy syntax to define Grafana dashboards: time series, gauge, bar, etc.",
 		Blocks: map[string]tfsdk.Block{
 			"defaults": {
 				NestingMode: tfsdk.BlockNestingModeList,
