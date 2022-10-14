@@ -294,8 +294,8 @@ Required:
 
 Optional:
 
-- `dimension` (Block List, Max: 5) (see [below for nested schema](#nestedblock--targets--cloudwatch--dimension))
-- `legend_format` (String) The legend name.
+- `dimension` (Block List, Max: 5) The dimension to filter the metric with. (see [below for nested schema](#nestedblock--targets--cloudwatch--dimension))
+- `label` (String) The legend name.
 - `match_exact` (Boolean) If enabled you also need to specify **all** the dimensions of the metric you’re querying.
 - `period` (String) The minimum interval between points in seconds.
 - `ref_id` (String) The ID of the query. The ID can be used to reference queries in math expressions.
@@ -306,8 +306,8 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `value` (String)
+- `name` (String) The name of the dimension.
+- `value` (String) The value of the dimension.
 
 
 

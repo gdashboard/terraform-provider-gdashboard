@@ -207,9 +207,9 @@ type CloudWatchTarget struct {
 	MatchExact types.Bool            `tfsdk:"match_exact"`
 	Region     types.String          `tfsdk:"region"`
 	// etc
-	RefId        types.String `tfsdk:"ref_id"`
-	Period       types.String `tfsdk:"period"`
-	LegendFormat types.String `tfsdk:"legend_format"`
+	RefId  types.String `tfsdk:"ref_id"`
+	Period types.String `tfsdk:"period"`
+	Label  types.String `tfsdk:"label"`
 }
 
 type CloudWatchDimension struct {
@@ -566,14 +566,17 @@ func targetBlock() tfsdk.Block {
 					"dimension": {
 						NestingMode: tfsdk.BlockNestingModeList,
 						MaxItems:    5,
+						Description: "The dimension to filter the metric with.",
 						Attributes: map[string]tfsdk.Attribute{
 							"name": {
-								Type:     types.StringType,
-								Required: true,
+								Type:        types.StringType,
+								Required:    true,
+								Description: "The name of the dimension.",
 							},
 							"value": {
-								Type:     types.StringType,
-								Required: true,
+								Type:        types.StringType,
+								Required:    true,
+								Description: "The value of the dimension.",
 							},
 						},
 					},
@@ -621,7 +624,7 @@ func targetBlock() tfsdk.Block {
 						Optional:    true,
 						Description: "The minimum interval between points in seconds.",
 					},
-					"legend_format": {
+					"label": {
 						Type:        types.StringType,
 						Optional:    true,
 						Description: "The legend name.",
@@ -814,7 +817,7 @@ func createTargets(dataTargets []Target) []grafana.Target {
 				Dimensions: dimensions,
 				Period:     target.Period.Value,
 				Region:     target.Region.Value,
-				Label:      target.LegendFormat.Value,
+				Label:      target.Label.Value,
 			}
 
 			targets = append(targets, t)
