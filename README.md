@@ -14,22 +14,6 @@ with [Grafana provider](https://registry.terraform.io/providers/grafana/grafana/
 ## Examples
 
 ```terraform
-terraform {
-  required_providers {
-    grafana = {
-      source  = "grafana/grafana"
-      version = "1.29.0"
-    }
-
-    gdashboard = {
-      source  = "iRevive/gdashboard"
-      version = ">= 0.0.3" # use actual version
-    }
-  }
-
-  required_version = ">= 1.2.0"
-}
-
 data "gdashboard_stat" "status" {
   title       = "Status"
   description = "Shows the status of the container"
