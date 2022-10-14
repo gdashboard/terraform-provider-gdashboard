@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -103,11 +104,13 @@ func timeseriesTooltipBlock() tfsdk.Block {
 		NestingMode: tfsdk.BlockNestingModeList,
 		MinItems:    0,
 		MaxItems:    1,
+		Description: "The tooltip visualization options.",
 		Attributes: map[string]tfsdk.Attribute{
 			"mode": {
-				Type:        types.StringType,
-				Required:    true,
-				Description: "When you hover your cursor over the visualization, Grafana can display tooltips",
+				Type:                types.StringType,
+				Required:            true,
+				Description:         "Choose the how to display the tooltip. The choices are: multi, single, hidden.",
+				MarkdownDescription: "Choose the how to display the tooltip. The choices are: `multi`, `single`, `hidden`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("multi", "single", "hidden"),
 				},
@@ -121,61 +124,90 @@ func timeseriesGraphBlock() tfsdk.Block {
 		NestingMode: tfsdk.BlockNestingModeList,
 		MinItems:    0,
 		MaxItems:    1,
+		Description: "The visualization options.",
 		Attributes: map[string]tfsdk.Attribute{
 			"draw_style": {
-				Type:     types.StringType,
-				Optional: true,
+				Type:                types.StringType,
+				Optional:            true,
+				Description:         "Choose how to display the tooltip. The choices are: multi, single, hidden.",
+				MarkdownDescription: "Choose how to display the tooltip. The choices are: `multi`, `single`, `hidden`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("line", "bars", "points"),
 				},
 			},
 			"line_interpolation": {
-				Type:     types.StringType,
-				Optional: true,
+				Type:                types.StringType,
+				Optional:            true,
+				Description:         "Choose how to interpolation the line. The choices are: linear, smooth, stepBefore, stepAfter.",
+				MarkdownDescription: "Choose how to interpolation the line. The choices are: `linear`, `smooth`, `stepBefore`, `stepAfter`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("linear", "smooth", "stepBefore", "stepAfter"),
 				},
 			},
 			"line_width": {
-				Type:     types.Int64Type,
-				Optional: true,
+				Type:                types.Int64Type,
+				Optional:            true,
+				Description:         "The width of the line. Must be between 0 and 10 (inclusive).",
+				MarkdownDescription: "The width of the line. Must be between `0` and `10` (inclusive).",
+				Validators: []tfsdk.AttributeValidator{
+					int64validator.Between(0, 10),
+				},
 			},
 			"fill_opacity": {
-				Type:     types.Int64Type,
-				Optional: true,
+				Type:                types.Int64Type,
+				Optional:            true,
+				Description:         "The opacity of the filled areas. Must be between 0 and 100 (inclusive).",
+				MarkdownDescription: "The opacity of the filled areas. Must be between `0` and `100` (inclusive).",
+				Validators: []tfsdk.AttributeValidator{
+					int64validator.Between(0, 100),
+				},
 			},
 			"gradient_mode": {
-				Type:     types.StringType,
-				Optional: true,
+				Type:                types.StringType,
+				Optional:            true,
+				Description:         "The gradient mode. The choices are: none, opacity, hue, scheme.",
+				MarkdownDescription: "The gradient mode. The choices are: `none`, `opacity`, `hue`, `scheme`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("none", "opacity", "hue", "scheme"),
 				},
 			},
 			"line_style": {
-				Type:     types.StringType,
-				Optional: true,
+				Type:                types.StringType,
+				Optional:            true,
+				Description:         "The style of the line. The choices are: solid, dash, dots.",
+				MarkdownDescription: "The style of the line. The choices are: `solid`, `dash`, `dots`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("solid", "dash", "dots"),
 				},
 			},
 			"span_nulls": {
-				Type:     types.BoolType,
-				Optional: true,
+				Type:        types.BoolType,
+				Optional:    true,
+				Description: "Whether to ignore or replace null values with zeroes or not.",
 			},
 			"show_points": {
-				Type:     types.StringType,
-				Optional: true,
+				Type:                types.StringType,
+				Optional:            true,
+				Description:         "Choose how to display data points. The choices are: auto, never, always.",
+				MarkdownDescription: "Choose how to display data points. The choices are: `auto`, `never`, `always`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("auto", "never", "always"),
 				},
 			},
 			"point_size": {
-				Type:     types.Int64Type,
-				Optional: true,
+				Type:                types.Int64Type,
+				Optional:            true,
+				Description:         "The size of the data point. Must be between 1 and 40 (inclusive).",
+				MarkdownDescription: "The size of the data point. Must be between `1` and `40` (inclusive).",
+				Validators: []tfsdk.AttributeValidator{
+					int64validator.Between(1, 40),
+				},
 			},
 			"stack_series": {
-				Type:     types.StringType,
-				Optional: true,
+				Type:                types.StringType,
+				Optional:            true,
+				Description:         "Choose how to stack the series. The choices are: none, normal, percent.",
+				MarkdownDescription: "Choose how to stack the series. The choices are: `none`, `normal`, `percent`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("none", "normal", "percent"),
 				},
@@ -189,24 +221,27 @@ func timeseriesLegendBlock() tfsdk.Block {
 		NestingMode: tfsdk.BlockNestingModeList,
 		MinItems:    0,
 		MaxItems:    1,
+		Description: "Legend options.",
 		Attributes: map[string]tfsdk.Attribute{
 			"calculations": {
 				Type:        types.ListType{ElemType: types.StringType},
 				Optional:    true,
-				Description: "Choose which of the standard calculations to show in the legend: min, max, mean",
+				Description: "Choose which of the standard calculations to show in the legend: min, max, mean, etc.",
 			},
 			"display_mode": {
-				Type:        types.StringType,
-				Optional:    true,
-				Description: "Use these settings to define how the legend appears in your visualization: list, table, hidden",
+				Type:                types.StringType,
+				Optional:            true,
+				Description:         "Choose how to display the legend. The choices are: list, table, hidden.",
+				MarkdownDescription: "Choose how to display the legend. The choices are: `list`, `table`, `hidden`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("list", "table", "hidden"),
 				},
 			},
 			"placement": {
-				Type:        types.StringType,
-				Optional:    true,
-				Description: "Choose where to display the legend: bottom, right",
+				Type:                types.StringType,
+				Optional:            true,
+				Description:         "Choose where to display the legend. The choice are: bottom, right.",
+				MarkdownDescription: "Choose where to display the legend. The choice are: `bottom`, `right`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("bottom", "right"),
 				},

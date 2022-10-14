@@ -67,15 +67,17 @@ func gaugeGraphBlock() tfsdk.Block {
 		NestingMode: tfsdk.BlockNestingModeList,
 		MinItems:    0,
 		MaxItems:    1,
+		Description: "The visualization options.",
 		Blocks: map[string]tfsdk.Block{
 			"options":   reduceOptionsBlock(),
 			"text_size": textSizeBlock(),
 		},
 		Attributes: map[string]tfsdk.Attribute{
 			"orientation": {
-				Type:        types.StringType,
-				Optional:    true,
-				Description: "Layout orientation",
+				Type:                types.StringType,
+				Optional:            true,
+				Description:         "The layout orientation. The choices are: auto, horizontal, vertical.",
+				MarkdownDescription: "The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("auto", "horizontal", "vertical"),
 				},
@@ -83,12 +85,12 @@ func gaugeGraphBlock() tfsdk.Block {
 			"show_threshold_labels": {
 				Type:        types.BoolType,
 				Optional:    true,
-				Description: "Render the threshold values around the gauge bar",
+				Description: "Whether to render the threshold values around the gauge bar or not.",
 			},
 			"show_threshold_markers": {
 				Type:        types.BoolType,
 				Optional:    true,
-				Description: "Renders the thresholds as an outer bar",
+				Description: "Whether to renders the thresholds as an outer bar or not.",
 			},
 		},
 	}

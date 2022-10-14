@@ -93,11 +93,11 @@ data "gdashboard_timeseries" "test" {
 
 - `axis` (Block List, Max: 1) Axis display options. (see [below for nested schema](#nestedblock--axis))
 - `description` (String) The description of this panel.
-- `field` (Block List, Max: 1) (see [below for nested schema](#nestedblock--field))
-- `graph` (Block List, Max: 1) (see [below for nested schema](#nestedblock--graph))
-- `legend` (Block List, Max: 1) (see [below for nested schema](#nestedblock--legend))
-- `targets` (Block List, Max: 3) (see [below for nested schema](#nestedblock--targets))
-- `tooltip` (Block List, Max: 1) (see [below for nested schema](#nestedblock--tooltip))
+- `field` (Block List, Max: 1) The customization of field options. (see [below for nested schema](#nestedblock--field))
+- `graph` (Block List, Max: 1) The visualization options. (see [below for nested schema](#nestedblock--graph))
+- `legend` (Block List, Max: 1) Legend options. (see [below for nested schema](#nestedblock--legend))
+- `targets` (Block List, Max: 3) The queries to collect values from data sources. (see [below for nested schema](#nestedblock--targets))
+- `tooltip` (Block List, Max: 1) The tooltip visualization options. (see [below for nested schema](#nestedblock--tooltip))
 
 ### Read-Only
 
@@ -133,23 +133,26 @@ Optional:
 
 Optional:
 
-- `color` (Block List, Max: 1) (see [below for nested schema](#nestedblock--field--color))
-- `decimals` (Number)
-- `mappings` (Block List, Max: 1) (see [below for nested schema](#nestedblock--field--mappings))
-- `max` (Number)
-- `min` (Number)
-- `no_value` (Number)
-- `thresholds` (Block List, Max: 1) (see [below for nested schema](#nestedblock--field--thresholds))
-- `unit` (String)
+- `color` (Block List, Max: 1) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--field--color))
+- `decimals` (Number) The number of decimals to include when rendering a value. Must be between `0` and `20` (inclusive).
+- `mappings` (Block List, Max: 1) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--field--mappings))
+- `max` (Number) The maximum value used in percentage threshold calculations.
+- `min` (Number) The minimum value used in percentage threshold calculations.
+- `no_value` (Number) The value to display if the field value is empty or null.
+- `thresholds` (Block List, Max: 1) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--field--thresholds))
+- `unit` (String) The unit the field should use.
 
 <a id="nestedblock--field--color"></a>
 ### Nested Schema for `field.color`
 
 Optional:
 
-- `fixed_color` (String)
-- `mode` (String)
-- `series_by` (String)
+- `fixed_color` (String) The series to use to define the color. This is useful for graphs and pie charts, for example.
+- `mode` (String) The colorization mode. The most popular options:
+1) `fixed` - specific color set by using the value of `fixed_color`.
+2) `thresholds` - a color is derived from the matching threshold. This is useful for gauges, stat, and table visualizations.
+3) `palette-classic` - a color is derived from the matching threshold using the classic color palette.
+- `series_by` (String) The series to use to define the color. This is useful for graphs and pie charts, for example.
 
 
 <a id="nestedblock--field--mappings"></a>
@@ -157,23 +160,23 @@ Optional:
 
 Optional:
 
-- `range` (Block List, Max: 10) (see [below for nested schema](#nestedblock--field--mappings--range))
-- `regex` (Block List, Max: 10) (see [below for nested schema](#nestedblock--field--mappings--regex))
-- `special` (Block List, Max: 10) (see [below for nested schema](#nestedblock--field--mappings--special))
-- `value` (Block List, Max: 10) (see [below for nested schema](#nestedblock--field--mappings--value))
+- `range` (Block List, Max: 10) Match a numerical range of values. (see [below for nested schema](#nestedblock--field--mappings--range))
+- `regex` (Block List, Max: 10) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--field--mappings--regex))
+- `special` (Block List, Max: 10) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--field--mappings--special))
+- `value` (Block List, Max: 10) Match a specific text value. (see [below for nested schema](#nestedblock--field--mappings--value))
 
 <a id="nestedblock--field--mappings--range"></a>
 ### Nested Schema for `field.mappings.range`
 
 Required:
 
-- `from` (String)
-- `to` (String)
+- `from` (Number) The start of the range.
+- `to` (Number) The end of the range.
 
 Optional:
 
-- `color` (String)
-- `display_text` (String)
+- `color` (String) The color to use if the condition is met.
+- `display_text` (String) Text to display if the condition is met. This field accepts Grafana variables.
 
 
 <a id="nestedblock--field--mappings--regex"></a>
@@ -181,12 +184,12 @@ Optional:
 
 Required:
 
-- `pattern` (String)
+- `pattern` (String) The regular expression to match.
 
 Optional:
 
-- `color` (String)
-- `display_text` (String)
+- `color` (String) The color to use if the condition is met.
+- `display_text` (String) Text to display if the condition is met. This field accepts Grafana variables.
 
 
 <a id="nestedblock--field--mappings--special"></a>
@@ -194,9 +197,9 @@ Optional:
 
 Optional:
 
-- `color` (String)
-- `display_text` (String)
-- `match` (String)
+- `color` (String) The color to use if the condition is met.
+- `display_text` (String) Text to display if the condition is met. This field accepts Grafana variables.
+- `match` (String) The category to match. The choices are: `null`, `nan`, `null+nan`, `true`, `false`, `empty`.
 
 
 <a id="nestedblock--field--mappings--value"></a>
@@ -204,12 +207,12 @@ Optional:
 
 Required:
 
-- `value` (String)
+- `value` (String) The exact value to match.
 
 Optional:
 
-- `color` (String)
-- `display_text` (String)
+- `color` (String) The color to use if the condition is met.
+- `display_text` (String) Text to display if the condition is met. This field accepts Grafana variables.
 
 
 
@@ -218,19 +221,21 @@ Optional:
 
 Optional:
 
-- `mode` (String)
-- `step` (Block List, Max: 20) (see [below for nested schema](#nestedblock--field--thresholds--step))
+- `mode` (String) The threshold mode. The choices are:
+1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
+2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
+- `step` (Block List, Max: 20) The threshold steps. (see [below for nested schema](#nestedblock--field--thresholds--step))
 
 <a id="nestedblock--field--thresholds--step"></a>
 ### Nested Schema for `field.thresholds.step`
 
 Required:
 
-- `color` (String)
+- `color` (String) The color for the matching values.
 
 Optional:
 
-- `value` (Number)
+- `value` (Number) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
 
 
 
@@ -240,16 +245,16 @@ Optional:
 
 Optional:
 
-- `draw_style` (String)
-- `fill_opacity` (Number)
-- `gradient_mode` (String)
-- `line_interpolation` (String)
-- `line_style` (String)
-- `line_width` (Number)
-- `point_size` (Number)
-- `show_points` (String)
-- `span_nulls` (Boolean)
-- `stack_series` (String)
+- `draw_style` (String) Choose how to display the tooltip. The choices are: `multi`, `single`, `hidden`.
+- `fill_opacity` (Number) The opacity of the filled areas. Must be between `0` and `100` (inclusive).
+- `gradient_mode` (String) The gradient mode. The choices are: `none`, `opacity`, `hue`, `scheme`.
+- `line_interpolation` (String) Choose how to interpolation the line. The choices are: `linear`, `smooth`, `stepBefore`, `stepAfter`.
+- `line_style` (String) The style of the line. The choices are: `solid`, `dash`, `dots`.
+- `line_width` (Number) The width of the line. Must be between `0` and `10` (inclusive).
+- `point_size` (Number) The size of the data point. Must be between `1` and `40` (inclusive).
+- `show_points` (String) Choose how to display data points. The choices are: `auto`, `never`, `always`.
+- `span_nulls` (Boolean) Whether to ignore or replace null values with zeroes or not.
+- `stack_series` (String) Choose how to stack the series. The choices are: `none`, `normal`, `percent`.
 
 
 <a id="nestedblock--legend"></a>
@@ -257,9 +262,9 @@ Optional:
 
 Optional:
 
-- `calculations` (List of String) Choose which of the standard calculations to show in the legend: min, max, mean
-- `display_mode` (String) Use these settings to define how the legend appears in your visualization: list, table, hidden
-- `placement` (String) Choose where to display the legend: bottom, right
+- `calculations` (List of String) Choose which of the standard calculations to show in the legend: min, max, mean, etc.
+- `display_mode` (String) Choose how to display the legend. The choices are: `list`, `table`, `hidden`.
+- `placement` (String) Choose where to display the legend. The choice are: `bottom`, `right`.
 
 
 <a id="nestedblock--targets"></a>
@@ -267,27 +272,27 @@ Optional:
 
 Optional:
 
-- `cloudwatch` (Block List, Max: 5) (see [below for nested schema](#nestedblock--targets--cloudwatch))
-- `prometheus` (Block List, Max: 5) (see [below for nested schema](#nestedblock--targets--prometheus))
+- `cloudwatch` (Block List, Max: 5) The CloudWatch query. (see [below for nested schema](#nestedblock--targets--cloudwatch))
+- `prometheus` (Block List, Max: 5) The Prometheus query. (see [below for nested schema](#nestedblock--targets--prometheus))
 
 <a id="nestedblock--targets--cloudwatch"></a>
 ### Nested Schema for `targets.cloudwatch`
 
 Required:
 
-- `metric_name` (String)
-- `namespace` (String)
-- `statistic` (String)
-- `uid` (String) CloudWatch DataSource UID
+- `metric_name` (String) The name of the metric to query. Example: `CPUUtilization`
+- `namespace` (String) The namespace to query the metrics from.
+- `statistic` (String) The calculation to apply to the time series.
+- `uid` (String) The UID of a CloudWatch DataSource to use in this query.
 
 Optional:
 
 - `dimension` (Block List, Max: 5) (see [below for nested schema](#nestedblock--targets--cloudwatch--dimension))
-- `legend_format` (String)
-- `match_exact` (Boolean)
-- `period` (String)
-- `ref_id` (String)
-- `region` (String)
+- `legend_format` (String) The legend name.
+- `match_exact` (Boolean) If enabled you also need to specify **all** the dimensions of the metric you’re querying.
+- `period` (String) The minimum interval between points in seconds.
+- `ref_id` (String) The ID of the query. The ID can be used to reference queries in math expressions.
+- `region` (String) The AWS region to query the metrics from.
 
 <a id="nestedblock--targets--cloudwatch--dimension"></a>
 ### Nested Schema for `targets.cloudwatch.dimension`
@@ -304,16 +309,16 @@ Required:
 
 Required:
 
-- `expr` (String)
-- `uid` (String) Prometheus DataSource UID
+- `expr` (String) The query expression.
+- `uid` (String) The UID of a Prometheus DataSource to use in this query.
 
 Optional:
 
-- `format` (String)
-- `instant` (Boolean)
-- `legend_format` (String)
-- `min_interval` (String)
-- `ref_id` (String)
+- `format` (String) The query format. The choices are: `time_series`, `table`, `heatmap`.
+- `instant` (Boolean) Whether to return the latest value from the time series or not.
+- `legend_format` (String) The legend name.
+- `min_interval` (String) The lower bounds on the interval between data points.
+- `ref_id` (String) The ID of the query. The ID can be used to reference queries in math expressions.
 
 
 
@@ -322,6 +327,6 @@ Optional:
 
 Required:
 
-- `mode` (String) When you hover your cursor over the visualization, Grafana can display tooltips
+- `mode` (String) Choose the how to display the tooltip. The choices are: `multi`, `single`, `hidden`.
 
 

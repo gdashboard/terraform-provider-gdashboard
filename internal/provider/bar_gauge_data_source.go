@@ -67,29 +67,35 @@ func barGaugeGraphBlock() tfsdk.Block {
 		NestingMode: tfsdk.BlockNestingModeList,
 		MinItems:    0,
 		MaxItems:    1,
+		Description: "The visualization options.",
 		Blocks: map[string]tfsdk.Block{
 			"options":   reduceOptionsBlock(),
 			"text_size": textSizeBlock(),
 		},
 		Attributes: map[string]tfsdk.Attribute{
 			"orientation": {
-				Type:        types.StringType,
-				Optional:    true,
-				Description: "Layout orientation",
+				Type:                types.StringType,
+				Optional:            true,
+				Description:         "The layout orientation. The choices are: auto, horizontal, vertical.",
+				MarkdownDescription: "The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("auto", "horizontal", "vertical"),
 				},
 			},
 			"display_mode": {
-				Type:     types.StringType,
-				Optional: true,
+				Type:                types.StringType,
+				Optional:            true,
+				Description:         "The display mode. The choices are: gradient, lcd, basic.",
+				MarkdownDescription: "The display mode. The choices are: `gradient`, `lcd`, `basic`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("gradient", "lcd", "basic"),
 				},
 			},
 			"text_alignment": {
-				Type:     types.StringType,
-				Optional: true,
+				Type:                types.StringType,
+				Optional:            true,
+				Description:         "The text alignment. The choices are: auto, center.",
+				MarkdownDescription: "The text alignment. The choices are: `auto`, `center`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("auto", "center"),
 				},

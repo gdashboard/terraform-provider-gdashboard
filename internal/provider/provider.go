@@ -91,11 +91,13 @@ func (p *GrafanaDashboardBuilderProvider) GetSchema(ctx context.Context) (tfsdk.
 				NestingMode: tfsdk.BlockNestingModeList,
 				MinItems:    0,
 				MaxItems:    1,
+				Description: "The default values to use with when an attribute is missing in the data source definition.",
 				Blocks: map[string]tfsdk.Block{
 					"dashboard": {
 						NestingMode: tfsdk.BlockNestingModeList,
 						MinItems:    0,
 						MaxItems:    1,
+						Description: "Dashboard defaults.",
 						Blocks: map[string]tfsdk.Block{
 							"time": dashboardTimeBlock(),
 						},
@@ -109,6 +111,7 @@ func (p *GrafanaDashboardBuilderProvider) GetSchema(ctx context.Context) (tfsdk.
 						NestingMode: tfsdk.BlockNestingModeList,
 						MinItems:    0,
 						MaxItems:    1,
+						Description: "Timeseries defaults.",
 						Blocks: map[string]tfsdk.Block{
 							"legend":  timeseriesLegendBlock(),
 							"tooltip": timeseriesTooltipBlock(),
@@ -121,6 +124,7 @@ func (p *GrafanaDashboardBuilderProvider) GetSchema(ctx context.Context) (tfsdk.
 						NestingMode: tfsdk.BlockNestingModeList,
 						MinItems:    0,
 						MaxItems:    1,
+						Description: "Bar gauge defaults.",
 						Blocks: map[string]tfsdk.Block{
 							"field": fieldBlock(),
 							"graph": barGaugeGraphBlock(),
@@ -130,6 +134,7 @@ func (p *GrafanaDashboardBuilderProvider) GetSchema(ctx context.Context) (tfsdk.
 						NestingMode: tfsdk.BlockNestingModeList,
 						MinItems:    0,
 						MaxItems:    1,
+						Description: "Stat defaults.",
 						Blocks: map[string]tfsdk.Block{
 							"field": fieldBlock(),
 							"graph": statGraphBlock(),
@@ -139,6 +144,7 @@ func (p *GrafanaDashboardBuilderProvider) GetSchema(ctx context.Context) (tfsdk.
 						NestingMode: tfsdk.BlockNestingModeList,
 						MinItems:    0,
 						MaxItems:    1,
+						Description: "Gauge defaults.",
 						Blocks: map[string]tfsdk.Block{
 							"field": fieldBlock(),
 							"graph": gaugeGraphBlock(),
