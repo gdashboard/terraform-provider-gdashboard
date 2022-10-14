@@ -49,4 +49,3 @@ data "gdashboard_stat" "status_2" {
     }
   }
 }
-
