@@ -1,6 +1,75 @@
 # Terraform Provider GDashboard
 
-The provider allows building Grafana panels using Terraform syntax.
+The provider offers a handy syntax to define Grafana dashboards: timeseries, gauge, bar, etc.
+
+## Using the provider
+
+Please, see [provider documentation](https://registry.terraform.io/providers/iRevive/gdashboard/latest/docs).
+
+The provider defines only data sources. Each data source computes a JSON that is compatible with Grafana API.
+Therefore, this provider is not particularly useful on its own, but it can be
+used to generate a JSON compatible with Grafana API, which can then be used
+with [Grafana provider](https://registry.terraform.io/providers/grafana/grafana/latest/docs) to provision a dashboard.
+
+## Examples
+
+```terraform
+data "gdashboard_stat" "status" {
+  title       = "Status"
+  description = "Shows the status of the container"
+
+  field {
+    mappings {
+      value {
+        value        = "1"
+        display_text = "UP"
+        color        = "green"
+      }
+
+      special {
+        match        = "null+nan"
+        display_text = "DOWN"
+        color        = "red"
+      }
+    }
+  }
+
+  targets {
+    prometheus {
+      uid     = "prometheus"
+      expr    = "up{container_name='container'}"
+      instant = true
+    }
+  }
+}
+
+data "gdashboard_dashboard" "dashboard" {
+  title = "My dashboard"
+
+  layout {
+    row {
+      panel {
+        size = {
+          height = 8
+          width  = 10
+        }
+        source = data.gdashboard_stat.status.json
+      }
+    }
+  }
+}
+
+# Define provider
+provider "grafana" {
+  url  = "https://my.grafana.com" # use your API endpoint
+  auth = var.grafana_auth
+}
+
+# Create your dashboard
+resource "grafana_dashboard" "my_dashboard" {
+  config_json = data.gdashboard_dashboard.dashboard.json
+}
+```
 
 ## Requirements
 
@@ -30,10 +99,6 @@ go mod tidy
 ```
 
 Then commit the changes to `go.mod` and `go.sum`.
-
-## Using the provider
-
-Fill this in for each provider
 
 ## Developing the Provider
 

@@ -104,14 +104,17 @@ func dashboardTimeBlock() tfsdk.Block {
 		NestingMode: tfsdk.BlockNestingModeList,
 		MinItems:    0,
 		MaxItems:    1,
+		Description: "The default query time range.",
 		Attributes: map[string]tfsdk.Attribute{
 			"from": {
-				Type:     types.StringType,
-				Required: true,
+				Type:        types.StringType,
+				Required:    true,
+				Description: "The start of the range.",
 			},
 			"to": {
-				Type:     types.StringType,
-				Required: true,
+				Type:        types.StringType,
+				Required:    true,
+				Description: "The end of the range.",
 			},
 		},
 	}
@@ -121,15 +124,16 @@ func dashboardEditableAttribute() tfsdk.Attribute {
 	return tfsdk.Attribute{
 		Type:        types.BoolType,
 		Optional:    true,
-		Description: "Whether the dashboard is editable or not",
+		Description: "Whether to make the dashboard editable or not.",
 	}
 }
 
 func dashboardStyleAttribute() tfsdk.Attribute {
 	return tfsdk.Attribute{
-		Type:        types.StringType,
-		Optional:    true,
-		Description: "The dashboard style: dark, light",
+		Type:                types.StringType,
+		Optional:            true,
+		Description:         "The dashboard style. The choices are: dark, light.",
+		MarkdownDescription: "The dashboard style. The choices are: `dark`, `light`.",
 		Validators: []tfsdk.AttributeValidator{
 			stringvalidator.OneOf("dark", "light"),
 		},
@@ -138,9 +142,10 @@ func dashboardStyleAttribute() tfsdk.Attribute {
 
 func dashboardGraphTooltipAttribute() tfsdk.Attribute {
 	return tfsdk.Attribute{
-		Type:        types.StringType,
-		Optional:    true,
-		Description: "Controls tooltip and hover highlight behavior across different panels: default, shared-crosshair, shared-tooltip",
+		Type:                types.StringType,
+		Optional:            true,
+		Description:         "Controls tooltip and hover highlight behavior across different panels: default, shared-crosshair, shared-tooltip.",
+		MarkdownDescription: "Controls tooltip and hover highlight behavior across different panels: `default`, `shared-crosshair`, `shared-tooltip`.",
 		Validators: []tfsdk.AttributeValidator{
 			stringvalidator.OneOf("default", "shared-crosshair", "shared-tooltip"),
 		},
@@ -157,57 +162,66 @@ func (d *DashboardDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag
 			"variables": {
 				NestingMode: tfsdk.BlockNestingModeList,
 				MaxItems:    10,
+				Description: "The variables.",
 				Blocks: map[string]tfsdk.Block{
 					"custom": {
 						NestingMode: tfsdk.BlockNestingModeList,
 						MinItems:    1,
 						MaxItems:    10,
+						Description: "The variable options defined as a comma-separated list.",
 						Blocks: map[string]tfsdk.Block{
 							"option": {
 								NestingMode: tfsdk.BlockNestingModeList,
 								MinItems:    1,
 								MaxItems:    10,
+								Description: "The option entry.",
 								Attributes: map[string]tfsdk.Attribute{
 									"text": {
-										Type:     types.StringType,
-										Required: true,
+										Type:        types.StringType,
+										Required:    true,
+										Description: "The text (label) of the entry.",
 									},
 									"value": {
-										Type:     types.StringType,
-										Required: true,
+										Type:        types.StringType,
+										Required:    true,
+										Description: "The value of the entry.",
 									},
 									"selected": {
-										Type:     types.BoolType,
-										Optional: true,
+										Type:        types.BoolType,
+										Optional:    true,
+										Description: "Whether to mark the option as selected or not.",
 									},
 								},
 							},
 						},
 						Attributes: map[string]tfsdk.Attribute{
 							"name": {
-								Type:     types.StringType,
-								Required: true,
+								Type:        types.StringType,
+								Required:    true,
+								Description: "The name of the variable.",
 							},
 						},
 					},
 					"const": {
 						NestingMode: tfsdk.BlockNestingModeList,
 						MaxItems:    5,
+						Description: "The constant variable.",
 						Attributes: map[string]tfsdk.Attribute{
 							"name": {
 								Type:        types.StringType,
-								Description: "The name of the variable",
+								Description: "The name of the variable.",
 								Required:    true,
 							},
 							"value": {
 								Type:        types.StringType,
-								Description: "The value of the variable",
+								Description: "The value of the variable.",
 								Required:    true,
 							},
 							"hide": {
-								Type:        types.StringType,
-								Description: "Which variable information to hide: label, variable",
-								Optional:    true,
+								Type:                types.StringType,
+								Optional:            true,
+								Description:         "Which variable information to hide. The choices are: label, variable.",
+								MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
 								Validators: []tfsdk.AttributeValidator{
 									stringvalidator.OneOf("label", "variable"),
 								},
@@ -218,36 +232,39 @@ func (d *DashboardDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag
 			},
 			"layout": {
 				NestingMode: tfsdk.BlockNestingModeSingle,
+				Description: "The layout of the dashboard.",
 				Blocks: map[string]tfsdk.Block{
 					"row": {
 						NestingMode: tfsdk.BlockNestingModeList,
 						MaxItems:    40,
+						Description: "The row within the dashboard.",
 						Blocks: map[string]tfsdk.Block{
 							"panel": {
 								MaxItems:    20,
 								NestingMode: tfsdk.BlockNestingModeList,
+								Description: "The definition of the panel within the row.",
 								Attributes: map[string]tfsdk.Attribute{
 									"size": {
-										Description: "The size of the panel",
+										Description: "The size of the panel.",
 										Required:    true,
 										Attributes: tfsdk.SingleNestedAttributes(
 											map[string]tfsdk.Attribute{
 												"height": {
 													Type:        types.Int64Type,
 													Required:    true,
-													Description: "The height of the panel",
+													Description: "The height of the panel.",
 												},
 												"width": {
 													Type:        types.Int64Type,
 													Required:    true,
-													Description: "The width of the panel",
+													Description: "The width of the panel.",
 												},
 											},
 										),
 									},
 									"source": {
 										Type:        types.StringType,
-										Description: "The JSON source of the panel",
+										Description: "The JSON source of the panel.",
 										Required:    true,
 									},
 								},
@@ -269,18 +286,19 @@ func (d *DashboardDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag
 				Computed: true,
 			},
 			"json": {
-				Type:     types.StringType,
-				Computed: true,
+				Type:        types.StringType,
+				Computed:    true,
+				Description: "The Grafana-API-compatible JSON of this panel.",
 			},
 			"title": {
 				Type:        types.StringType,
 				Required:    true,
-				Description: "The title of the dashboard",
+				Description: "The title of the dashboard.",
 			},
 			"uid": {
 				Type:        types.StringType,
 				Optional:    true,
-				Description: "The UID of the dashboard",
+				Description: "The UID of the dashboard.",
 			},
 			"editable":      dashboardEditableAttribute(),
 			"style":         dashboardStyleAttribute(),

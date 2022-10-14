@@ -1,5 +1,5 @@
-data "gdashboard_timeseries" "test" {
-  title = "Test"
+data "gdashboard_timeseries" "jvm_memory" {
+  title = "JVM memory"
 
   legend {
     calculations = ["min", "max", "mean"]
@@ -38,29 +38,6 @@ data "gdashboard_timeseries" "test" {
       ref_id        = "Prometheus_Query"
       min_interval  = "30"
       legend_format = "Memory total"
-    }
-
-    cloudwatch {
-      uid         = "cloudwatch"
-      namespace   = "AWS/ApplicationELB"
-      metric_name = "HTTPCode_Target_2XX_Count"
-      statistic   = "Sum"
-      match_exact = true
-      region      = "af-south-1"
-
-      dimension {
-        name  = "LoadBalancer"
-        value = "lb_arn_suffix"
-      }
-
-      dimension {
-        name  = "TargetGroup"
-        value = "target_group"
-      }
-
-      ref_id        = "CW_Query"
-      period        = "30"
-      legend_format = "Request Count"
     }
   }
 

@@ -1,5 +1,5 @@
-data "gdashboard_gauge" "jobs_processed" {
-  title = "Example"
+data "gdashboard_gauge" "jvm_memory" {
+  title = "JVM Memory"
 
   field {
     unit = "percent"

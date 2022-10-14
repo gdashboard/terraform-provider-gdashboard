@@ -1,0 +1,36 @@
+---
+page_title: "Provider: {{ .ProviderShortName | lower }}"
+description: |-
+  The provider offers a handy syntax to define Grafana dashboards: timeseries, gauge, bar, etc.
+---
+
+# {{ .ProviderShortName | lower }} provider
+
+The provider offers a handy syntax to define Grafana dashboards: timeseries, gauge, bar, etc.
+
+The provider defines only data sources. Each data source computes a JSON that is compatible with Grafana API.
+Therefore, this provider is not particularly useful on its own, but it can be
+used to generate a JSON compatible with Grafana API, which can then be used
+with [Grafana provider](https://registry.terraform.io/providers/grafana/grafana/latest/docs) to provision a dashboard.
+
+You can start using data sources without defining `provider "gdashboard"`,
+unless you would like to configure provider-wise defaults for a certain panels (see an example below).
+
+## Dashboard Provisioning Example
+
+As mentioned above, the provider is not helpful since its only output is JSON.
+But you can provision a dashboard using [Grafana provider](https://registry.terraform.io/providers/grafana/grafana/latest/docs).
+
+{{ tffile "examples/provider/provider_grafana_example.tf" }}
+
+## Defaults Example
+
+You can define **defaults** for a data source. That means the provider takes a default value from the provider configuration
+when an attribute is missing in your data source definition.
+
+For example, we can configure the provider to use a custom legend with **all** timeseries panels.
+Don't worry, you can always override an attribute.
+
+{{ tffile "examples/provider/provider_timeseries_defaults.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}

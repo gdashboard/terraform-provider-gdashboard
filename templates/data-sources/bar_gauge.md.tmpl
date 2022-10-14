@@ -1,0 +1,28 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Minimal Example
+
+{{ tffile "examples/data-sources/gdashboard_bar_gauge/data-source-minimal.tf" }}
+
+## Configuration Example
+
+{{ tffile "examples/data-sources/gdashboard_bar_gauge/data-source-full.tf" }}
+
+## Provider Defaults Example
+
+You can define default attributes for the bar gauge data source via provider.
+In the example below, both panels inherit default attributes from the provider.
+
+{{ tffile "examples/data-sources/gdashboard_bar_gauge/data-source-provider-defaults.tf" }}
+
+
+{{ .SchemaMarkdown | trimspace }}

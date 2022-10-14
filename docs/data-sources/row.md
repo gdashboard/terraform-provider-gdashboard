@@ -13,8 +13,8 @@ Row panel data source
 ## Example Usage
 
 ```terraform
-data "gdashboard_row" "test" {
-  title = "Test"
+data "gdashboard_row" "overview" {
+  title = "Overview row"
 
   graph {
     collapsed = true
@@ -27,7 +27,7 @@ data "gdashboard_row" "test" {
 
 ### Required
 
-- `title` (String) The title of the panel
+- `title` (String) The title of this panel.
 
 ### Optional
 
@@ -36,7 +36,7 @@ data "gdashboard_row" "test" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `json` (String)
+- `json` (String) The Grafana-API-compatible JSON of this panel.
 
 <a id="nestedblock--graph"></a>
 ### Nested Schema for `graph`

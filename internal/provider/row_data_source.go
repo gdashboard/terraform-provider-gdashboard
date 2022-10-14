@@ -65,19 +65,9 @@ func (d *RowDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 		},
 
 		Attributes: map[string]tfsdk.Attribute{
-			"id": {
-				Type:     types.StringType,
-				Computed: true,
-			},
-			"json": {
-				Type:     types.StringType,
-				Computed: true,
-			},
-			"title": {
-				Type:        types.StringType,
-				Required:    true,
-				Description: "The title of the panel",
-			},
+			"id":    idAttribute(),
+			"json":  jsonAttribute(),
+			"title": titleAttribute(),
 		},
 	}, nil
 }
