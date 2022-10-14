@@ -16,23 +16,23 @@ func TestAccDashboardDataSource(t *testing.T) {
 				Config: testAccDashboardDataSourceConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "title", "Test"),
-					resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", dashboardExpectedJson),
+					resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceConfigExpectedJson),
 				),
-			}, /*
-				{
-					Config: testAccDashboardDataSourceProviderDefaultsConfig,
-					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "title", "Test"),
-						resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", dashboardProviderDefaultsExpectedJson),
-					),
-				},
-				{
-					Config: testAccDashboardDataSourceProviderCustomDefaultsConfig,
-					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "title", "Test"),
-						resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", dashboardProviderCustomDefaultsExpectedJson),
-					),
-				},*/
+			},
+			{
+				Config: testAccDashboardDataSourceProviderDefaultsConfig,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "title", "Test"),
+					resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProviderDefaultsConfigExpectedJson),
+				),
+			},
+			{
+				Config: testAccDashboardDataSourceProviderCustomDefaultsConfig,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "title", "Test"),
+					resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProviderCustomDefaultsConfigExpectedJson),
+				),
+			},
 		},
 	})
 }
@@ -58,6 +58,7 @@ data "gdashboard_dashboard" "test" {
 
     custom {
 	  name = "custom"
+	  hide = "label" 
 
       option {
 		text  = "entry-1"
@@ -112,7 +113,7 @@ data "gdashboard_dashboard" "test" {
 }
 `
 
-const dashboardExpectedJson = `{
+const testAccDashboardDataSourceConfigExpectedJson = `{
   "uid": "test-uid",
   "slug": "",
   "title": "Test",
@@ -226,7 +227,7 @@ const dashboardExpectedJson = `{
           "value": "value"
         },
         "label": "",
-        "hide": 0,
+        "hide": 1,
         "sort": 0
       },
       {
@@ -293,7 +294,7 @@ data "gdashboard_dashboard" "test" {
 }
 `
 
-const dashboardProviderCustomDefaultsExpectedJson = `{
+const testAccDashboardDataSourceProviderCustomDefaultsConfigExpectedJson = `{
   "slug": "",
   "title": "Test",
   "originalTitle": "",
@@ -334,7 +335,7 @@ data "gdashboard_dashboard" "test" {
 }
 `
 
-const dashboardProviderDefaultsExpectedJson = `{
+const testAccDashboardDataSourceProviderDefaultsConfigExpectedJson = `{
   "slug": "",
   "title": "Test",
   "originalTitle": "",

@@ -200,6 +200,15 @@ func (d *DashboardDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag
 								Required:    true,
 								Description: "The name of the variable.",
 							},
+							"hide": {
+								Type:                types.StringType,
+								Optional:            true,
+								Description:         "Which variable information to hide. The choices are: label, variable.",
+								MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
+								Validators: []tfsdk.AttributeValidator{
+									stringvalidator.OneOf("label", "variable"),
+								},
+							},
 						},
 					},
 					"const": {
