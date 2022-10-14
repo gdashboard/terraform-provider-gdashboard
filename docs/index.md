@@ -604,7 +604,7 @@ Optional:
 
 Optional:
 
-- `axis` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--timeseries--axis))
+- `axis` (Block List, Max: 1) Axis display options. (see [below for nested schema](#nestedblock--defaults--timeseries--axis))
 - `field` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--timeseries--field))
 - `graph` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--timeseries--graph))
 - `legend` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--timeseries--legend))
@@ -615,22 +615,22 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `placement` (String)
-- `scale` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--timeseries--axis--scale))
-- `soft_max` (Number)
-- `soft_min` (Number)
+- `label` (String) The custom text label for the y-axis.
+- `placement` (String) The placement of the y-axis. The choices are: `auto`, `left`, `right`, `hidden`.
+- `scale` (Block List, Max: 1) Can be used to configure the scale of the y-axis. Another way visualize series that differ by orders of magnitude is to use a logarithmic scales. This is really useful for data usage or latency measurements. The goal here is to avoid one series dominating and delegating all the others to the bottom of the graph. (see [below for nested schema](#nestedblock--defaults--timeseries--axis--scale))
+- `soft_max` (Number) The soft maximum of y-axis. By default, the Grafana workspace sets the range for the y-axis automatically based on the data.The `soft_max` setting can prevent blips from appearing as mountains when the data is mostly flat, and hard min or max derived from standard min and max field options can prevent intermittent spikes from flattening useful detail by clipping the spikes past a defined point.
+- `soft_min` (Number) The soft minimum of y-axis. By default, the Grafana workspace sets the range for the y-axis automatically based on the data.The `soft_min` setting can prevent blips from appearing as mountains when the data is mostly flat, and hard min or max derived from standard min and max field options can prevent intermittent spikes from flattening useful detail by clipping the spikes past a defined point.
 
 <a id="nestedblock--defaults--timeseries--axis--scale"></a>
 ### Nested Schema for `defaults.timeseries.axis.scale`
 
 Required:
 
-- `type` (String)
+- `type` (String) The type of the scale. The choices are: `linear`, `log`.
 
 Optional:
 
-- `log` (Number)
+- `log` (Number) The power of the logarithmic scale. The choices are: `2`, `10`.
 
 
 

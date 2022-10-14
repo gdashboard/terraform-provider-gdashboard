@@ -110,24 +110,10 @@ func (d *BarGaugeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 		},
 
 		Attributes: map[string]tfsdk.Attribute{
-			"id": {
-				Type:     types.StringType,
-				Computed: true,
-			},
-			"json": {
-				Type:     types.StringType,
-				Computed: true,
-			},
-			"title": {
-				Type:        types.StringType,
-				Required:    true,
-				Description: "The title of the panel",
-			},
-			"description": {
-				Type:        types.StringType,
-				Optional:    true,
-				Description: "The description of the panel",
-			},
+			"id":          idAttribute(),
+			"json":        jsonAttribute(),
+			"title":       titleAttribute(),
+			"description": descriptionAttribute(),
 		},
 	}, nil
 }

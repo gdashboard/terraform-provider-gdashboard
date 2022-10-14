@@ -65,11 +65,11 @@ data "gdashboard_gauge" "jobs_processed" {
 
 ### Required
 
-- `title` (String) The title of the panel
+- `title` (String) The title of this panel.
 
 ### Optional
 
-- `description` (String) The description of the panel
+- `description` (String) The description of this panel.
 - `field` (Block List, Max: 1) (see [below for nested schema](#nestedblock--field))
 - `graph` (Block List, Max: 1) (see [below for nested schema](#nestedblock--graph))
 - `targets` (Block List, Max: 3) (see [below for nested schema](#nestedblock--targets))
@@ -77,7 +77,7 @@ data "gdashboard_gauge" "jobs_processed" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `json` (String)
+- `json` (String) The Grafana-API-compatible JSON of this panel.
 
 <a id="nestedblock--field"></a>
 ### Nested Schema for `field`

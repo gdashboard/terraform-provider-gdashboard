@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -219,46 +220,82 @@ func axisBlock() tfsdk.Block {
 		NestingMode: tfsdk.BlockNestingModeList,
 		MinItems:    0,
 		MaxItems:    1,
+		Description: "Axis display options.",
 		Blocks: map[string]tfsdk.Block{
 			"scale": {
 				NestingMode: tfsdk.BlockNestingModeList,
 				MinItems:    0,
 				MaxItems:    1,
+				Description: "Can be used to configure the scale of the y-axis.",
+				MarkdownDescription: "Can be used to configure the scale of the y-axis. " +
+					"Another way visualize series that differ by orders of magnitude is to use a logarithmic scales. " +
+					"This is really useful for data usage or latency measurements. " +
+					"The goal here is to avoid one series dominating and delegating all the others to the bottom of the graph.",
 				Attributes: map[string]tfsdk.Attribute{
 					"type": {
-						Type:     types.StringType,
-						Required: true,
+						Type:                types.StringType,
+						Required:            true,
+						Description:         "The type of the scale. The choices are: linear, log.",
+						MarkdownDescription: "The type of the scale. The choices are: `linear`, `log`.",
 						Validators: []tfsdk.AttributeValidator{
 							stringvalidator.OneOf("linear", "log"),
 						},
 					},
 					"log": {
-						Type:     types.Int64Type,
-						Optional: true,
+						Type:                types.Int64Type,
+						Optional:            true,
+						Description:         "The power of the logarithmic scale. The choices are: 2, 10.",
+						MarkdownDescription: "The power of the logarithmic scale. The choices are: `2`, `10`.",
+						Validators: []tfsdk.AttributeValidator{
+							int64validator.OneOf(2, 10),
+						},
 					},
 				},
 			},
 		},
 		Attributes: map[string]tfsdk.Attribute{
 			"label": {
-				Type:     types.StringType,
-				Optional: true,
+				Type:        types.StringType,
+				Description: "The custom text label for the y-axis.",
+				Optional:    true,
 			},
 			"placement": {
-				Type:     types.StringType,
-				Optional: true,
+				Type:                types.StringType,
+				Optional:            true,
+				Description:         "The placement of the y-axis. The choices are: auto, left, right, hidden.",
+				MarkdownDescription: "The placement of the y-axis. The choices are: `auto`, `left`, `right`, `hidden`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("auto", "left", "right", "hidden"),
 				},
 			},
 			"soft_min": {
-				Type:     types.Int64Type,
-				Optional: true,
+				Type:        types.Int64Type,
+				Optional:    true,
+				Description: "The soft minimum of y-axis.",
+				MarkdownDescription: "The soft minimum of y-axis. " +
+					"By default, the Grafana workspace sets the range for the y-axis automatically based on the data." +
+					"The `soft_min` setting can prevent blips from appearing as mountains when the data is mostly flat, " +
+					"and hard min or max derived from standard min and max field options can prevent intermittent spikes " +
+					"from flattening useful detail by clipping the spikes past a defined point.",
 			},
 			"soft_max": {
+				Type:        types.Int64Type,
+				Optional:    true,
+				Description: "The soft maximum of y-axis.",
+				MarkdownDescription: "The soft maximum of y-axis. " +
+					"By default, the Grafana workspace sets the range for the y-axis automatically based on the data." +
+					"The `soft_max` setting can prevent blips from appearing as mountains when the data is mostly flat, " +
+					"and hard min or max derived from standard min and max field options can prevent intermittent spikes " +
+					"from flattening useful detail by clipping the spikes past a defined point.",
+			},
+			/*"width": {
 				Type:     types.Int64Type,
 				Optional: true,
-			},
+				Description: "The fixed width of the y-axis.",
+				MarkdownDescription: "The fixed width of the y-axis. By default, the Grafana workspace dynamically calculates the axis width. " +
+					"By setting the width of the axis, data whose axes types are different can share the same display proportions. " +
+					"This makes it easier to compare more than one graph’s worth of data because the axes are not shifted or stretched within visual proximity of each other.",
+			},*/
 		},
 	}
 }
@@ -589,6 +626,38 @@ func mappingsBlock() tfsdk.Block {
 				},
 			},
 		},
+	}
+}
+
+// attributes
+func idAttribute() tfsdk.Attribute {
+	return tfsdk.Attribute{
+		Type:     types.StringType,
+		Computed: true,
+	}
+}
+
+func jsonAttribute() tfsdk.Attribute {
+	return tfsdk.Attribute{
+		Type:        types.StringType,
+		Computed:    true,
+		Description: "The Grafana-API-compatible JSON of this panel.",
+	}
+}
+
+func titleAttribute() tfsdk.Attribute {
+	return tfsdk.Attribute{
+		Type:        types.StringType,
+		Required:    true,
+		Description: "The title of this panel.",
+	}
+}
+
+func descriptionAttribute() tfsdk.Attribute {
+	return tfsdk.Attribute{
+		Type:        types.StringType,
+		Optional:    true,
+		Description: "The description of this panel.",
 	}
 }
 

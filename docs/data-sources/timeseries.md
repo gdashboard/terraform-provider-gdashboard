@@ -87,12 +87,12 @@ data "gdashboard_timeseries" "test" {
 
 ### Required
 
-- `title` (String) The title of the panel
+- `title` (String) The title of this panel.
 
 ### Optional
 
-- `axis` (Block List, Max: 1) (see [below for nested schema](#nestedblock--axis))
-- `description` (String) The description of the panel
+- `axis` (Block List, Max: 1) Axis display options. (see [below for nested schema](#nestedblock--axis))
+- `description` (String) The description of this panel.
 - `field` (Block List, Max: 1) (see [below for nested schema](#nestedblock--field))
 - `graph` (Block List, Max: 1) (see [below for nested schema](#nestedblock--graph))
 - `legend` (Block List, Max: 1) (see [below for nested schema](#nestedblock--legend))
@@ -102,29 +102,29 @@ data "gdashboard_timeseries" "test" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `json` (String)
+- `json` (String) The Grafana-API-compatible JSON of this panel.
 
 <a id="nestedblock--axis"></a>
 ### Nested Schema for `axis`
 
 Optional:
 
-- `label` (String)
-- `placement` (String)
-- `scale` (Block List, Max: 1) (see [below for nested schema](#nestedblock--axis--scale))
-- `soft_max` (Number)
-- `soft_min` (Number)
+- `label` (String) The custom text label for the y-axis.
+- `placement` (String) The placement of the y-axis. The choices are: `auto`, `left`, `right`, `hidden`.
+- `scale` (Block List, Max: 1) Can be used to configure the scale of the y-axis. Another way visualize series that differ by orders of magnitude is to use a logarithmic scales. This is really useful for data usage or latency measurements. The goal here is to avoid one series dominating and delegating all the others to the bottom of the graph. (see [below for nested schema](#nestedblock--axis--scale))
+- `soft_max` (Number) The soft maximum of y-axis. By default, the Grafana workspace sets the range for the y-axis automatically based on the data.The `soft_max` setting can prevent blips from appearing as mountains when the data is mostly flat, and hard min or max derived from standard min and max field options can prevent intermittent spikes from flattening useful detail by clipping the spikes past a defined point.
+- `soft_min` (Number) The soft minimum of y-axis. By default, the Grafana workspace sets the range for the y-axis automatically based on the data.The `soft_min` setting can prevent blips from appearing as mountains when the data is mostly flat, and hard min or max derived from standard min and max field options can prevent intermittent spikes from flattening useful detail by clipping the spikes past a defined point.
 
 <a id="nestedblock--axis--scale"></a>
 ### Nested Schema for `axis.scale`
 
 Required:
 
-- `type` (String)
+- `type` (String) The type of the scale. The choices are: `linear`, `log`.
 
 Optional:
 
-- `log` (Number)
+- `log` (Number) The power of the logarithmic scale. The choices are: `2`, `10`.
 
 
 
