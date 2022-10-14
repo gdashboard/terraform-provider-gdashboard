@@ -14,7 +14,7 @@ Dashboard data source
 
 ```terraform
 data "gdashboard_timeseries" "jvm_memory" {
-  title = "Test"
+  title = "JVM Memory"
 
   targets {
     prometheus {
@@ -24,10 +24,8 @@ data "gdashboard_timeseries" "jvm_memory" {
   }
 }
 
-data "gdashboard_dashboard" "test" {
-  title         = "Test"
-  uid           = "test-uid"
-  editable      = false
+data "gdashboard_dashboard" "jvm_dashboard" {
+  title         = "JVM Dashboard"
   style         = "light"
   graph_tooltip = "shared-crosshair"
 
@@ -42,7 +40,7 @@ data "gdashboard_dashboard" "test" {
       value = "const-value"
     }
 
-    custom {
+    custom { # dropdown variable
       name = "custom"
 
       option {

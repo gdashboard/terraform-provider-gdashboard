@@ -13,8 +13,8 @@ Row panel data source
 ## Example Usage
 
 ```terraform
-data "gdashboard_row" "test" {
-  title = "Test"
+data "gdashboard_row" "overview" {
+  title = "Overview row"
 
   graph {
     collapsed = true

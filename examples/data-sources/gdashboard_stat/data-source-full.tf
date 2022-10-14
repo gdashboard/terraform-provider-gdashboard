@@ -1,5 +1,5 @@
-data "gdashboard_stat" "test" {
-  title       = "Test"
+data "gdashboard_stat" "status" {
+  title       = "Status"
   description = "Stat description"
 
   graph {
