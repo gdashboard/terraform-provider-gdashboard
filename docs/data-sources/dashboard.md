@@ -154,6 +154,10 @@ Required:
 - `name` (String) The name of the variable.
 - `option` (Block List, Min: 1, Max: 10) The option entry. (see [below for nested schema](#nestedblock--variables--custom--option))
 
+Optional:
+
+- `hide` (String) Which variable information to hide. The choices are: `label`, `variable`.
+
 <a id="nestedblock--variables--custom--option"></a>
 ### Nested Schema for `variables.custom.option`
 

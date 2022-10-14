@@ -80,6 +80,7 @@ type Variable struct {
 
 type VariableCustom struct {
 	Name    types.String           `tfsdk:"name"`
+	Hide    types.String           `tfsdk:"hide"`
 	Options []VariableCustomOption `tfsdk:"option"`
 }
 
@@ -199,6 +200,15 @@ func (d *DashboardDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag
 								Type:        types.StringType,
 								Required:    true,
 								Description: "The name of the variable.",
+							},
+							"hide": {
+								Type:                types.StringType,
+								Optional:            true,
+								Description:         "Which variable information to hide. The choices are: label, variable.",
+								MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
+								Validators: []tfsdk.AttributeValidator{
+									stringvalidator.OneOf("label", "variable"),
+								},
 							},
 						},
 					},
@@ -366,12 +376,26 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				}
 			}
 
+			hide := uint8(0)
+
+			if !custom.Hide.Null {
+				switch v := custom.Hide.Value; v {
+				case "label":
+					hide = 1
+				case "variable":
+					hide = 2
+				default:
+					hide = 0
+				}
+			}
+
 			v := grafana.TemplateVar{
 				Type:    "custom",
 				Name:    custom.Name.Value,
 				Options: opts,
 				Query:   query,
 				Current: current,
+				Hide:    hide,
 			}
 
 			vars = append(vars, v)
