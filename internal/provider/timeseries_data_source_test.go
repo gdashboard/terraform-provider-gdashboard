@@ -99,9 +99,9 @@ data "gdashboard_timeseries" "test" {
 	    value = "target_group"
 	  }	
 
-	  ref_id        = "CW_Query"
-	  period        = "30"
-      legend_format = "Request Count"
+	  ref_id = "CW_Query"
+	  period = "30"
+      label  = "Request Count"
 	}
   }
 	
