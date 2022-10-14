@@ -45,7 +45,7 @@ type BarGaugeDataSourceModel struct {
 	Json        types.String      `tfsdk:"json"`
 	Title       types.String      `tfsdk:"title"`
 	Description types.String      `tfsdk:"description"`
-	Targets     []Target          `tfsdk:"targets"`
+	Queries     []Query           `tfsdk:"queries"`
 	Field       []FieldOptions    `tfsdk:"field"`
 	Graph       []BarGaugeOptions `tfsdk:"graph"`
 }
@@ -110,7 +110,7 @@ func (d *BarGaugeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 		MarkdownDescription: "Bar Gauge panel data source",
 
 		Blocks: map[string]tfsdk.Block{
-			"targets": targetBlock(),
+			"queries": queryBlock(),
 			"field":   fieldBlock(),
 			"graph":   barGaugeGraphBlock(),
 		},
@@ -152,7 +152,7 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 
-	targets := createTargets(data.Targets)
+	targets := createTargets(data.Queries)
 	fieldConfig := createFieldConfig(d.Defaults.Field, data.Field)
 
 	options := grafana.Options{

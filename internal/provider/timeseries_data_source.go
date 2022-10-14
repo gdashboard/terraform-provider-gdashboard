@@ -64,7 +64,7 @@ type TimeseriesDataSourceModel struct {
 	Json        types.String               `tfsdk:"json"`
 	Title       types.String               `tfsdk:"title"`
 	Description types.String               `tfsdk:"description"`
-	Targets     []Target                   `tfsdk:"targets"`
+	Queries     []Query                    `tfsdk:"queries"`
 	Legend      []TimeseriesLegendOptions  `tfsdk:"legend"`
 	Tooltip     []TimeseriesTooltipOptions `tfsdk:"tooltip"`
 	Field       []FieldOptions             `tfsdk:"field"`
@@ -256,7 +256,7 @@ func (d *TimeseriesDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 		MarkdownDescription: "Timeseries panel data source",
 
 		Blocks: map[string]tfsdk.Block{
-			"targets": targetBlock(),
+			"queries": queryBlock(),
 			"legend":  timeseriesLegendBlock(),
 			"tooltip": timeseriesTooltipBlock(),
 			"field":   fieldBlock(),
@@ -301,7 +301,7 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		return
 	}
 
-	targets := createTargets(data.Targets)
+	targets := createTargets(data.Queries)
 
 	legendOptions := grafana.TimeseriesLegendOptions{
 		Calcs:       d.Defaults.Legend.Calculations,

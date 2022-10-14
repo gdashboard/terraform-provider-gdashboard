@@ -182,7 +182,7 @@ type TextSizeOptions struct {
 	Value types.Int64 `tfsdk:"value"`
 }
 
-type Target struct {
+type Query struct {
 	Prometheus []PrometheusTarget `tfsdk:"prometheus"`
 	CloudWatch []CloudWatchTarget `tfsdk:"cloudwatch"`
 }
@@ -506,7 +506,7 @@ func textSizeBlock() tfsdk.Block {
 	}
 }
 
-func targetBlock() tfsdk.Block {
+func queryBlock() tfsdk.Block {
 	return tfsdk.Block{
 		NestingMode: tfsdk.BlockNestingModeList,
 		MaxItems:    3,
@@ -777,10 +777,10 @@ func descriptionAttribute() tfsdk.Attribute {
 
 // creators
 
-func createTargets(dataTargets []Target) []grafana.Target {
+func createTargets(queries []Query) []grafana.Target {
 	targets := make([]grafana.Target, 0)
 
-	for _, group := range dataTargets {
+	for _, group := range queries {
 		for _, target := range group.Prometheus {
 			t := grafana.Target{
 				Datasource: grafana.Datasource{
