@@ -195,7 +195,7 @@ Optional:
 - `orientation` (String) Layout orientation
 - `show_threshold_labels` (Boolean) Render the threshold values around the gauge bar
 - `show_threshold_markers` (Boolean) Renders the thresholds as an outer bar
-- `text_size` (Block List, Max: 1) (see [below for nested schema](#nestedblock--graph--text_size))
+- `text_size` (Block List, Max: 1) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--graph--text_size))
 
 <a id="nestedblock--graph--options"></a>
 ### Nested Schema for `graph.options`
@@ -213,8 +213,8 @@ Optional:
 
 Optional:
 
-- `title` (Number)
-- `value` (Number)
+- `title` (Number) The size of the title. Must be between `1` and `100` (inclusive).
+- `value` (Number) The size of the value. Must be between `1` and `100` (inclusive).
 
 
 

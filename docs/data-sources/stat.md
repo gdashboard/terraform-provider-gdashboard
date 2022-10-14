@@ -13,15 +13,42 @@ Stat panel data source
 ## Example Usage
 
 ```terraform
-data "gdashboard_stat" "status" {
-  title = "Status"
+data "gdashboard_stat" "test" {
+  title       = "Test"
+  description = "Stat description"
+
+  graph {
+    orientation = "vertical"
+    text_mode   = "value"
+    color_mode  = "background"
+    graph_mode  = "none"
+
+    options {
+      values      = true
+      fields      = "/.*/"
+      calculation = "first"
+    }
+
+    text_size {
+      title = 10
+      value = 15
+    }
+  }
 
   field {
+    unit = "p"
+
     mappings {
       value {
         value        = "1"
         display_text = "UP"
         color        = "green"
+      }
+
+      value {
+        value        = "0"
+        display_text = "DOWN"
+        color        = "red"
       }
 
       special {
@@ -179,7 +206,7 @@ Optional:
 - `orientation` (String) Layout orientation
 - `text_alignment` (String)
 - `text_mode` (String)
-- `text_size` (Block List, Max: 1) (see [below for nested schema](#nestedblock--graph--text_size))
+- `text_size` (Block List, Max: 1) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--graph--text_size))
 
 <a id="nestedblock--graph--options"></a>
 ### Nested Schema for `graph.options`
@@ -197,8 +224,8 @@ Optional:
 
 Optional:
 
-- `title` (Number)
-- `value` (Number)
+- `title` (Number) The size of the title. Must be between `1` and `100` (inclusive).
+- `value` (Number) The size of the value. Must be between `1` and `100` (inclusive).
 
 
 

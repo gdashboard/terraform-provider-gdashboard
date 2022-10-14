@@ -420,14 +420,25 @@ func textSizeBlock() tfsdk.Block {
 		NestingMode: tfsdk.BlockNestingModeList,
 		MinItems:    0,
 		MaxItems:    1,
+		Description: "The size of the text elements on the panel.",
 		Attributes: map[string]tfsdk.Attribute{
 			"title": {
-				Type:     types.Int64Type,
-				Optional: true,
+				Type:                types.Int64Type,
+				Optional:            true,
+				Description:         "The size of the title. Must be between 1 and 100 (inclusive).",
+				MarkdownDescription: "The size of the title. Must be between `1` and `100` (inclusive).",
+				Validators: []tfsdk.AttributeValidator{
+					int64validator.Between(1, 100),
+				},
 			},
 			"value": {
-				Type:     types.Int64Type,
-				Optional: true,
+				Type:                types.Int64Type,
+				Optional:            true,
+				Description:         "The size of the value. Must be between 1 and 100 (inclusive).",
+				MarkdownDescription: "The size of the value. Must be between `1` and `100` (inclusive).",
+				Validators: []tfsdk.AttributeValidator{
+					int64validator.Between(1, 100),
+				},
 			},
 		},
 	}

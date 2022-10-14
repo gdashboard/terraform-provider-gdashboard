@@ -257,7 +257,7 @@ Optional:
 - `options` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph--options))
 - `orientation` (String) Layout orientation
 - `text_alignment` (String)
-- `text_size` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph--text_size))
+- `text_size` (Block List, Max: 1) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph--text_size))
 
 <a id="nestedblock--defaults--bar_gauge--graph--options"></a>
 ### Nested Schema for `defaults.bar_gauge.graph.options`
@@ -275,8 +275,8 @@ Optional:
 
 Optional:
 
-- `title` (Number)
-- `value` (Number)
+- `title` (Number) The size of the title. Must be between `1` and `100` (inclusive).
+- `value` (Number) The size of the value. Must be between `1` and `100` (inclusive).
 
 
 
@@ -425,7 +425,7 @@ Optional:
 - `orientation` (String) Layout orientation
 - `show_threshold_labels` (Boolean) Render the threshold values around the gauge bar
 - `show_threshold_markers` (Boolean) Renders the thresholds as an outer bar
-- `text_size` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--gauge--graph--text_size))
+- `text_size` (Block List, Max: 1) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--defaults--gauge--graph--text_size))
 
 <a id="nestedblock--defaults--gauge--graph--options"></a>
 ### Nested Schema for `defaults.gauge.graph.options`
@@ -443,8 +443,8 @@ Optional:
 
 Optional:
 
-- `title` (Number)
-- `value` (Number)
+- `title` (Number) The size of the title. Must be between `1` and `100` (inclusive).
+- `value` (Number) The size of the value. Must be between `1` and `100` (inclusive).
 
 
 
@@ -575,7 +575,7 @@ Optional:
 - `orientation` (String) Layout orientation
 - `text_alignment` (String)
 - `text_mode` (String)
-- `text_size` (Block List, Max: 1) (see [below for nested schema](#nestedblock--defaults--stat--graph--text_size))
+- `text_size` (Block List, Max: 1) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--defaults--stat--graph--text_size))
 
 <a id="nestedblock--defaults--stat--graph--options"></a>
 ### Nested Schema for `defaults.stat.graph.options`
@@ -593,8 +593,8 @@ Optional:
 
 Optional:
 
-- `title` (Number)
-- `value` (Number)
+- `title` (Number) The size of the title. Must be between `1` and `100` (inclusive).
+- `value` (Number) The size of the value. Must be between `1` and `100` (inclusive).
 
 
 
