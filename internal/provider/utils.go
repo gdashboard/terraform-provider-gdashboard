@@ -997,116 +997,99 @@ func createFieldConfig(defaults FieldDefaults, fieldOptions []FieldOptions) graf
 			}
 		}
 
-		mappings := make([]grafana.FieldMapping, 0)
-
-		for _, mapping := range field.Mappings {
-			idx := 0
-			valuesMap := make(map[string]interface{})
-
-			for _, value := range mapping.Value {
-				v := ValueMappingResult{
-					Color: value.Color.Value,
-					Text:  value.DisplayText.Value,
-					Index: idx,
-				}
-
-				valuesMap[value.Value.Value] = v
-				idx += 1
-			}
-
-			if len(valuesMap) > 0 {
-				mapping := grafana.FieldMapping{
-					Type:    "value",
-					Options: valuesMap,
-				}
-
-				mappings = append(mappings, mapping)
-			}
-
-			for _, range_ := range mapping.Range {
-				mapping := grafana.FieldMapping{
-					Type: "range",
-					Options: map[string]interface{}{
-						"from": range_.From.Value,
-						"to":   range_.From.Value,
-						"result": ValueMappingResult{
-							Color: range_.Color.Value,
-							Text:  range_.DisplayText.Value,
-							Index: idx,
-						},
-					},
-				}
-				idx += 1
-
-				mappings = append(mappings, mapping)
-			}
-
-			for _, regex := range mapping.Regex {
-				mapping := grafana.FieldMapping{
-					Type: "regex",
-					Options: map[string]interface{}{
-						"pattern": regex.Pattern.Value,
-						"result": ValueMappingResult{
-							Color: regex.Color.Value,
-							Text:  regex.DisplayText.Value,
-							Index: idx,
-						},
-					},
-				}
-				idx += 1
-
-				mappings = append(mappings, mapping)
-			}
-
-			for _, special := range mapping.Special {
-				mapping := grafana.FieldMapping{
-					Type: "special",
-					Options: map[string]interface{}{
-						"match": special.Match.Value,
-						"result": ValueMappingResult{
-							Color: special.Color.Value,
-							Text:  special.DisplayText.Value,
-							Index: idx,
-						},
-					},
-				}
-				idx += 1
-
-				mappings = append(mappings, mapping)
-			}
-		}
+		mappings := createMappings(field.Mappings)
 
 		if len(mappings) > 0 {
 			fieldConfig.Mappings = mappings
 		}
 
-		for _, threshold := range field.Thresholds {
-			steps := make([]grafana.ThresholdStep, len(threshold.Steps))
-
-			if !threshold.Mode.Null {
-				fieldConfig.Thresholds.Mode = threshold.Mode.Value
-			}
-
-			for i, step := range threshold.Steps {
-				s := grafana.ThresholdStep{
-					Color: step.Color.Value,
-				}
-
-				if !step.Value.Null {
-					value := step.Value.Value
-					s.Value = &value
-				}
-
-				steps[i] = s
-			}
-
-			if len(steps) > 0 {
-				fieldConfig.Thresholds.Steps = steps
-			}
-		}
+		updateThresholds(&fieldConfig.Thresholds, field.Thresholds)
 	}
 
 	return fieldConfig
+}
+
+func createMappings(mappingOptions []MappingOptions) []grafana.FieldMapping {
+	mappings := make([]grafana.FieldMapping, 0)
+
+	for _, mapping := range mappingOptions {
+		idx := 0
+		valuesMap := make(map[string]interface{})
+
+		for _, value := range mapping.Value {
+			v := ValueMappingResult{
+				Color: value.Color.Value,
+				Text:  value.DisplayText.Value,
+				Index: idx,
+			}
+
+			valuesMap[value.Value.Value] = v
+			idx += 1
+		}
+
+		if len(valuesMap) > 0 {
+			mapping := grafana.FieldMapping{
+				Type:    "value",
+				Options: valuesMap,
+			}
+
+			mappings = append(mappings, mapping)
+		}
+
+		for _, range_ := range mapping.Range {
+			mapping := grafana.FieldMapping{
+				Type: "range",
+				Options: map[string]interface{}{
+					"from": range_.From.Value,
+					"to":   range_.From.Value,
+					"result": ValueMappingResult{
+						Color: range_.Color.Value,
+						Text:  range_.DisplayText.Value,
+						Index: idx,
+					},
+				},
+			}
+			idx += 1
+
+			mappings = append(mappings, mapping)
+		}
+
+		for _, regex := range mapping.Regex {
+			mapping := grafana.FieldMapping{
+				Type: "regex",
+				Options: map[string]interface{}{
+					"pattern": regex.Pattern.Value,
+					"result": ValueMappingResult{
+						Color: regex.Color.Value,
+						Text:  regex.DisplayText.Value,
+						Index: idx,
+					},
+				},
+			}
+			idx += 1
+
+			mappings = append(mappings, mapping)
+		}
+
+		for _, special := range mapping.Special {
+			mapping := grafana.FieldMapping{
+				Type: "special",
+				Options: map[string]interface{}{
+					"match": special.Match.Value,
+					"result": ValueMappingResult{
+						Color: special.Color.Value,
+						Text:  special.DisplayText.Value,
+						Index: idx,
+					},
+				},
+			}
+			idx += 1
+
+			mappings = append(mappings, mapping)
+		}
+	}
+
+	return mappings
 }
 
 func createOverrides(overrides []FieldOverrideOptions) []grafana.FieldOverride {
@@ -1219,12 +1202,58 @@ func createOverrideProperties(fieldOptions []FieldOptions) []grafana.FieldOverri
 				Value: fieldColor,
 			})
 		}
+
+		mappings := createMappings(field.Mappings)
+
+		if len(mappings) > 0 {
+			properties = append(properties, grafana.FieldOverrideProperty{
+				Id:    "mappings",
+				Value: mappings,
+			})
+		}
+
+		thresholds := grafana.Thresholds{}
+		updateThresholds(&thresholds, field.Thresholds)
+
+		if len(field.Thresholds) > 0 {
+			properties = append(properties, grafana.FieldOverrideProperty{
+				Id:    "thresholds",
+				Value: thresholds,
+			})
+		}
 	}
 
 	return properties
 }
 
 // updaters
+func updateThresholds(thresholds *grafana.Thresholds, thresholdOptions []ThresholdOptions) {
+	for _, threshold := range thresholdOptions {
+		steps := make([]grafana.ThresholdStep, len(threshold.Steps))
+
+		if !threshold.Mode.Null {
+			thresholds.Mode = threshold.Mode.Value
+		}
+
+		for i, step := range threshold.Steps {
+			s := grafana.ThresholdStep{
+				Color: step.Color.Value,
+			}
+
+			if !step.Value.Null {
+				value := step.Value.Value
+				s.Value = &value
+			}
+
+			steps[i] = s
+		}
+
+		if len(steps) > 0 {
+			thresholds.Steps = steps
+		}
+	}
+}
+
 func updateTextSize(options *grafana.TextSize, opts []TextSizeOptions) {
 	for _, textSize := range opts {
 		if !textSize.Title.Null {
