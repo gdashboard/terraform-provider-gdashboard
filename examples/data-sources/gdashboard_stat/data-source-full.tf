@@ -2,24 +2,6 @@ data "gdashboard_stat" "status" {
   title       = "Status"
   description = "Stat description"
 
-  graph {
-    orientation = "vertical"
-    text_mode   = "value"
-    color_mode  = "background"
-    graph_mode  = "none"
-
-    options {
-      values      = true
-      fields      = "/.*/"
-      calculation = "first"
-    }
-
-    text_size {
-      title = 10
-      value = 15
-    }
-  }
-
   field {
     unit = "p"
 
@@ -44,10 +26,41 @@ data "gdashboard_stat" "status" {
     }
   }
 
+  overrides {
+    by_query_id {
+      query_id = "Prometheus_Query"
+      field {
+        color {
+          mode        = "fixed"
+          fixed_color = "red"
+        }
+      }
+    }
+  }
+
+  graph {
+    orientation = "vertical"
+    text_mode   = "value"
+    color_mode  = "background"
+    graph_mode  = "none"
+
+    options {
+      values      = true
+      fields      = "/.*/"
+      calculation = "first"
+    }
+
+    text_size {
+      title = 10
+      value = 15
+    }
+  }
+
   queries {
     prometheus {
       uid     = "prometheus"
       expr    = "up{container_name='container'}"
+      ref_id  = "Prometheus_Query"
       instant = true
     }
   }

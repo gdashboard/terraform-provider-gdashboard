@@ -53,6 +53,18 @@ data "gdashboard_timeseries" "jvm_memory" {
     }
   }
 
+  overrides {
+    by_query_id {
+      query_id = "Prometheus_Query"
+      field {
+        color {
+          mode        = "fixed"
+          fixed_color = "red"
+        }
+      }
+    }
+  }
+
   graph {
     fill_opacity = 10
     show_points  = "always"
