@@ -41,13 +41,14 @@ type BarGaugeGraphDefault struct {
 
 // BarGaugeDataSourceModel describes the data source data model.
 type BarGaugeDataSourceModel struct {
-	Id          types.String      `tfsdk:"id"`
-	Json        types.String      `tfsdk:"json"`
-	Title       types.String      `tfsdk:"title"`
-	Description types.String      `tfsdk:"description"`
-	Queries     []Query           `tfsdk:"queries"`
-	Field       []FieldOptions    `tfsdk:"field"`
-	Graph       []BarGaugeOptions `tfsdk:"graph"`
+	Id          types.String           `tfsdk:"id"`
+	Json        types.String           `tfsdk:"json"`
+	Title       types.String           `tfsdk:"title"`
+	Description types.String           `tfsdk:"description"`
+	Queries     []Query                `tfsdk:"queries"`
+	Field       []FieldOptions         `tfsdk:"field"`
+	Graph       []BarGaugeOptions      `tfsdk:"graph"`
+	Overrides   []FieldOverrideOptions `tfsdk:"overrides"`
 }
 
 type BarGaugeOptions struct {
@@ -111,9 +112,10 @@ func (d *BarGaugeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 		MarkdownDescription: "Bar gauge panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/bar-gauge/) for more details.",
 
 		Blocks: map[string]tfsdk.Block{
-			"queries": queryBlock(),
-			"field":   fieldBlock(),
-			"graph":   barGaugeGraphBlock(),
+			"queries":   queryBlock(),
+			"field":     fieldBlock(),
+			"graph":     barGaugeGraphBlock(),
+			"overrides": fieldOverrideBlock(),
 		},
 
 		Attributes: map[string]tfsdk.Attribute{
@@ -201,7 +203,8 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 			Targets: targets,
 			Options: options,
 			FieldConfig: grafana.FieldConfig{
-				Defaults: fieldConfig,
+				Defaults:  fieldConfig,
+				Overrides: createOverrides(data.Overrides),
 			},
 		},
 	}

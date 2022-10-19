@@ -43,13 +43,14 @@ type StatGraphDefaults struct {
 
 // StatDataSourceModel describes the data source data model.
 type StatDataSourceModel struct {
-	Id          types.String   `tfsdk:"id"`
-	Json        types.String   `tfsdk:"json"`
-	Title       types.String   `tfsdk:"title"`
-	Description types.String   `tfsdk:"description"`
-	Queries     []Query        `tfsdk:"queries"`
-	Field       []FieldOptions `tfsdk:"field"`
-	Graph       []StatOptions  `tfsdk:"graph"`
+	Id          types.String           `tfsdk:"id"`
+	Json        types.String           `tfsdk:"json"`
+	Title       types.String           `tfsdk:"title"`
+	Description types.String           `tfsdk:"description"`
+	Queries     []Query                `tfsdk:"queries"`
+	Field       []FieldOptions         `tfsdk:"field"`
+	Graph       []StatOptions          `tfsdk:"graph"`
+	Overrides   []FieldOverrideOptions `tfsdk:"overrides"`
 }
 
 type StatOptions struct {
@@ -133,9 +134,10 @@ func (d *StatDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diag
 		MarkdownDescription: "Stat panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/stat/) for more details.",
 
 		Blocks: map[string]tfsdk.Block{
-			"queries": queryBlock(),
-			"field":   fieldBlock(),
-			"graph":   statGraphBlock(),
+			"queries":   queryBlock(),
+			"field":     fieldBlock(),
+			"graph":     statGraphBlock(),
+			"overrides": fieldOverrideBlock(),
 		},
 
 		Attributes: map[string]tfsdk.Attribute{
@@ -233,7 +235,8 @@ func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 			Targets: targets,
 			Options: options,
 			FieldConfig: grafana.FieldConfig{
-				Defaults: fieldConfig,
+				Defaults:  fieldConfig,
+				Overrides: createOverrides(data.Overrides),
 			},
 		},
 	}

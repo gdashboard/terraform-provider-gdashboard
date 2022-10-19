@@ -41,13 +41,14 @@ type GaugeGraphDefault struct {
 
 // GaugeDataSourceModel describes the data source data model.
 type GaugeDataSourceModel struct {
-	Id          types.String   `tfsdk:"id"`
-	Json        types.String   `tfsdk:"json"`
-	Title       types.String   `tfsdk:"title"`
-	Description types.String   `tfsdk:"description"`
-	Queries     []Query        `tfsdk:"queries"`
-	Field       []FieldOptions `tfsdk:"field"`
-	Graph       []GaugeOptions `tfsdk:"graph"`
+	Id          types.String           `tfsdk:"id"`
+	Json        types.String           `tfsdk:"json"`
+	Title       types.String           `tfsdk:"title"`
+	Description types.String           `tfsdk:"description"`
+	Queries     []Query                `tfsdk:"queries"`
+	Field       []FieldOptions         `tfsdk:"field"`
+	Graph       []GaugeOptions         `tfsdk:"graph"`
+	Overrides   []FieldOverrideOptions `tfsdk:"overrides"`
 }
 
 type GaugeOptions struct {
@@ -103,9 +104,10 @@ func (d *GaugeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 		MarkdownDescription: "Gauge panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/). for more details",
 
 		Blocks: map[string]tfsdk.Block{
-			"queries": queryBlock(),
-			"field":   fieldBlock(),
-			"graph":   gaugeGraphBlock(),
+			"queries":   queryBlock(),
+			"field":     fieldBlock(),
+			"graph":     gaugeGraphBlock(),
+			"overrides": fieldOverrideBlock(),
 		},
 
 		Attributes: map[string]tfsdk.Attribute{
@@ -193,7 +195,8 @@ func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 			Targets: targets,
 			Options: options,
 			FieldConfig: grafana.FieldConfig{
-				Defaults: fieldConfig,
+				Defaults:  fieldConfig,
+				Overrides: createOverrides(data.Overrides),
 			},
 		},
 	}

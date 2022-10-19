@@ -70,6 +70,7 @@ type TimeseriesDataSourceModel struct {
 	Field       []FieldOptions             `tfsdk:"field"`
 	Axis        []AxisOptions              `tfsdk:"axis"`
 	Graph       []TimeseriesGraphOptions   `tfsdk:"graph"`
+	Overrides   []FieldOverrideOptions     `tfsdk:"overrides"`
 }
 
 type TimeseriesLegendOptions struct {
@@ -257,12 +258,13 @@ func (d *TimeseriesDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 		MarkdownDescription: "Time series panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/time-series/).",
 
 		Blocks: map[string]tfsdk.Block{
-			"queries": queryBlock(),
-			"legend":  timeseriesLegendBlock(),
-			"tooltip": timeseriesTooltipBlock(),
-			"field":   fieldBlock(),
-			"axis":    axisBlock(),
-			"graph":   timeseriesGraphBlock(),
+			"queries":   queryBlock(),
+			"legend":    timeseriesLegendBlock(),
+			"tooltip":   timeseriesTooltipBlock(),
+			"field":     fieldBlock(),
+			"axis":      axisBlock(),
+			"graph":     timeseriesGraphBlock(),
+			"overrides": fieldOverrideBlock(),
 		},
 
 		Attributes: map[string]tfsdk.Attribute{
@@ -448,7 +450,8 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 				Tooltip: tooltipOptions,
 			},
 			FieldConfig: grafana.FieldConfig{
-				Defaults: fieldConfig,
+				Defaults:  fieldConfig,
+				Overrides: createOverrides(data.Overrides),
 			},
 		},
 	}
