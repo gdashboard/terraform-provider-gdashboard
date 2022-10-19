@@ -1,12 +1,12 @@
 ---
 page_title: "Provider: gdashboard"
 description: |-
-  The provider offers a handy syntax to define Grafana dashboards: time series, gauge, bar, etc.
+  The provider offers a handy syntax to define Grafana dashboards: time series, gauge, bar gauge, stat, etc.
 ---
 
 # gdashboard provider
 
-The provider offers a handy syntax to define Grafana dashboards: time series, gauge, bar, etc.
+The provider offers a handy syntax to define Grafana dashboards: time series, gauge, bar gauge, stat, etc.
 
 The provider defines only data sources. Each data source computes a JSON that is compatible with Grafana API.
 Therefore, this provider is not particularly useful on its own, but it can be
