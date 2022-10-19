@@ -318,7 +318,7 @@ Optional:
 
 Optional:
 
-- `draw_style` (String) Choose how to display the tooltip. The choices are: `multi`, `single`, `hidden`.
+- `draw_style` (String) Choose the visualization style. The choices are: `line`, `bars`, `points`.
 - `fill_opacity` (Number) The opacity of the filled areas. Must be between `0` and `100` (inclusive).
 - `gradient_mode` (String) The gradient mode. The choices are: `none`, `opacity`, `hue`, `scheme`.
 - `line_interpolation` (String) Choose how to interpolation the line. The choices are: `linear`, `smooth`, `stepBefore`, `stepAfter`.

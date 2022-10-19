@@ -129,8 +129,8 @@ func timeseriesGraphBlock() tfsdk.Block {
 			"draw_style": {
 				Type:                types.StringType,
 				Optional:            true,
-				Description:         "Choose how to display the tooltip. The choices are: multi, single, hidden.",
-				MarkdownDescription: "Choose how to display the tooltip. The choices are: `multi`, `single`, `hidden`.",
+				Description:         "Choose the visualization style. The choices are: line, bars, points.",
+				MarkdownDescription: "Choose the visualization style. The choices are: `line`, `bars`, `points`.",
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("line", "bars", "points"),
 				},
