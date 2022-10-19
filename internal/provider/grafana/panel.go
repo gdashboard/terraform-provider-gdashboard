@@ -149,7 +149,8 @@ type (
 		FieldConfig     *FieldConfig     `json:"fieldConfig,omitempty"`
 	}
 	FieldConfig struct {
-		Defaults FieldConfigDefaults `json:"defaults"`
+		Defaults  FieldConfigDefaults `json:"defaults"`
+		Overrides []FieldOverride     `json:"overrides,omitempty"`
 	}
 	TextSize struct {
 		TitleSize *int `json:"titleSize,omitempty"`
@@ -433,7 +434,19 @@ type (
 		FixedColor string `json:"fixedColor,omitempty"`
 		SeriesBy   string `json:"seriesBy,omitempty"`
 	}
-	CustomPanel map[string]interface{}
+	CustomPanel          map[string]interface{}
+	FieldOverrideMatcher struct {
+		Id      string `json:"id"`
+		Options string `json:"options"`
+	}
+	FieldOverrideProperty struct {
+		Id    string `json:"id"`
+		Value any    `json:"value"`
+	}
+	FieldOverride struct {
+		Matcher    FieldOverrideMatcher    `json:"matcher"`
+		Properties []FieldOverrideProperty `json:"properties"`
+	}
 )
 
 // for a graph panel

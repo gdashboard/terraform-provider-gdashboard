@@ -182,6 +182,33 @@ type TextSizeOptions struct {
 	Value types.Int64 `tfsdk:"value"`
 }
 
+type FieldOverrideOptions struct {
+	ByName    []ByNameOverrideOptions    `tfsdk:"by_name"`
+	ByRegex   []ByRegexOverrideOptions   `tfsdk:"by_regex"`
+	ByType    []ByTypeOverrideOptions    `tfsdk:"by_type"`
+	ByQueryID []ByQueryIDOverrideOptions `tfsdk:"by_query_id"`
+}
+
+type ByNameOverrideOptions struct {
+	Name  types.String   `tfsdk:"name"`
+	Field []FieldOptions `tfsdk:"field"`
+}
+
+type ByRegexOverrideOptions struct {
+	Regex types.String   `tfsdk:"regex"`
+	Field []FieldOptions `tfsdk:"field"`
+}
+
+type ByTypeOverrideOptions struct {
+	Type  types.String   `tfsdk:"type"`
+	Field []FieldOptions `tfsdk:"field"`
+}
+
+type ByQueryIDOverrideOptions struct {
+	QueryID types.String   `tfsdk:"query_id"`
+	Field   []FieldOptions `tfsdk:"field"`
+}
+
 type Query struct {
 	Prometheus []PrometheusTarget `tfsdk:"prometheus"`
 	CloudWatch []CloudWatchTarget `tfsdk:"cloudwatch"`
@@ -743,6 +770,81 @@ func mappingsBlock() tfsdk.Block {
 	}
 }
 
+func fieldOverrideBlock() tfsdk.Block {
+	return tfsdk.Block{
+		NestingMode: tfsdk.BlockNestingModeList,
+		MinItems:    0,
+		MaxItems:    3,
+		Description: "The set of rules that override attributes of a field.",
+		Blocks: map[string]tfsdk.Block{
+			"by_name": {
+				NestingMode: tfsdk.BlockNestingModeList,
+				MinItems:    0,
+				MaxItems:    10,
+				Description: "Override properties for a field with a specific name.",
+				Blocks: map[string]tfsdk.Block{
+					"field": fieldBlock(),
+				},
+				Attributes: map[string]tfsdk.Attribute{
+					"name": {
+						Type:        types.StringType,
+						Required:    true,
+						Description: "The name of the field to override attributes for.",
+					},
+				},
+			},
+			"by_regex": {
+				NestingMode: tfsdk.BlockNestingModeList,
+				MinItems:    0,
+				MaxItems:    10,
+				Description: "Override properties for a field with a matching name.",
+				Blocks: map[string]tfsdk.Block{
+					"field": fieldBlock(),
+				},
+				Attributes: map[string]tfsdk.Attribute{
+					"regex": {
+						Type:        types.StringType,
+						Required:    true,
+						Description: "The regex the field's name should match.",
+					},
+				},
+			},
+			"by_type": {
+				NestingMode: tfsdk.BlockNestingModeList,
+				MinItems:    0,
+				MaxItems:    10,
+				Description: "Override properties for a field with a specific type.",
+				Blocks: map[string]tfsdk.Block{
+					"field": fieldBlock(),
+				},
+				Attributes: map[string]tfsdk.Attribute{
+					"type": {
+						Type:        types.StringType,
+						Required:    true,
+						Description: "The type of the field to override attributes for.",
+					},
+				},
+			},
+			"by_query_id": {
+				NestingMode: tfsdk.BlockNestingModeList,
+				MinItems:    0,
+				MaxItems:    10,
+				Description: "Override properties for a field returned by a specific query.",
+				Blocks: map[string]tfsdk.Block{
+					"field": fieldBlock(),
+				},
+				Attributes: map[string]tfsdk.Attribute{
+					"query_id": {
+						Type:        types.StringType,
+						Required:    true,
+						Description: "The name of the field to override attributes for.",
+					},
+				},
+			},
+		},
+	}
+}
+
 // attributes
 func idAttribute() tfsdk.Attribute {
 	return tfsdk.Attribute{
@@ -895,119 +997,263 @@ func createFieldConfig(defaults FieldDefaults, fieldOptions []FieldOptions) graf
 			}
 		}
 
-		mappings := make([]grafana.FieldMapping, 0)
-
-		for _, mapping := range field.Mappings {
-			idx := 0
-			valuesMap := make(map[string]interface{})
-
-			for _, value := range mapping.Value {
-				v := ValueMappingResult{
-					Color: value.Color.Value,
-					Text:  value.DisplayText.Value,
-					Index: idx,
-				}
-
-				valuesMap[value.Value.Value] = v
-				idx += 1
-			}
-
-			if len(valuesMap) > 0 {
-				mapping := grafana.FieldMapping{
-					Type:    "value",
-					Options: valuesMap,
-				}
-
-				mappings = append(mappings, mapping)
-			}
-
-			for _, range_ := range mapping.Range {
-				mapping := grafana.FieldMapping{
-					Type: "range",
-					Options: map[string]interface{}{
-						"from": range_.From.Value,
-						"to":   range_.From.Value,
-						"result": ValueMappingResult{
-							Color: range_.Color.Value,
-							Text:  range_.DisplayText.Value,
-							Index: idx,
-						},
-					},
-				}
-				idx += 1
-
-				mappings = append(mappings, mapping)
-			}
-
-			for _, regex := range mapping.Regex {
-				mapping := grafana.FieldMapping{
-					Type: "regex",
-					Options: map[string]interface{}{
-						"pattern": regex.Pattern.Value,
-						"result": ValueMappingResult{
-							Color: regex.Color.Value,
-							Text:  regex.DisplayText.Value,
-							Index: idx,
-						},
-					},
-				}
-				idx += 1
-
-				mappings = append(mappings, mapping)
-			}
-
-			for _, special := range mapping.Special {
-				mapping := grafana.FieldMapping{
-					Type: "special",
-					Options: map[string]interface{}{
-						"match": special.Match.Value,
-						"result": ValueMappingResult{
-							Color: special.Color.Value,
-							Text:  special.DisplayText.Value,
-							Index: idx,
-						},
-					},
-				}
-				idx += 1
-
-				mappings = append(mappings, mapping)
-			}
-		}
+		mappings := createMappings(field.Mappings)
 
 		if len(mappings) > 0 {
 			fieldConfig.Mappings = mappings
 		}
 
-		for _, threshold := range field.Thresholds {
-			steps := make([]grafana.ThresholdStep, len(threshold.Steps))
-
-			if !threshold.Mode.Null {
-				fieldConfig.Thresholds.Mode = threshold.Mode.Value
-			}
-
-			for i, step := range threshold.Steps {
-				s := grafana.ThresholdStep{
-					Color: step.Color.Value,
-				}
-
-				if !step.Value.Null {
-					value := step.Value.Value
-					s.Value = &value
-				}
-
-				steps[i] = s
-			}
-
-			if len(steps) > 0 {
-				fieldConfig.Thresholds.Steps = steps
-			}
-		}
+		updateThresholds(&fieldConfig.Thresholds, field.Thresholds)
 	}
 
 	return fieldConfig
 }
 
+func createMappings(mappingOptions []MappingOptions) []grafana.FieldMapping {
+	mappings := make([]grafana.FieldMapping, 0)
+
+	for _, mapping := range mappingOptions {
+		idx := 0
+		valuesMap := make(map[string]interface{})
+
+		for _, value := range mapping.Value {
+			v := ValueMappingResult{
+				Color: value.Color.Value,
+				Text:  value.DisplayText.Value,
+				Index: idx,
+			}
+
+			valuesMap[value.Value.Value] = v
+			idx += 1
+		}
+
+		if len(valuesMap) > 0 {
+			mapping := grafana.FieldMapping{
+				Type:    "value",
+				Options: valuesMap,
+			}
+
+			mappings = append(mappings, mapping)
+		}
+
+		for _, range_ := range mapping.Range {
+			mapping := grafana.FieldMapping{
+				Type: "range",
+				Options: map[string]interface{}{
+					"from": range_.From.Value,
+					"to":   range_.From.Value,
+					"result": ValueMappingResult{
+						Color: range_.Color.Value,
+						Text:  range_.DisplayText.Value,
+						Index: idx,
+					},
+				},
+			}
+			idx += 1
+
+			mappings = append(mappings, mapping)
+		}
+
+		for _, regex := range mapping.Regex {
+			mapping := grafana.FieldMapping{
+				Type: "regex",
+				Options: map[string]interface{}{
+					"pattern": regex.Pattern.Value,
+					"result": ValueMappingResult{
+						Color: regex.Color.Value,
+						Text:  regex.DisplayText.Value,
+						Index: idx,
+					},
+				},
+			}
+			idx += 1
+
+			mappings = append(mappings, mapping)
+		}
+
+		for _, special := range mapping.Special {
+			mapping := grafana.FieldMapping{
+				Type: "special",
+				Options: map[string]interface{}{
+					"match": special.Match.Value,
+					"result": ValueMappingResult{
+						Color: special.Color.Value,
+						Text:  special.DisplayText.Value,
+						Index: idx,
+					},
+				},
+			}
+			idx += 1
+
+			mappings = append(mappings, mapping)
+		}
+	}
+
+	return mappings
+}
+
+func createOverrides(overrides []FieldOverrideOptions) []grafana.FieldOverride {
+	fieldOverrides := make([]grafana.FieldOverride, 0)
+
+	for _, override := range overrides {
+		for _, byName := range override.ByName {
+			fieldOverride := grafana.FieldOverride{
+				Matcher: grafana.FieldOverrideMatcher{
+					Id:      "byName",
+					Options: byName.Name.Value,
+				},
+				Properties: createOverrideProperties(byName.Field),
+			}
+			fieldOverrides = append(fieldOverrides, fieldOverride)
+		}
+
+		for _, byRegex := range override.ByRegex {
+			fieldOverride := grafana.FieldOverride{
+				Matcher: grafana.FieldOverrideMatcher{
+					Id:      "byRegexp",
+					Options: byRegex.Regex.Value,
+				},
+				Properties: createOverrideProperties(byRegex.Field),
+			}
+			fieldOverrides = append(fieldOverrides, fieldOverride)
+		}
+
+		for _, byType := range override.ByType {
+			fieldOverride := grafana.FieldOverride{
+				Matcher: grafana.FieldOverrideMatcher{
+					Id:      "byType",
+					Options: byType.Type.Value,
+				},
+				Properties: createOverrideProperties(byType.Field),
+			}
+			fieldOverrides = append(fieldOverrides, fieldOverride)
+		}
+
+		for _, byQueryID := range override.ByQueryID {
+			fieldOverride := grafana.FieldOverride{
+				Matcher: grafana.FieldOverrideMatcher{
+					Id:      "byFrameRefID",
+					Options: byQueryID.QueryID.Value,
+				},
+				Properties: createOverrideProperties(byQueryID.Field),
+			}
+			fieldOverrides = append(fieldOverrides, fieldOverride)
+		}
+	}
+
+	return fieldOverrides
+}
+
+func createOverrideProperties(fieldOptions []FieldOptions) []grafana.FieldOverrideProperty {
+	properties := make([]grafana.FieldOverrideProperty, 0)
+
+	for _, field := range fieldOptions {
+		if !field.Unit.Null {
+			properties = append(properties, grafana.FieldOverrideProperty{
+				Id:    "unit",
+				Value: field.Unit.Value,
+			})
+		}
+
+		if !field.Decimals.Null {
+			properties = append(properties, grafana.FieldOverrideProperty{
+				Id:    "decimals",
+				Value: field.Decimals.Value,
+			})
+		}
+
+		if !field.Min.Null {
+			properties = append(properties, grafana.FieldOverrideProperty{
+				Id:    "min",
+				Value: field.Min.Value,
+			})
+		}
+
+		if !field.Max.Null {
+			properties = append(properties, grafana.FieldOverrideProperty{
+				Id:    "max",
+				Value: field.Max.Value,
+			})
+		}
+
+		if !field.NoValue.Null {
+			properties = append(properties, grafana.FieldOverrideProperty{
+				Id:    "noValue",
+				Value: field.Decimals.Value,
+			})
+		}
+
+		for _, color := range field.Color {
+			fieldColor := grafana.FieldConfigColor{}
+			if !color.Mode.Null {
+				fieldColor.Mode = color.Mode.Value
+			}
+
+			if !color.FixedColor.Null {
+				fieldColor.FixedColor = color.FixedColor.Value
+			}
+
+			if !color.SeriesBy.Null {
+				fieldColor.SeriesBy = color.SeriesBy.Value
+			}
+
+			properties = append(properties, grafana.FieldOverrideProperty{
+				Id:    "color",
+				Value: fieldColor,
+			})
+		}
+
+		mappings := createMappings(field.Mappings)
+
+		if len(mappings) > 0 {
+			properties = append(properties, grafana.FieldOverrideProperty{
+				Id:    "mappings",
+				Value: mappings,
+			})
+		}
+
+		thresholds := grafana.Thresholds{}
+		updateThresholds(&thresholds, field.Thresholds)
+
+		if len(field.Thresholds) > 0 {
+			properties = append(properties, grafana.FieldOverrideProperty{
+				Id:    "thresholds",
+				Value: thresholds,
+			})
+		}
+	}
+
+	return properties
+}
+
 // updaters
+func updateThresholds(thresholds *grafana.Thresholds, thresholdOptions []ThresholdOptions) {
+	for _, threshold := range thresholdOptions {
+		steps := make([]grafana.ThresholdStep, len(threshold.Steps))
+
+		if !threshold.Mode.Null {
+			thresholds.Mode = threshold.Mode.Value
+		}
+
+		for i, step := range threshold.Steps {
+			s := grafana.ThresholdStep{
+				Color: step.Color.Value,
+			}
+
+			if !step.Value.Null {
+				value := step.Value.Value
+				s.Value = &value
+			}
+
+			steps[i] = s
+		}
+
+		if len(steps) > 0 {
+			thresholds.Steps = steps
+		}
+	}
+}
+
 func updateTextSize(options *grafana.TextSize, opts []TextSizeOptions) {
 	for _, textSize := range opts {
 		if !textSize.Title.Null {

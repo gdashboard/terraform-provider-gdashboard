@@ -62,6 +62,36 @@ data "gdashboard_bar_gauge" "test" {
 	}
   }
 
+  overrides {
+	by_query_id {
+	  query_id = "Prometheus_Query"
+	  field {
+        unit     = "bytes"
+		min      = 0
+		max      = 10
+		decimals = 1
+		no_value = "1"
+        color {
+		  mode        = "fixed"
+      	  fixed_color = "red"	
+        }
+	    thresholds {
+          mode = "percentage"
+          step {
+            color = "red"
+          }
+        }
+	    mappings {
+          value {
+            value        = "1"
+            display_text = "UP"
+            color        = "green"
+          }
+	    }
+	  }
+	}
+  }
+
   queries {
     prometheus {
       uid           = "prometheus"
@@ -178,7 +208,71 @@ const testAccBarGaugeDataSourceConfigExpectedJson = `{
           "mode": ""
         }
       }
-    }
+    },
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byFrameRefID",
+          "options": "Prometheus_Query"
+        },
+        "properties": [
+          {
+            "id": "unit",
+            "value": "bytes"
+          },
+          {
+            "id": "decimals",
+            "value": 1
+          },
+          {
+            "id": "min",
+            "value": 0
+          },
+          {
+            "id": "max",
+            "value": 10
+          },
+          {
+            "id": "noValue",
+            "value": 1
+          },
+          {
+            "id": "color",
+            "value": {
+              "mode": "fixed",
+              "fixedColor": "red"
+            }
+          },
+          {
+            "id": "mappings",
+            "value": [
+              {
+                "type": "value",
+                "options": {
+                  "1": {
+                    "color": "green",
+                    "text": "UP",
+                    "index": 0
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "thresholds",
+            "value": {
+              "mode": "percentage",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
   }
 }`
 
