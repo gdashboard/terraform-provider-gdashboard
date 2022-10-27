@@ -175,16 +175,16 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 	}
 
 	for _, graph := range data.Graph {
-		if !graph.Orientation.Null {
-			options.Orientation = graph.Orientation.Value
+		if !graph.Orientation.IsNull() {
+			options.Orientation = graph.Orientation.ValueString()
 		}
 
-		if !graph.DisplayMode.Null {
-			options.DisplayMode = graph.DisplayMode.Value
+		if !graph.DisplayMode.IsNull() {
+			options.DisplayMode = graph.DisplayMode.ValueString()
 		}
 
-		if !graph.TextAlignment.Null {
-			options.JustifyMode = graph.TextAlignment.Value
+		if !graph.TextAlignment.IsNull() {
+			options.JustifyMode = graph.TextAlignment.ValueString()
 		}
 
 		updateTextSize(&options.TextSize, graph.TextSize)
@@ -194,7 +194,7 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 	panel := &grafana.Panel{
 		CommonPanel: grafana.CommonPanel{
 			OfType: grafana.BarGaugeType,
-			Title:  data.Title.Value,
+			Title:  data.Title.ValueString(),
 			Type:   "bargauge",
 			Span:   12,
 			IsNew:  true,
@@ -209,8 +209,9 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 		},
 	}
 
-	if !data.Description.Null {
-		panel.CommonPanel.Description = &data.Description.Value
+	if !data.Description.IsNull() {
+		description := data.Description.ValueString()
+		panel.CommonPanel.Description = &description
 	}
 
 	jsonData, err := json.MarshalIndent(panel, "", "  ")
@@ -219,8 +220,8 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 
-	data.Json = types.String{Value: string(jsonData)}
-	data.Id = types.String{Value: strconv.Itoa(hashcode(jsonData))}
+	data.Json = types.StringValue(string(jsonData))
+	data.Id = types.StringValue(strconv.Itoa(hashcode(jsonData)))
 
 	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("%s", string(jsonData)))
 

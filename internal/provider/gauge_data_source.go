@@ -167,16 +167,18 @@ func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	}
 
 	for _, graph := range data.Graph {
-		if !graph.Orientation.Null {
-			options.Orientation = graph.Orientation.Value
+		if !graph.Orientation.IsNull() {
+			options.Orientation = graph.Orientation.ValueString()
 		}
 
-		if !graph.ShowThresholdLabels.Null {
-			options.ShowThresholdLabels = &graph.ShowThresholdLabels.Value
+		if !graph.ShowThresholdLabels.IsNull() {
+			show := graph.ShowThresholdLabels.ValueBool()
+			options.ShowThresholdLabels = &show
 		}
 
-		if !graph.ShowThresholdMarkers.Null {
-			options.ShowThresholdMarkers = &graph.ShowThresholdMarkers.Value
+		if !graph.ShowThresholdMarkers.IsNull() {
+			show := graph.ShowThresholdMarkers.ValueBool()
+			options.ShowThresholdMarkers = &show
 		}
 
 		updateTextSize(&options.TextSize, graph.TextSize)
@@ -186,7 +188,7 @@ func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	panel := &grafana.Panel{
 		CommonPanel: grafana.CommonPanel{
 			OfType: grafana.GaugeType,
-			Title:  data.Title.Value,
+			Title:  data.Title.ValueString(),
 			Type:   "gauge",
 			Span:   12,
 			IsNew:  true,
@@ -201,8 +203,9 @@ func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		},
 	}
 
-	if !data.Description.Null {
-		panel.CommonPanel.Description = &data.Description.Value
+	if !data.Description.IsNull() {
+		description := data.Description.ValueString()
+		panel.CommonPanel.Description = &description
 	}
 
 	jsonData, err := json.MarshalIndent(panel, "", "  ")
@@ -211,8 +214,8 @@ func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		return
 	}
 
-	data.Json = types.String{Value: string(jsonData)}
-	data.Id = types.String{Value: strconv.Itoa(hashcode(jsonData))}
+	data.Json = types.StringValue(string(jsonData))
+	data.Id = types.StringValue(strconv.Itoa(hashcode(jsonData)))
 
 	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("%s", string(jsonData)))
 

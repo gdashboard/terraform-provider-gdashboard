@@ -355,32 +355,32 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 
 			for i, opt := range custom.Options {
 				opts[i] = grafana.Option{
-					Text:     opt.Text.Value,
-					Value:    opt.Value.Value,
-					Selected: opt.Selected.Value,
+					Text:     opt.Text.ValueString(),
+					Value:    opt.Value.ValueString(),
+					Selected: opt.Selected.ValueBool(),
 				}
 
 				if query != "" {
 					query = query + ", "
 				}
 
-				query = query + opt.Text.Value + " : " + opt.Value.Value
+				query = query + opt.Text.ValueString() + " : " + opt.Value.ValueString()
 
-				if opt.Selected.Value {
+				if opt.Selected.ValueBool() {
 					current = grafana.Current{
 						Text: &grafana.StringSliceString{
-							Value: []string{opt.Text.Value},
+							Value: []string{opt.Text.ValueString()},
 							Valid: true,
 						},
-						Value: opt.Value.Value,
+						Value: opt.Value.ValueString(),
 					}
 				}
 			}
 
 			hide := uint8(0)
 
-			if !custom.Hide.Null {
-				switch v := custom.Hide.Value; v {
+			if !custom.Hide.IsNull() {
+				switch v := custom.Hide.ValueString(); v {
 				case "label":
 					hide = 1
 				case "variable":
@@ -392,7 +392,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 
 			v := grafana.TemplateVar{
 				Type:    "custom",
-				Name:    custom.Name.Value,
+				Name:    custom.Name.ValueString(),
 				Options: opts,
 				Query:   query,
 				Current: current,
@@ -405,8 +405,8 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		for _, c := range variable.Constant {
 			hide := uint8(0)
 
-			if !c.Hide.Null {
-				switch v := c.Hide.Value; v {
+			if !c.Hide.IsNull() {
+				switch v := c.Hide.ValueString(); v {
 				case "label":
 					hide = 1
 				case "variable":
@@ -418,8 +418,8 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 
 			v := grafana.TemplateVar{
 				Type:  "constant",
-				Name:  c.Name.Value,
-				Query: c.Value.Value,
+				Name:  c.Name.ValueString(),
+				Query: c.Value.ValueString(),
 				Hide:  hide,
 			}
 
@@ -433,14 +433,14 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		for columnIdx, column := range row.Panels {
 			var panel grafana.Panel
 
-			err := json.Unmarshal([]byte(column.Source.Value), &panel)
+			err := json.Unmarshal([]byte(column.Source.ValueString()), &panel)
 			if err != nil {
 				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Could not unmarshall json as Panel: %s", err))
 				return
 			}
 
-			height := int(column.Size.Height.Value)
-			width := int(column.Size.Width.Value)
+			height := int(column.Size.Height.ValueInt64())
+			width := int(column.Size.Width.ValueInt64())
 
 			var x int
 			var y int
@@ -450,7 +450,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 			} else {
 				total := 0
 				for _, item := range row.Panels[0:columnIdx] {
-					total += int(item.Size.Width.Value)
+					total += int(item.Size.Width.ValueInt64())
 				}
 				x = total
 			}
@@ -462,7 +462,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				for _, r := range data.Layout.Rows[0:rowIdx] {
 					max := 0
 					for _, c := range r.Panels {
-						max = int(math.Max(float64(max), float64(c.Size.Height.Value)))
+						max = int(math.Max(float64(max), float64(c.Size.Height.ValueInt64())))
 					}
 					total += max
 				}
@@ -486,7 +486,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 	}
 
 	dashboard := &grafana.Board{
-		Title:         data.Title.Value,
+		Title:         data.Title.ValueString(),
 		Editable:      d.Defaults.Editable,
 		Style:         d.Defaults.Style,
 		SchemaVersion: 0,
@@ -501,26 +501,26 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		},
 	}
 
-	if !data.UID.Null {
-		dashboard.UID = data.UID.Value
+	if !data.UID.IsNull() {
+		dashboard.UID = data.UID.ValueString()
 	}
 
-	if !data.Editable.Null {
-		dashboard.Editable = data.Editable.Value
+	if !data.Editable.IsNull() {
+		dashboard.Editable = data.Editable.ValueBool()
 	}
 
-	if !data.Style.Null {
-		dashboard.Style = data.Style.Value
+	if !data.Style.IsNull() {
+		dashboard.Style = data.Style.ValueString()
 	}
 
 	for _, time := range data.Time {
-		dashboard.Time.From = time.From.Value
-		dashboard.Time.To = time.To.Value
+		dashboard.Time.From = time.From.ValueString()
+		dashboard.Time.To = time.To.ValueString()
 	}
 
 	tooltip := ""
-	if !data.GraphTooltip.Null {
-		tooltip = data.GraphTooltip.Value
+	if !data.GraphTooltip.IsNull() {
+		tooltip = data.GraphTooltip.ValueString()
 	} else {
 		tooltip = d.Defaults.GraphTooltip
 	}
@@ -537,8 +537,8 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	data.Json = types.String{Value: string(jsonData)}
-	data.Id = types.String{Value: strconv.Itoa(hashcode(jsonData))}
+	data.Json = types.StringValue(string(jsonData))
+	data.Id = types.StringValue(strconv.Itoa(hashcode(jsonData)))
 
 	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("%s", string(jsonData)))
 

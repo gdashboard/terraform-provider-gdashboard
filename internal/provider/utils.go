@@ -886,15 +886,15 @@ func createTargets(queries []Query) []grafana.Target {
 		for _, target := range group.Prometheus {
 			t := grafana.Target{
 				Datasource: grafana.Datasource{
-					UID:  target.Uid.Value,
+					UID:  target.Uid.ValueString(),
 					Type: "prometheus",
 				},
-				RefID:        target.RefId.Value,
-				Expr:         target.Expr.Value,
-				Interval:     target.MinInterval.Value,
-				LegendFormat: target.LegendFormat.Value,
-				Instant:      target.Instant.Value,
-				Format:       target.Format.Value,
+				RefID:        target.RefId.ValueString(),
+				Expr:         target.Expr.ValueString(),
+				Interval:     target.MinInterval.ValueString(),
+				LegendFormat: target.LegendFormat.ValueString(),
+				Instant:      target.Instant.ValueBool(),
+				Format:       target.Format.ValueString(),
 			}
 
 			targets = append(targets, t)
@@ -904,22 +904,22 @@ func createTargets(queries []Query) []grafana.Target {
 			dimensions := make(map[string]string)
 
 			for _, dim := range target.Dimensions {
-				dimensions[dim.Name.Value] = dim.Value.Value
+				dimensions[dim.Name.ValueString()] = dim.Value.ValueString()
 			}
 
 			t := grafana.Target{
 				Datasource: grafana.Datasource{
-					UID:  target.Uid.Value,
+					UID:  target.Uid.ValueString(),
 					Type: "cloudwatch",
 				},
-				RefID:      target.RefId.Value,
-				Namespace:  target.Namespace.Value,
-				MetricName: target.MetricName.Value,
-				Statistics: []string{target.Statistic.Value},
+				RefID:      target.RefId.ValueString(),
+				Namespace:  target.Namespace.ValueString(),
+				MetricName: target.MetricName.ValueString(),
+				Statistics: []string{target.Statistic.ValueString()},
 				Dimensions: dimensions,
-				Period:     target.Period.Value,
-				Region:     target.Region.Value,
-				Label:      target.Label.Value,
+				Period:     target.Period.ValueString(),
+				Region:     target.Region.ValueString(),
+				Label:      target.Label.ValueString(),
 			}
 
 			targets = append(targets, t)
@@ -962,38 +962,41 @@ func createFieldConfig(defaults FieldDefaults, fieldOptions []FieldOptions) graf
 	}
 
 	for _, field := range fieldOptions {
-		if !field.Unit.Null {
-			fieldConfig.Unit = field.Unit.Value
+		if !field.Unit.IsNull() {
+			fieldConfig.Unit = field.Unit.ValueString()
 		}
 
-		if !field.Decimals.Null {
-			decimals := int(field.Decimals.Value)
+		if !field.Decimals.IsNull() {
+			decimals := int(field.Decimals.ValueInt64())
 			fieldConfig.Decimals = &decimals
 		}
 
-		if !field.Min.Null {
-			fieldConfig.Min = &field.Min.Value
+		if !field.Min.IsNull() {
+			min := field.Min.ValueFloat64()
+			fieldConfig.Min = &min
 		}
 
-		if !field.Max.Null {
-			fieldConfig.Max = &field.Max.Value
+		if !field.Max.IsNull() {
+			max := field.Max.ValueFloat64()
+			fieldConfig.Max = &max
 		}
 
-		if !field.NoValue.Null {
-			fieldConfig.NoValue = &field.NoValue.Value
+		if !field.NoValue.IsNull() {
+			noValue := field.NoValue.ValueFloat64()
+			fieldConfig.NoValue = &noValue
 		}
 
 		for _, color := range field.Color {
-			if !color.Mode.Null {
-				fieldConfig.Color.Mode = color.Mode.Value
+			if !color.Mode.IsNull() {
+				fieldConfig.Color.Mode = color.Mode.ValueString()
 			}
 
-			if !color.FixedColor.Null {
-				fieldConfig.Color.FixedColor = color.FixedColor.Value
+			if !color.FixedColor.IsNull() {
+				fieldConfig.Color.FixedColor = color.FixedColor.ValueString()
 			}
 
-			if !color.SeriesBy.Null {
-				fieldConfig.Color.SeriesBy = color.SeriesBy.Value
+			if !color.SeriesBy.IsNull() {
+				fieldConfig.Color.SeriesBy = color.SeriesBy.ValueString()
 			}
 		}
 
@@ -1018,12 +1021,12 @@ func createMappings(mappingOptions []MappingOptions) []grafana.FieldMapping {
 
 		for _, value := range mapping.Value {
 			v := ValueMappingResult{
-				Color: value.Color.Value,
-				Text:  value.DisplayText.Value,
+				Color: value.Color.ValueString(),
+				Text:  value.DisplayText.ValueString(),
 				Index: idx,
 			}
 
-			valuesMap[value.Value.Value] = v
+			valuesMap[value.Value.ValueString()] = v
 			idx += 1
 		}
 
@@ -1040,11 +1043,11 @@ func createMappings(mappingOptions []MappingOptions) []grafana.FieldMapping {
 			mapping := grafana.FieldMapping{
 				Type: "range",
 				Options: map[string]interface{}{
-					"from": range_.From.Value,
-					"to":   range_.From.Value,
+					"from": range_.From.ValueFloat64(),
+					"to":   range_.From.ValueFloat64(),
 					"result": ValueMappingResult{
-						Color: range_.Color.Value,
-						Text:  range_.DisplayText.Value,
+						Color: range_.Color.ValueString(),
+						Text:  range_.DisplayText.ValueString(),
 						Index: idx,
 					},
 				},
@@ -1058,10 +1061,10 @@ func createMappings(mappingOptions []MappingOptions) []grafana.FieldMapping {
 			mapping := grafana.FieldMapping{
 				Type: "regex",
 				Options: map[string]interface{}{
-					"pattern": regex.Pattern.Value,
+					"pattern": regex.Pattern.ValueString(),
 					"result": ValueMappingResult{
-						Color: regex.Color.Value,
-						Text:  regex.DisplayText.Value,
+						Color: regex.Color.ValueString(),
+						Text:  regex.DisplayText.ValueString(),
 						Index: idx,
 					},
 				},
@@ -1075,10 +1078,10 @@ func createMappings(mappingOptions []MappingOptions) []grafana.FieldMapping {
 			mapping := grafana.FieldMapping{
 				Type: "special",
 				Options: map[string]interface{}{
-					"match": special.Match.Value,
+					"match": special.Match.ValueString(),
 					"result": ValueMappingResult{
-						Color: special.Color.Value,
-						Text:  special.DisplayText.Value,
+						Color: special.Color.ValueString(),
+						Text:  special.DisplayText.ValueString(),
 						Index: idx,
 					},
 				},
@@ -1100,7 +1103,7 @@ func createOverrides(overrides []FieldOverrideOptions) []grafana.FieldOverride {
 			fieldOverride := grafana.FieldOverride{
 				Matcher: grafana.FieldOverrideMatcher{
 					Id:      "byName",
-					Options: byName.Name.Value,
+					Options: byName.Name.ValueString(),
 				},
 				Properties: createOverrideProperties(byName.Field),
 			}
@@ -1111,7 +1114,7 @@ func createOverrides(overrides []FieldOverrideOptions) []grafana.FieldOverride {
 			fieldOverride := grafana.FieldOverride{
 				Matcher: grafana.FieldOverrideMatcher{
 					Id:      "byRegexp",
-					Options: byRegex.Regex.Value,
+					Options: byRegex.Regex.ValueString(),
 				},
 				Properties: createOverrideProperties(byRegex.Field),
 			}
@@ -1122,7 +1125,7 @@ func createOverrides(overrides []FieldOverrideOptions) []grafana.FieldOverride {
 			fieldOverride := grafana.FieldOverride{
 				Matcher: grafana.FieldOverrideMatcher{
 					Id:      "byType",
-					Options: byType.Type.Value,
+					Options: byType.Type.ValueString(),
 				},
 				Properties: createOverrideProperties(byType.Field),
 			}
@@ -1133,7 +1136,7 @@ func createOverrides(overrides []FieldOverrideOptions) []grafana.FieldOverride {
 			fieldOverride := grafana.FieldOverride{
 				Matcher: grafana.FieldOverrideMatcher{
 					Id:      "byFrameRefID",
-					Options: byQueryID.QueryID.Value,
+					Options: byQueryID.QueryID.ValueString(),
 				},
 				Properties: createOverrideProperties(byQueryID.Field),
 			}
@@ -1148,53 +1151,53 @@ func createOverrideProperties(fieldOptions []FieldOptions) []grafana.FieldOverri
 	properties := make([]grafana.FieldOverrideProperty, 0)
 
 	for _, field := range fieldOptions {
-		if !field.Unit.Null {
+		if !field.Unit.IsNull() {
 			properties = append(properties, grafana.FieldOverrideProperty{
 				Id:    "unit",
-				Value: field.Unit.Value,
+				Value: field.Unit.ValueString(),
 			})
 		}
 
-		if !field.Decimals.Null {
+		if !field.Decimals.IsNull() {
 			properties = append(properties, grafana.FieldOverrideProperty{
 				Id:    "decimals",
-				Value: field.Decimals.Value,
+				Value: field.Decimals.ValueInt64(),
 			})
 		}
 
-		if !field.Min.Null {
+		if !field.Min.IsNull() {
 			properties = append(properties, grafana.FieldOverrideProperty{
 				Id:    "min",
-				Value: field.Min.Value,
+				Value: field.Min.ValueFloat64(),
 			})
 		}
 
-		if !field.Max.Null {
+		if !field.Max.IsNull() {
 			properties = append(properties, grafana.FieldOverrideProperty{
 				Id:    "max",
-				Value: field.Max.Value,
+				Value: field.Max.ValueFloat64(),
 			})
 		}
 
-		if !field.NoValue.Null {
+		if !field.NoValue.IsNull() {
 			properties = append(properties, grafana.FieldOverrideProperty{
 				Id:    "noValue",
-				Value: field.Decimals.Value,
+				Value: field.Decimals.ValueInt64(),
 			})
 		}
 
 		for _, color := range field.Color {
 			fieldColor := grafana.FieldConfigColor{}
-			if !color.Mode.Null {
-				fieldColor.Mode = color.Mode.Value
+			if !color.Mode.IsNull() {
+				fieldColor.Mode = color.Mode.ValueString()
 			}
 
-			if !color.FixedColor.Null {
-				fieldColor.FixedColor = color.FixedColor.Value
+			if !color.FixedColor.IsNull() {
+				fieldColor.FixedColor = color.FixedColor.ValueString()
 			}
 
-			if !color.SeriesBy.Null {
-				fieldColor.SeriesBy = color.SeriesBy.Value
+			if !color.SeriesBy.IsNull() {
+				fieldColor.SeriesBy = color.SeriesBy.ValueString()
 			}
 
 			properties = append(properties, grafana.FieldOverrideProperty{
@@ -1231,17 +1234,17 @@ func updateThresholds(thresholds *grafana.Thresholds, thresholdOptions []Thresho
 	for _, threshold := range thresholdOptions {
 		steps := make([]grafana.ThresholdStep, len(threshold.Steps))
 
-		if !threshold.Mode.Null {
-			thresholds.Mode = threshold.Mode.Value
+		if !threshold.Mode.IsNull() {
+			thresholds.Mode = threshold.Mode.ValueString()
 		}
 
 		for i, step := range threshold.Steps {
 			s := grafana.ThresholdStep{
-				Color: step.Color.Value,
+				Color: step.Color.ValueString(),
 			}
 
-			if !step.Value.Null {
-				value := step.Value.Value
+			if !step.Value.IsNull() {
+				value := step.Value.ValueFloat64()
 				s.Value = &value
 			}
 
@@ -1256,13 +1259,13 @@ func updateThresholds(thresholds *grafana.Thresholds, thresholdOptions []Thresho
 
 func updateTextSize(options *grafana.TextSize, opts []TextSizeOptions) {
 	for _, textSize := range opts {
-		if !textSize.Title.Null {
-			size := int(textSize.Title.Value)
+		if !textSize.Title.IsNull() {
+			size := int(textSize.Title.ValueInt64())
 			options.TitleSize = &size
 		}
 
-		if !textSize.Value.Null {
-			size := int(textSize.Value.Value)
+		if !textSize.Value.IsNull() {
+			size := int(textSize.Value.ValueInt64())
 			options.ValueSize = &size
 		}
 	}
@@ -1270,21 +1273,21 @@ func updateTextSize(options *grafana.TextSize, opts []TextSizeOptions) {
 
 func updateReduceOptions(options *grafana.ReduceOptions, opts []ReduceOptions) {
 	for _, reducer := range opts {
-		if !reducer.Values.Null {
-			options.Values = reducer.Values.Value
+		if !reducer.Values.IsNull() {
+			options.Values = reducer.Values.ValueBool()
 		}
 
-		if !reducer.Fields.Null {
-			options.Fields = reducer.Fields.Value
+		if !reducer.Fields.IsNull() {
+			options.Fields = reducer.Fields.ValueString()
 		}
 
-		if !reducer.Limit.Null {
-			limit := int(reducer.Limit.Value)
+		if !reducer.Limit.IsNull() {
+			limit := int(reducer.Limit.ValueInt64())
 			options.Limit = &limit
 		}
 
-		if !reducer.Calculation.Null {
-			options.Calcs = []string{reducer.Calculation.Value}
+		if !reducer.Calculation.IsNull() {
+			options.Calcs = []string{reducer.Calculation.ValueString()}
 		}
 	}
 }

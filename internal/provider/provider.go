@@ -240,21 +240,21 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 	if len(data.Defaults) > 0 && len(data.Defaults[0].Dashboard) > 0 {
 		opts := data.Defaults[0].Dashboard[0]
 
-		if !opts.Style.Null {
-			defaults.Dashboard.Style = opts.Style.Value
+		if !opts.Style.IsNull() {
+			defaults.Dashboard.Style = opts.Style.ValueString()
 		}
 
-		if !opts.Editable.Null {
-			defaults.Dashboard.Editable = opts.Editable.Value
+		if !opts.Editable.IsNull() {
+			defaults.Dashboard.Editable = opts.Editable.ValueBool()
 		}
 
-		if !opts.GraphTooltip.Null {
-			defaults.Dashboard.GraphTooltip = opts.GraphTooltip.Value
+		if !opts.GraphTooltip.IsNull() {
+			defaults.Dashboard.GraphTooltip = opts.GraphTooltip.ValueString()
 		}
 
 		for _, time := range opts.Time {
-			defaults.Dashboard.Time.From = time.From.Value
-			defaults.Dashboard.Time.To = time.To.Value
+			defaults.Dashboard.Time.From = time.From.ValueString()
+			defaults.Dashboard.Time.To = time.To.ValueString()
 		}
 	}
 
@@ -264,44 +264,44 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 		updateFieldDefaults(&defaults.Timeseries.Field, opts.Field)
 
 		for _, graph := range opts.Graph {
-			if !graph.DrawStyle.Null {
-				defaults.Timeseries.Graph.DrawStyle = graph.DrawStyle.Value
+			if !graph.DrawStyle.IsNull() {
+				defaults.Timeseries.Graph.DrawStyle = graph.DrawStyle.ValueString()
 			}
 
-			if !graph.LineInterpolation.Null {
-				defaults.Timeseries.Graph.LineInterpolation = graph.LineInterpolation.Value
+			if !graph.LineInterpolation.IsNull() {
+				defaults.Timeseries.Graph.LineInterpolation = graph.LineInterpolation.ValueString()
 			}
 
-			if !graph.LineWidth.Null {
-				defaults.Timeseries.Graph.LineWidth = int(graph.LineWidth.Value)
+			if !graph.LineWidth.IsNull() {
+				defaults.Timeseries.Graph.LineWidth = int(graph.LineWidth.ValueInt64())
 			}
 
-			if !graph.FillOpacity.Null {
-				defaults.Timeseries.Graph.FillOpacity = int(graph.FillOpacity.Value)
+			if !graph.FillOpacity.IsNull() {
+				defaults.Timeseries.Graph.FillOpacity = int(graph.FillOpacity.ValueInt64())
 			}
 
-			if !graph.GradientMode.Null {
-				defaults.Timeseries.Graph.GradientMode = graph.GradientMode.Value
+			if !graph.GradientMode.IsNull() {
+				defaults.Timeseries.Graph.GradientMode = graph.GradientMode.ValueString()
 			}
 
-			if !graph.LineStyle.Null {
-				defaults.Timeseries.Graph.LineStyle = graph.LineStyle.Value
+			if !graph.LineStyle.IsNull() {
+				defaults.Timeseries.Graph.LineStyle = graph.LineStyle.ValueString()
 			}
 
-			if !graph.SpanNulls.Null {
-				defaults.Timeseries.Graph.SpanNulls = graph.SpanNulls.Value
+			if !graph.SpanNulls.IsNull() {
+				defaults.Timeseries.Graph.SpanNulls = graph.SpanNulls.ValueBool()
 			}
 
-			if !graph.ShowPoints.Null {
-				defaults.Timeseries.Graph.ShowPoints = graph.ShowPoints.Value
+			if !graph.ShowPoints.IsNull() {
+				defaults.Timeseries.Graph.ShowPoints = graph.ShowPoints.ValueString()
 			}
 
-			if !graph.PointSize.Null {
-				defaults.Timeseries.Graph.PointSize = int(graph.PointSize.Value)
+			if !graph.PointSize.IsNull() {
+				defaults.Timeseries.Graph.PointSize = int(graph.PointSize.ValueInt64())
 			}
 
-			if !graph.StackSeries.Null {
-				defaults.Timeseries.Graph.StackSeries = graph.StackSeries.Value
+			if !graph.StackSeries.IsNull() {
+				defaults.Timeseries.Graph.StackSeries = graph.StackSeries.ValueString()
 			}
 		}
 
@@ -310,51 +310,51 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 				calculations := make([]string, len(legend.Calculations))
 
 				for i, c := range legend.Calculations {
-					calculations[i] = c.Value
+					calculations[i] = c.ValueString()
 				}
 
 				defaults.Timeseries.Legend.Calculations = calculations
 			}
 
-			if !legend.DisplayMode.Null {
-				defaults.Timeseries.Legend.DisplayMode = legend.DisplayMode.Value
+			if !legend.DisplayMode.IsNull() {
+				defaults.Timeseries.Legend.DisplayMode = legend.DisplayMode.ValueString()
 			}
 
-			if !legend.Placement.Null {
-				defaults.Timeseries.Legend.Placement = legend.Placement.Value
+			if !legend.Placement.IsNull() {
+				defaults.Timeseries.Legend.Placement = legend.Placement.ValueString()
 			}
 		}
 
 		for _, tooltip := range opts.Tooltip {
-			defaults.Timeseries.Tooltip.Mode = tooltip.Mode.Value
+			defaults.Timeseries.Tooltip.Mode = tooltip.Mode.ValueString()
 		}
 
 		for _, axis := range opts.Axis {
-			if !axis.Label.Null {
-				defaults.Timeseries.Axis.Label = axis.Label.Value
+			if !axis.Label.IsNull() {
+				defaults.Timeseries.Axis.Label = axis.Label.ValueString()
 			}
 
-			if !axis.Placement.Null {
-				defaults.Timeseries.Axis.Placement = axis.Placement.Value
+			if !axis.Placement.IsNull() {
+				defaults.Timeseries.Axis.Placement = axis.Placement.ValueString()
 			}
 
-			if !axis.SoftMin.Null {
-				min := int(axis.SoftMin.Value)
+			if !axis.SoftMin.IsNull() {
+				min := int(axis.SoftMin.ValueInt64())
 				defaults.Timeseries.Axis.SoftMin = &min
 			}
 
-			if !axis.SoftMax.Null {
-				max := int(axis.SoftMax.Value)
+			if !axis.SoftMax.IsNull() {
+				max := int(axis.SoftMax.ValueInt64())
 				defaults.Timeseries.Axis.SoftMax = &max
 			}
 
 			for _, scale := range axis.Scale {
-				if !scale.Type.Null {
-					defaults.Timeseries.Axis.Scale.Type = scale.Type.Value
+				if !scale.Type.IsNull() {
+					defaults.Timeseries.Axis.Scale.Type = scale.Type.ValueString()
 				}
 
-				if !scale.Log.Null {
-					defaults.Timeseries.Axis.Scale.Log = int(scale.Log.Value)
+				if !scale.Log.IsNull() {
+					defaults.Timeseries.Axis.Scale.Log = int(scale.Log.ValueInt64())
 				}
 			}
 		}
@@ -366,16 +366,16 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 		updateFieldDefaults(&defaults.BarGauge.Field, opts.Field)
 
 		for _, graph := range opts.Graph {
-			if !graph.Orientation.Null {
-				defaults.BarGauge.Graph.Orientation = graph.Orientation.Value
+			if !graph.Orientation.IsNull() {
+				defaults.BarGauge.Graph.Orientation = graph.Orientation.ValueString()
 			}
 
-			if !graph.DisplayMode.Null {
-				defaults.BarGauge.Graph.DisplayMode = graph.DisplayMode.Value
+			if !graph.DisplayMode.IsNull() {
+				defaults.BarGauge.Graph.DisplayMode = graph.DisplayMode.ValueString()
 			}
 
-			if !graph.TextAlignment.Null {
-				defaults.BarGauge.Graph.TextAlignment = graph.TextAlignment.Value
+			if !graph.TextAlignment.IsNull() {
+				defaults.BarGauge.Graph.TextAlignment = graph.TextAlignment.ValueString()
 			}
 
 			updateTextSizeDefaults(&defaults.BarGauge.Graph.TextSize, graph.TextSize)
@@ -389,24 +389,24 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 		updateFieldDefaults(&defaults.Stat.Field, opts.Field)
 
 		for _, graph := range opts.Graph {
-			if !graph.Orientation.Null {
-				defaults.Stat.Graph.Orientation = graph.Orientation.Value
+			if !graph.Orientation.IsNull() {
+				defaults.Stat.Graph.Orientation = graph.Orientation.ValueString()
 			}
 
-			if !graph.TextMode.Null {
-				defaults.Stat.Graph.TextMode = graph.TextMode.Value
+			if !graph.TextMode.IsNull() {
+				defaults.Stat.Graph.TextMode = graph.TextMode.ValueString()
 			}
 
-			if !graph.ColorMode.Null {
-				defaults.Stat.Graph.ColorMode = graph.ColorMode.Value
+			if !graph.ColorMode.IsNull() {
+				defaults.Stat.Graph.ColorMode = graph.ColorMode.ValueString()
 			}
 
-			if !graph.GraphMode.Null {
-				defaults.Stat.Graph.GraphMode = graph.GraphMode.Value
+			if !graph.GraphMode.IsNull() {
+				defaults.Stat.Graph.GraphMode = graph.GraphMode.ValueString()
 			}
 
-			if !graph.TextAlignment.Null {
-				defaults.Stat.Graph.TextAlignment = graph.TextAlignment.Value
+			if !graph.TextAlignment.IsNull() {
+				defaults.Stat.Graph.TextAlignment = graph.TextAlignment.ValueString()
 			}
 
 			updateTextSizeDefaults(&defaults.Stat.Graph.TextSize, graph.TextSize)
@@ -420,16 +420,16 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 		updateFieldDefaults(&defaults.Gauge.Field, opts.Field)
 
 		for _, graph := range opts.Graph {
-			if !graph.Orientation.Null {
-				defaults.Gauge.Graph.Orientation = graph.Orientation.Value
+			if !graph.Orientation.IsNull() {
+				defaults.Gauge.Graph.Orientation = graph.Orientation.ValueString()
 			}
 
-			if !graph.ShowThresholdLabels.Null {
-				defaults.Gauge.Graph.ShowThresholdLabels = graph.ShowThresholdLabels.Value
+			if !graph.ShowThresholdLabels.IsNull() {
+				defaults.Gauge.Graph.ShowThresholdLabels = graph.ShowThresholdLabels.ValueBool()
 			}
 
-			if !graph.ShowThresholdMarkers.Null {
-				defaults.Gauge.Graph.ShowThresholdMarkers = graph.ShowThresholdMarkers.Value
+			if !graph.ShowThresholdMarkers.IsNull() {
+				defaults.Gauge.Graph.ShowThresholdMarkers = graph.ShowThresholdMarkers.ValueBool()
 			}
 
 			updateTextSizeDefaults(&defaults.Gauge.Graph.TextSize, graph.TextSize)
@@ -443,55 +443,58 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 
 func updateFieldDefaults(defaults *FieldDefaults, opts []FieldOptions) {
 	for _, field := range opts {
-		if !field.Unit.Null {
-			defaults.Unit = field.Unit.Value
+		if !field.Unit.IsNull() {
+			defaults.Unit = field.Unit.ValueString()
 		}
 
-		if !field.Decimals.Null {
-			decimals := int(field.Decimals.Value)
+		if !field.Decimals.IsNull() {
+			decimals := int(field.Decimals.ValueInt64())
 			defaults.Decimals = &decimals
 		}
 
-		if !field.Min.Null {
-			defaults.Min = &field.Min.Value
+		if !field.Min.IsNull() {
+			min := field.Min.ValueFloat64()
+			defaults.Min = &min
 		}
 
-		if !field.Max.Null {
-			defaults.Max = &field.Max.Value
+		if !field.Max.IsNull() {
+			max := field.Max.ValueFloat64()
+			defaults.Max = &max
 		}
 
-		if !field.NoValue.Null {
-			defaults.NoValue = &field.NoValue.Value
+		if !field.NoValue.IsNull() {
+			noValue := field.NoValue.ValueFloat64()
+			defaults.NoValue = &noValue
 		}
 
 		for _, color := range field.Color {
-			if !color.Mode.Null {
-				defaults.Color.Mode = color.Mode.Value
+			if !color.Mode.IsNull() {
+				defaults.Color.Mode = color.Mode.ValueString()
 			}
 
-			if !color.FixedColor.Null {
-				defaults.Color.FixedColor = color.FixedColor.Value
+			if !color.FixedColor.IsNull() {
+				defaults.Color.FixedColor = color.FixedColor.ValueString()
 			}
 
-			if !color.SeriesBy.Null {
-				defaults.Color.SeriesBy = color.SeriesBy.Value
+			if !color.SeriesBy.IsNull() {
+				defaults.Color.SeriesBy = color.SeriesBy.ValueString()
 			}
 		}
 
 		for _, threshold := range field.Thresholds {
 			steps := make([]ThresholdStepDefaults, len(threshold.Steps))
 
-			if !threshold.Mode.Null {
-				defaults.Thresholds.Mode = threshold.Mode.Value
+			if !threshold.Mode.IsNull() {
+				defaults.Thresholds.Mode = threshold.Mode.ValueString()
 			}
 
 			for i, step := range threshold.Steps {
 				s := ThresholdStepDefaults{
-					Color: step.Color.Value,
+					Color: step.Color.ValueString(),
 				}
 
-				if !step.Value.Null {
-					value := step.Value.Value
+				if !step.Value.IsNull() {
+					value := step.Value.ValueFloat64()
 					s.Value = &value
 				}
 
@@ -505,13 +508,13 @@ func updateFieldDefaults(defaults *FieldDefaults, opts []FieldOptions) {
 
 func updateTextSizeDefaults(defaults *TextSizeDefaults, opts []TextSizeOptions) {
 	for _, textSize := range opts {
-		if !textSize.Title.Null {
-			size := int(textSize.Title.Value)
+		if !textSize.Title.IsNull() {
+			size := int(textSize.Title.ValueInt64())
 			defaults.Title = &size
 		}
 
-		if !textSize.Value.Null {
-			size := int(textSize.Value.Value)
+		if !textSize.Value.IsNull() {
+			size := int(textSize.Value.ValueInt64())
 			defaults.Value = &size
 		}
 	}
@@ -519,21 +522,21 @@ func updateTextSizeDefaults(defaults *TextSizeDefaults, opts []TextSizeOptions) 
 
 func updateReduceOptionsDefaults(defaults *ReduceOptionDefaults, opts []ReduceOptions) {
 	for _, reducer := range opts {
-		if !reducer.Values.Null {
-			defaults.Values = reducer.Values.Value
+		if !reducer.Values.IsNull() {
+			defaults.Values = reducer.Values.ValueBool()
 		}
 
-		if !reducer.Fields.Null {
-			defaults.Fields = reducer.Fields.Value
+		if !reducer.Fields.IsNull() {
+			defaults.Fields = reducer.Fields.ValueString()
 		}
 
-		if !reducer.Limit.Null {
-			limit := int(reducer.Limit.Value)
+		if !reducer.Limit.IsNull() {
+			limit := int(reducer.Limit.ValueInt64())
 			defaults.Limit = &limit
 		}
 
-		if !reducer.Calculation.Null {
-			defaults.Calculation = reducer.Calculation.Value
+		if !reducer.Calculation.IsNull() {
+			defaults.Calculation = reducer.Calculation.ValueString()
 		}
 	}
 }

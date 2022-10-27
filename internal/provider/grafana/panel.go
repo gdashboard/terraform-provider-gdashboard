@@ -545,7 +545,7 @@ type (
 	}
 )
 
-// for an any panel
+// Target for an any panel
 type Target struct {
 	RefID      string      `json:"refId"`
 	Datasource interface{} `json:"datasource,omitempty"`

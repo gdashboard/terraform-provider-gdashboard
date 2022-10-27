@@ -21,7 +21,7 @@ type Datasource struct {
 	SecureJSONData    interface{} `json:"secureJsonData"`
 }
 
-// Datasource type as described in
+// DatasourceType Datasource type as described in
 // http://docs.grafana.org/reference/http_api/#available-data-source-types
 type DatasourceType struct {
 	Metrics  bool   `json:"metrics"`
