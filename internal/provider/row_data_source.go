@@ -92,15 +92,15 @@ func (d *RowDataSource) Read(ctx context.Context, req datasource.ReadRequest, re
 	rowPanel := grafana.RowPanel{}
 
 	for _, graph := range data.Graph {
-		if !graph.Collapsed.Null {
-			rowPanel.Collapsed = graph.Collapsed.Value
+		if !graph.Collapsed.IsNull() {
+			rowPanel.Collapsed = graph.Collapsed.ValueBool()
 		}
 	}
 
 	panel := &grafana.Panel{
 		CommonPanel: grafana.CommonPanel{
 			OfType: grafana.RowType,
-			Title:  data.Title.Value,
+			Title:  data.Title.ValueString(),
 			Type:   "row",
 			Span:   12,
 			IsNew:  true,
@@ -114,8 +114,8 @@ func (d *RowDataSource) Read(ctx context.Context, req datasource.ReadRequest, re
 		return
 	}
 
-	data.Json = types.String{Value: string(jsonData)}
-	data.Id = types.String{Value: strconv.Itoa(hashcode(jsonData))}
+	data.Json = types.StringValue(string(jsonData))
+	data.Id = types.StringValue(strconv.Itoa(hashcode(jsonData)))
 
 	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("%s", string(jsonData)))
 

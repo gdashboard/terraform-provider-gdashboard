@@ -320,23 +320,23 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		if len(legend.Calculations) > 0 {
 			calculations := make([]string, len(legend.Calculations))
 			for i, calc := range legend.Calculations {
-				calculations[i] = calc.Value
+				calculations[i] = calc.ValueString()
 			}
 
 			legendOptions.Calcs = calculations
 		}
 
-		if !legend.DisplayMode.Null {
-			legendOptions.DisplayMode = legend.DisplayMode.Value
+		if !legend.DisplayMode.IsNull() {
+			legendOptions.DisplayMode = legend.DisplayMode.ValueString()
 		}
 
-		if !legend.Placement.Null {
-			legendOptions.Placement = legend.Placement.Value
+		if !legend.Placement.IsNull() {
+			legendOptions.Placement = legend.Placement.ValueString()
 		}
 	}
 
 	for _, tooltip := range data.Tooltip {
-		tooltipOptions.Mode = tooltip.Mode.Value
+		tooltipOptions.Mode = tooltip.Mode.ValueString()
 	}
 
 	fieldConfig := createFieldConfig(d.Defaults.Field, data.Field)
@@ -364,81 +364,81 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	fieldConfig.Custom.ScaleDistribution.Log = d.Defaults.Axis.Scale.Log
 
 	for _, axis := range data.Axis {
-		if !axis.Label.Null {
-			fieldConfig.Custom.AxisLabel = axis.Label.Value
+		if !axis.Label.IsNull() {
+			fieldConfig.Custom.AxisLabel = axis.Label.ValueString()
 		}
 
-		if !axis.Placement.Null {
-			fieldConfig.Custom.AxisPlacement = axis.Placement.Value
+		if !axis.Placement.IsNull() {
+			fieldConfig.Custom.AxisPlacement = axis.Placement.ValueString()
 		}
 
-		if !axis.SoftMin.Null {
-			min := int(axis.SoftMin.Value)
+		if !axis.SoftMin.IsNull() {
+			min := int(axis.SoftMin.ValueInt64())
 			fieldConfig.Custom.AxisSoftMin = &min
 		}
 
-		if !axis.SoftMax.Null {
-			max := int(axis.SoftMax.Value)
+		if !axis.SoftMax.IsNull() {
+			max := int(axis.SoftMax.ValueInt64())
 			fieldConfig.Custom.AxisSoftMax = &max
 		}
 
 		for _, scale := range axis.Scale {
-			if !scale.Type.Null {
-				fieldConfig.Custom.ScaleDistribution.Type = scale.Type.Value
+			if !scale.Type.IsNull() {
+				fieldConfig.Custom.ScaleDistribution.Type = scale.Type.ValueString()
 			}
 
-			if !scale.Log.Null {
-				fieldConfig.Custom.ScaleDistribution.Log = int(scale.Log.Value)
+			if !scale.Log.IsNull() {
+				fieldConfig.Custom.ScaleDistribution.Log = int(scale.Log.ValueInt64())
 			}
 		}
 	}
 
 	for _, graph := range data.Graph {
-		if !graph.DrawStyle.Null {
-			fieldConfig.Custom.DrawStyle = graph.DrawStyle.Value
+		if !graph.DrawStyle.IsNull() {
+			fieldConfig.Custom.DrawStyle = graph.DrawStyle.ValueString()
 		}
 
-		if !graph.LineInterpolation.Null {
-			fieldConfig.Custom.LineInterpolation = graph.LineInterpolation.Value
+		if !graph.LineInterpolation.IsNull() {
+			fieldConfig.Custom.LineInterpolation = graph.LineInterpolation.ValueString()
 		}
 
-		if !graph.LineWidth.Null {
-			fieldConfig.Custom.LineWidth = int(graph.LineWidth.Value)
+		if !graph.LineWidth.IsNull() {
+			fieldConfig.Custom.LineWidth = int(graph.LineWidth.ValueInt64())
 		}
 
-		if !graph.FillOpacity.Null {
-			fieldConfig.Custom.FillOpacity = int(graph.FillOpacity.Value)
+		if !graph.FillOpacity.IsNull() {
+			fieldConfig.Custom.FillOpacity = int(graph.FillOpacity.ValueInt64())
 		}
 
-		if !graph.GradientMode.Null {
-			fieldConfig.Custom.GradientMode = graph.GradientMode.Value
+		if !graph.GradientMode.IsNull() {
+			fieldConfig.Custom.GradientMode = graph.GradientMode.ValueString()
 		}
 
-		if !graph.LineStyle.Null {
-			fieldConfig.Custom.LineStyle.Fill = graph.LineStyle.Value
+		if !graph.LineStyle.IsNull() {
+			fieldConfig.Custom.LineStyle.Fill = graph.LineStyle.ValueString()
 		}
 
-		if !graph.SpanNulls.Null {
-			fieldConfig.Custom.SpanNulls = graph.SpanNulls.Value
+		if !graph.SpanNulls.IsNull() {
+			fieldConfig.Custom.SpanNulls = graph.SpanNulls.ValueBool()
 		}
 
-		if !graph.ShowPoints.Null {
-			fieldConfig.Custom.ShowPoints = graph.ShowPoints.Value
+		if !graph.ShowPoints.IsNull() {
+			fieldConfig.Custom.ShowPoints = graph.ShowPoints.ValueString()
 		}
 
-		if !graph.PointSize.Null {
-			fieldConfig.Custom.PointSize = int(graph.PointSize.Value)
+		if !graph.PointSize.IsNull() {
+			fieldConfig.Custom.PointSize = int(graph.PointSize.ValueInt64())
 		}
 
-		if !graph.StackSeries.Null {
-			fieldConfig.Custom.Stacking.Mode = graph.StackSeries.Value
+		if !graph.StackSeries.IsNull() {
+			fieldConfig.Custom.Stacking.Mode = graph.StackSeries.ValueString()
 		}
 	}
 
 	panel := &grafana.Panel{
 		CommonPanel: grafana.CommonPanel{
 			OfType: grafana.TimeseriesType,
-			Title:  data.Title.Value,
+			Title:  data.Title.ValueString(),
 			Type:   "timeseries",
 			Span:   12,
 			IsNew:  true,
@@ -456,8 +456,9 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		},
 	}
 
-	if !data.Description.Null {
-		panel.CommonPanel.Description = &data.Description.Value
+	if !data.Description.IsNull() {
+		description := data.Description.ValueString()
+		panel.CommonPanel.Description = &description
 	}
 
 	jsonData, err := json.MarshalIndent(panel, "", "  ")
@@ -466,8 +467,8 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		return
 	}
 
-	data.Json = types.String{Value: string(jsonData)}
-	data.Id = types.String{Value: strconv.Itoa(hashcode(jsonData))}
+	data.Json = types.StringValue(string(jsonData))
+	data.Id = types.StringValue(strconv.Itoa(hashcode(jsonData)))
 
 	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("%s", string(jsonData)))
 

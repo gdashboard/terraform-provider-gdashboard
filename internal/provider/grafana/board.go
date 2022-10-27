@@ -65,13 +65,13 @@ type (
 		Hide        uint8       `json:"hide"`
 		Sort        int         `json:"sort"`
 	}
-	// for templateVar
+	// Option for templateVar
 	Option struct {
 		Text     string `json:"text"`
 		Value    string `json:"value"`
 		Selected bool   `json:"selected"`
 	}
-	// for templateVar
+	// Current for templateVar
 	Current struct {
 		Tags  []*string          `json:"tags,omitempty"`
 		Text  *StringSliceString `json:"text"`

@@ -199,24 +199,24 @@ func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 
 	for _, graph := range data.Graph {
-		if !graph.Orientation.Null {
-			options.Orientation = graph.Orientation.Value
+		if !graph.Orientation.IsNull() {
+			options.Orientation = graph.Orientation.ValueString()
 		}
 
-		if !graph.TextMode.Null {
-			options.TextMode = graph.TextMode.Value
+		if !graph.TextMode.IsNull() {
+			options.TextMode = graph.TextMode.ValueString()
 		}
 
-		if !graph.ColorMode.Null {
-			options.ColorMode = graph.ColorMode.Value
+		if !graph.ColorMode.IsNull() {
+			options.ColorMode = graph.ColorMode.ValueString()
 		}
 
-		if !graph.GraphMode.Null {
-			options.GraphMode = graph.GraphMode.Value
+		if !graph.GraphMode.IsNull() {
+			options.GraphMode = graph.GraphMode.ValueString()
 		}
 
-		if !graph.TextAlignment.Null {
-			options.JustifyMode = graph.TextAlignment.Value
+		if !graph.TextAlignment.IsNull() {
+			options.JustifyMode = graph.TextAlignment.ValueString()
 		}
 
 		updateTextSize(&options.TextSize, graph.TextSize)
@@ -226,7 +226,7 @@ func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	panel := &grafana.Panel{
 		CommonPanel: grafana.CommonPanel{
 			OfType: grafana.StatType,
-			Title:  data.Title.Value,
+			Title:  data.Title.ValueString(),
 			Type:   "stat",
 			Span:   12,
 			IsNew:  true,
@@ -241,8 +241,9 @@ func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		},
 	}
 
-	if !data.Description.Null {
-		panel.CommonPanel.Description = &data.Description.Value
+	if !data.Description.IsNull() {
+		description := data.Description.ValueString()
+		panel.CommonPanel.Description = &description
 	}
 
 	jsonData, err := json.MarshalIndent(panel, "", "  ")
@@ -251,8 +252,8 @@ func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	data.Json = types.String{Value: string(jsonData)}
-	data.Id = types.String{Value: strconv.Itoa(hashcode(jsonData))}
+	data.Json = types.StringValue(string(jsonData))
+	data.Id = types.StringValue(strconv.Itoa(hashcode(jsonData)))
 
 	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("%s", string(jsonData)))
 
