@@ -302,7 +302,7 @@ Optional:
 - `options` (Block List, Max: 1) Value reduce or calculation options. (see [below for nested schema](#nestedblock--graph--options))
 - `orientation` (String) The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.
 - `show_threshold_labels` (Boolean) Whether to render the threshold values around the gauge bar or not.
-- `show_threshold_markers` (Boolean) Whether to renders the thresholds as an outer bar or not.
+- `show_threshold_markers` (Boolean) Whether to render the thresholds as an outer bar or not.
 - `text_size` (Block List, Max: 1) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--graph--text_size))
 
 <a id="nestedblock--graph--options"></a>
