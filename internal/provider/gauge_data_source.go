@@ -91,7 +91,7 @@ func gaugeGraphBlock() tfsdk.Block {
 			"show_threshold_markers": {
 				Type:        types.BoolType,
 				Optional:    true,
-				Description: "Whether to renders the thresholds as an outer bar or not.",
+				Description: "Whether to render the thresholds as an outer bar or not.",
 			},
 		},
 	}
