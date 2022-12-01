@@ -358,18 +358,17 @@ func fieldBlock() schema.Block {
 							"fixed_color": schema.StringAttribute{
 								Optional:    true,
 								Description: "The series to use to define the color. This is useful for graphs and pie charts, for example.",
-								/*Validators: []schema.AttributeValidator{
-									schemavalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("mode")), // todo validate mode == fixed
-								},*/ // todo
 							},
 							"series_by": schema.StringAttribute{
 								Optional:    true,
 								Description: "The series to use to define the color. This is useful for graphs and pie charts, for example.",
-								/*Validators: []schema.AttributeValidator{
-									schemavalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("mode")), // todo validate mode == fixed
-								},*/ // todo
 							},
 						},
+						/* when fixed_color or series_by is present, mode must be present too
+
+						Validators: []validator.Object{
+							objectvalidator.
+						},*/
 					},
 					Validators: []validator.List{
 						listvalidator.SizeAtMost(1),
@@ -387,7 +386,7 @@ func fieldBlock() schema.Block {
 											Required:    true,
 											Description: "The color for the matching values.",
 										},
-										"value": schema.StringAttribute{
+										"value": schema.Float64Attribute{
 											Optional:    true,
 											Description: "The value to match. Either percentage or absolute. Depends on the mode.",
 											MarkdownDescription: "The value to match. Either percentage or absolute. Depends on the mode. " +
