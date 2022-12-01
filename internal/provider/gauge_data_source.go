@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 )
@@ -59,58 +61,57 @@ type GaugeOptions struct {
 	ReduceOptions        []ReduceOptions   `tfsdk:"options"`
 }
 
-func (d *GaugeDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *GaugeDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_gauge"
 }
 
-func gaugeGraphBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    1,
+func gaugeGraphBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "The visualization options.",
-		Blocks: map[string]tfsdk.Block{
-			"options":   reduceOptionsBlock(),
-			"text_size": textSizeBlock(),
-		},
-		Attributes: map[string]tfsdk.Attribute{
-			"orientation": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "The layout orientation. The choices are: auto, horizontal, vertical.",
-				MarkdownDescription: "The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("auto", "horizontal", "vertical"),
+		NestedObject: schema.NestedBlockObject{
+			Blocks: map[string]schema.Block{
+				"options":   reduceOptionsBlock(),
+				"text_size": textSizeBlock(),
+			},
+			Attributes: map[string]schema.Attribute{
+				"orientation": schema.StringAttribute{
+					Optional:            true,
+					Description:         "The layout orientation. The choices are: auto, horizontal, vertical.",
+					MarkdownDescription: "The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("auto", "horizontal", "vertical"),
+					},
+				},
+				"show_threshold_labels": schema.BoolAttribute{
+					Optional:    true,
+					Description: "Whether to render the threshold values around the gauge bar or not.",
+				},
+				"show_threshold_markers": schema.BoolAttribute{
+					Optional:    true,
+					Description: "Whether to render the thresholds as an outer bar or not.",
 				},
 			},
-			"show_threshold_labels": {
-				Type:        types.BoolType,
-				Optional:    true,
-				Description: "Whether to render the threshold values around the gauge bar or not.",
-			},
-			"show_threshold_markers": {
-				Type:        types.BoolType,
-				Optional:    true,
-				Description: "Whether to render the thresholds as an outer bar or not.",
-			},
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
 		},
 	}
 }
 
-func (d *GaugeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (d *GaugeDataSource) GetSchema(_ context.Context) (schema.Schema, diag.Diagnostics) {
+	return schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		Description:         "Gauge panel data source.",
 		MarkdownDescription: "Gauge panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/). for more details",
 
-		Blocks: map[string]tfsdk.Block{
+		Blocks: map[string]schema.Block{
 			"queries":   queryBlock(),
 			"field":     fieldBlock(),
 			"graph":     gaugeGraphBlock(),
 			"overrides": fieldOverrideBlock(),
 		},
 
-		Attributes: map[string]tfsdk.Attribute{
+		Attributes: map[string]schema.Attribute{
 			"id":          idAttribute(),
 			"json":        jsonAttribute(),
 			"title":       titleAttribute(),
@@ -119,7 +120,7 @@ func (d *GaugeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 	}, nil
 }
 
-func (d *GaugeDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *GaugeDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return

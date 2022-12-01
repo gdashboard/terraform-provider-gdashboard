@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 )
@@ -36,35 +38,36 @@ type RowOptions struct {
 	Collapsed types.Bool `tfsdk:"collapsed"`
 }
 
-func (d *RowDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *RowDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_row"
 }
 
-func rowGraphBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    1,
-		Attributes: map[string]tfsdk.Attribute{
-			"collapsed": {
-				Type:        types.BoolType,
-				Optional:    true,
-				Description: "Whether to render row collapsed or not",
+func rowGraphBlock() schema.Block {
+	return schema.ListNestedBlock{
+		NestedObject: schema.NestedBlockObject{
+			Attributes: map[string]schema.Attribute{
+				"collapsed": schema.BoolAttribute{
+					Optional:    true,
+					Description: "Whether to render row collapsed or not",
+				},
 			},
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
 		},
 	}
 }
 
-func (d *RowDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (d *RowDataSource) GetSchema(_ context.Context) (schema.Schema, diag.Diagnostics) {
+	return schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Row panel data source.",
 
-		Blocks: map[string]tfsdk.Block{
+		Blocks: map[string]schema.Block{
 			"graph": rowGraphBlock(),
 		},
 
-		Attributes: map[string]tfsdk.Attribute{
+		Attributes: map[string]schema.Attribute{
 			"id":    idAttribute(),
 			"json":  jsonAttribute(),
 			"title": titleAttribute(),
@@ -72,7 +75,7 @@ func (d *RowDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 	}, nil
 }
 
-func (d *RowDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *RowDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return

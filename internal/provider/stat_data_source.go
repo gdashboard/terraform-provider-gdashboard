@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 )
@@ -63,84 +65,81 @@ type StatOptions struct {
 	ReduceOptions []ReduceOptions   `tfsdk:"options"`
 }
 
-func (d *StatDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *StatDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_stat"
 }
 
-func statGraphBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    1,
+func statGraphBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "The visualization options.",
-		Blocks: map[string]tfsdk.Block{
-			"options":   reduceOptionsBlock(),
-			"text_size": textSizeBlock(),
+		NestedObject: schema.NestedBlockObject{
+			Blocks: map[string]schema.Block{
+				"options":   reduceOptionsBlock(),
+				"text_size": textSizeBlock(),
+			},
+			Attributes: map[string]schema.Attribute{
+				"orientation": schema.StringAttribute{
+					Optional:            true,
+					Description:         "The layout orientation. The choices are: auto, horizontal, vertical.",
+					MarkdownDescription: "The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("auto", "horizontal", "vertical"),
+					},
+				},
+				"text_mode": schema.StringAttribute{
+					Optional:            true,
+					Description:         "What show on panel. The choices are: auto, value, value_and_name, name, none.",
+					MarkdownDescription: "What show on panel. The choices are: `auto`, `value`, `value_and_name`, `name`, `none`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("auto", "value", "value_and_name", "name", "none"),
+					},
+				},
+				"color_mode": schema.StringAttribute{
+					Optional:            true,
+					Description:         "The color mode. The choices are: none, value, background.",
+					MarkdownDescription: "The color mode. The choices are: `none`, `value`, `background`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("none", "value", "background"),
+					},
+				},
+				"graph_mode": schema.StringAttribute{
+					Optional:            true,
+					Description:         "The graph mode. The choices are: none, area.",
+					MarkdownDescription: "The graph mode. The choices are: `none`, `area`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("none", "area"),
+					},
+				},
+				"text_alignment": schema.StringAttribute{
+					Optional:            true,
+					Description:         "The text alignment. The choices are: auto, center.",
+					MarkdownDescription: "The text alignment. The choices are: `auto`, `center`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("auto", "center"),
+					},
+				},
+			},
 		},
-		Attributes: map[string]tfsdk.Attribute{
-			"orientation": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "The layout orientation. The choices are: auto, horizontal, vertical.",
-				MarkdownDescription: "The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("auto", "horizontal", "vertical"),
-				},
-			},
-			"text_mode": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "What show on panel. The choices are: auto, value, value_and_name, name, none.",
-				MarkdownDescription: "What show on panel. The choices are: `auto`, `value`, `value_and_name`, `name`, `none`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("auto", "value", "value_and_name", "name", "none"),
-				},
-			},
-			"color_mode": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "The color mode. The choices are: none, value, background.",
-				MarkdownDescription: "The color mode. The choices are: `none`, `value`, `background`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("none", "value", "background"),
-				},
-			},
-			"graph_mode": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "The graph mode. The choices are: none, area.",
-				MarkdownDescription: "The graph mode. The choices are: `none`, `area`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("none", "area"),
-				},
-			},
-			"text_alignment": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "The text alignment. The choices are: auto, center.",
-				MarkdownDescription: "The text alignment. The choices are: `auto`, `center`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("auto", "center"),
-				},
-			},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
 		},
 	}
 }
 
-func (d *StatDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (d *StatDataSource) GetSchema(_ context.Context) (schema.Schema, diag.Diagnostics) {
+	return schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		Description:         "Stat panel data source.",
 		MarkdownDescription: "Stat panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/stat/) for more details.",
 
-		Blocks: map[string]tfsdk.Block{
+		Blocks: map[string]schema.Block{
 			"queries":   queryBlock(),
 			"field":     fieldBlock(),
 			"graph":     statGraphBlock(),
 			"overrides": fieldOverrideBlock(),
 		},
 
-		Attributes: map[string]tfsdk.Attribute{
+		Attributes: map[string]schema.Attribute{
 			"id":          idAttribute(),
 			"json":        jsonAttribute(),
 			"title":       titleAttribute(),
@@ -149,7 +148,7 @@ func (d *StatDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diag
 	}, nil
 }
 
-func (d *StatDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *StatDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
