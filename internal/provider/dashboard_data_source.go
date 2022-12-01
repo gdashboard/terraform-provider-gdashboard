@@ -179,7 +179,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 													Required:    true,
 													Description: "The value of the entry.",
 												},
-												"selected": schema.StringAttribute{
+												"selected": schema.BoolAttribute{
 													Optional:    true,
 													Description: "Whether to mark the option as selected or not.",
 												},
