@@ -2,11 +2,12 @@ package provider
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -78,82 +79,94 @@ type TimeModel struct {
 	To   types.String `tfsdk:"to"`
 }
 
-func (p *GrafanaDashboardBuilderProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+func (p *GrafanaDashboardBuilderProvider) Metadata(_ context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "gdashboard"
 	resp.Version = p.version
 }
 
-func (p *GrafanaDashboardBuilderProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (p *GrafanaDashboardBuilderProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		Description: "The provider offers a handy syntax to define Grafana dashboards: time series, gauge, bar gauge, stat, etc.",
-		Blocks: map[string]tfsdk.Block{
-			"defaults": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MinItems:    0,
-				MaxItems:    1,
+		Blocks: map[string]schema.Block{
+			"defaults": schema.ListNestedBlock{
 				Description: "The default values to use with when an attribute is missing in the data source definition.",
-				Blocks: map[string]tfsdk.Block{
-					"dashboard": {
-						NestingMode: tfsdk.BlockNestingModeList,
-						MinItems:    0,
-						MaxItems:    1,
-						Description: "Dashboard defaults.",
-						Blocks: map[string]tfsdk.Block{
-							"time": dashboardTimeBlock(),
+				NestedObject: schema.NestedBlockObject{
+					Blocks: map[string]schema.Block{
+						"dashboard": schema.ListNestedBlock{
+							Description: "Dashboard defaults.",
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"time": dashboardTimeBlock(),
+								},
+								Attributes: map[string]schema.Attribute{
+									"editable":      dashboardEditableAttribute(),
+									"style":         dashboardStyleAttribute(),
+									"graph_tooltip": dashboardGraphTooltipAttribute(),
+								},
+							},
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(1),
+							},
 						},
-						Attributes: map[string]tfsdk.Attribute{
-							"editable":      dashboardEditableAttribute(),
-							"style":         dashboardStyleAttribute(),
-							"graph_tooltip": dashboardGraphTooltipAttribute(),
+						"timeseries": schema.ListNestedBlock{
+							Description: "Timeseries defaults.",
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"legend":  timeseriesLegendBlock(),
+									"tooltip": timeseriesTooltipBlock(),
+									"field":   fieldBlock(),
+									"axis":    axisBlock(),
+									"graph":   timeseriesGraphBlock(),
+								},
+							},
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(1),
+							},
 						},
-					},
-					"timeseries": {
-						NestingMode: tfsdk.BlockNestingModeList,
-						MinItems:    0,
-						MaxItems:    1,
-						Description: "Timeseries defaults.",
-						Blocks: map[string]tfsdk.Block{
-							"legend":  timeseriesLegendBlock(),
-							"tooltip": timeseriesTooltipBlock(),
-							"field":   fieldBlock(),
-							"axis":    axisBlock(),
-							"graph":   timeseriesGraphBlock(),
+						"bar_gauge": schema.ListNestedBlock{
+							Description: "Bar gauge defaults.",
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"field": fieldBlock(),
+									"graph": barGaugeGraphBlock(),
+								},
+							},
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(1),
+							},
 						},
-					},
-					"bar_gauge": {
-						NestingMode: tfsdk.BlockNestingModeList,
-						MinItems:    0,
-						MaxItems:    1,
-						Description: "Bar gauge defaults.",
-						Blocks: map[string]tfsdk.Block{
-							"field": fieldBlock(),
-							"graph": barGaugeGraphBlock(),
+						"stat": schema.ListNestedBlock{
+							Description: "Stat defaults.",
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"field": fieldBlock(),
+									"graph": statGraphBlock(),
+								},
+							},
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(1),
+							},
 						},
-					},
-					"stat": {
-						NestingMode: tfsdk.BlockNestingModeList,
-						MinItems:    0,
-						MaxItems:    1,
-						Description: "Stat defaults.",
-						Blocks: map[string]tfsdk.Block{
-							"field": fieldBlock(),
-							"graph": statGraphBlock(),
-						},
-					},
-					"gauge": {
-						NestingMode: tfsdk.BlockNestingModeList,
-						MinItems:    0,
-						MaxItems:    1,
-						Description: "Gauge defaults.",
-						Blocks: map[string]tfsdk.Block{
-							"field": fieldBlock(),
-							"graph": gaugeGraphBlock(),
+						"gauge": schema.ListNestedBlock{
+							Description: "Gauge defaults.",
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"field": fieldBlock(),
+									"graph": gaugeGraphBlock(),
+								},
+							},
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(1),
+							},
 						},
 					},
 				},
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(1),
+				},
 			},
 		},
-	}, nil
+	}
 }
 
 func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {

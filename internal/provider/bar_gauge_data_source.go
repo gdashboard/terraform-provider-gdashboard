@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 )
@@ -59,75 +60,74 @@ type BarGaugeOptions struct {
 	ReduceOptions []ReduceOptions   `tfsdk:"options"`
 }
 
-func (d *BarGaugeDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *BarGaugeDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_bar_gauge"
 }
 
-func barGaugeGraphBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    1,
+func barGaugeGraphBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "The visualization options.",
-		Blocks: map[string]tfsdk.Block{
-			"options":   reduceOptionsBlock(),
-			"text_size": textSizeBlock(),
+		NestedObject: schema.NestedBlockObject{
+			Blocks: map[string]schema.Block{
+				"options":   reduceOptionsBlock(),
+				"text_size": textSizeBlock(),
+			},
+			Attributes: map[string]schema.Attribute{
+				"orientation": schema.StringAttribute{
+					Optional:            true,
+					Description:         "The layout orientation. The choices are: auto, horizontal, vertical.",
+					MarkdownDescription: "The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("auto", "horizontal", "vertical"),
+					},
+				},
+				"display_mode": schema.StringAttribute{
+					Optional:            true,
+					Description:         "The display mode. The choices are: gradient, lcd, basic.",
+					MarkdownDescription: "The display mode. The choices are: `gradient`, `lcd`, `basic`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("gradient", "lcd", "basic"),
+					},
+				},
+				"text_alignment": schema.StringAttribute{
+					Optional:            true,
+					Description:         "The text alignment. The choices are: auto, center.",
+					MarkdownDescription: "The text alignment. The choices are: `auto`, `center`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("auto", "center"),
+					},
+				},
+			},
 		},
-		Attributes: map[string]tfsdk.Attribute{
-			"orientation": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "The layout orientation. The choices are: auto, horizontal, vertical.",
-				MarkdownDescription: "The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("auto", "horizontal", "vertical"),
-				},
-			},
-			"display_mode": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "The display mode. The choices are: gradient, lcd, basic.",
-				MarkdownDescription: "The display mode. The choices are: `gradient`, `lcd`, `basic`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("gradient", "lcd", "basic"),
-				},
-			},
-			"text_alignment": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "The text alignment. The choices are: auto, center.",
-				MarkdownDescription: "The text alignment. The choices are: `auto`, `center`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("auto", "center"),
-				},
-			},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
 		},
 	}
 }
 
-func (d *BarGaugeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (d *BarGaugeDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		Description:         "Bar gauge panel data source.",
 		MarkdownDescription: "Bar gauge panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/bar-gauge/) for more details.",
 
-		Blocks: map[string]tfsdk.Block{
+		Blocks: map[string]schema.Block{
 			"queries":   queryBlock(),
 			"field":     fieldBlock(),
 			"graph":     barGaugeGraphBlock(),
 			"overrides": fieldOverrideBlock(),
 		},
 
-		Attributes: map[string]tfsdk.Attribute{
+		Attributes: map[string]schema.Attribute{
 			"id":          idAttribute(),
 			"json":        jsonAttribute(),
 			"title":       titleAttribute(),
 			"description": descriptionAttribute(),
 		},
-	}, nil
+	}
 }
 
-func (d *BarGaugeDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *BarGaugeDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return

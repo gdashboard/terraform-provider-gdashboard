@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 )
@@ -96,168 +97,161 @@ type TimeseriesGraphOptions struct {
 	StackSeries       types.String `tfsdk:"stack_series"`
 }
 
-func (d *TimeseriesDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *TimeseriesDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_timeseries"
 }
 
-func timeseriesTooltipBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    1,
+func timeseriesTooltipBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "The tooltip visualization options.",
-		Attributes: map[string]tfsdk.Attribute{
-			"mode": {
-				Type:                types.StringType,
-				Required:            true,
-				Description:         "Choose the how to display the tooltip. The choices are: multi, single, hidden.",
-				MarkdownDescription: "Choose the how to display the tooltip. The choices are: `multi`, `single`, `hidden`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("multi", "single", "hidden"),
+		NestedObject: schema.NestedBlockObject{
+			Attributes: map[string]schema.Attribute{
+				"mode": schema.StringAttribute{
+					Required:            true,
+					Description:         "Choose the how to display the tooltip. The choices are: multi, single, hidden.",
+					MarkdownDescription: "Choose the how to display the tooltip. The choices are: `multi`, `single`, `hidden`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("multi", "single", "hidden"),
+					},
 				},
 			},
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
 		},
 	}
 }
 
-func timeseriesGraphBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    1,
+func timeseriesGraphBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "The visualization options.",
-		Attributes: map[string]tfsdk.Attribute{
-			"draw_style": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "Choose the visualization style. The choices are: line, bars, points.",
-				MarkdownDescription: "Choose the visualization style. The choices are: `line`, `bars`, `points`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("line", "bars", "points"),
+		NestedObject: schema.NestedBlockObject{
+			Attributes: map[string]schema.Attribute{
+				"draw_style": schema.StringAttribute{
+					Optional:            true,
+					Description:         "Choose the visualization style. The choices are: line, bars, points.",
+					MarkdownDescription: "Choose the visualization style. The choices are: `line`, `bars`, `points`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("line", "bars", "points"),
+					},
+				},
+				"line_interpolation": schema.StringAttribute{
+					Optional:            true,
+					Description:         "Choose how to interpolation the line. The choices are: linear, smooth, stepBefore, stepAfter.",
+					MarkdownDescription: "Choose how to interpolation the line. The choices are: `linear`, `smooth`, `stepBefore`, `stepAfter`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("linear", "smooth", "stepBefore", "stepAfter"),
+					},
+				},
+				"line_width": schema.Int64Attribute{
+					Optional:            true,
+					Description:         "The width of the line. Must be between 0 and 10 (inclusive).",
+					MarkdownDescription: "The width of the line. Must be between `0` and `10` (inclusive).",
+					Validators: []validator.Int64{
+						int64validator.Between(0, 10),
+					},
+				},
+				"fill_opacity": schema.Int64Attribute{
+					Optional:            true,
+					Description:         "The opacity of the filled areas. Must be between 0 and 100 (inclusive).",
+					MarkdownDescription: "The opacity of the filled areas. Must be between `0` and `100` (inclusive).",
+					Validators: []validator.Int64{
+						int64validator.Between(0, 100),
+					},
+				},
+				"gradient_mode": schema.StringAttribute{
+					Optional:            true,
+					Description:         "The gradient mode. The choices are: none, opacity, hue, scheme.",
+					MarkdownDescription: "The gradient mode. The choices are: `none`, `opacity`, `hue`, `scheme`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("none", "opacity", "hue", "scheme"),
+					},
+				},
+				"line_style": schema.StringAttribute{
+					Optional:            true,
+					Description:         "The style of the line. The choices are: solid, dash, dots.",
+					MarkdownDescription: "The style of the line. The choices are: `solid`, `dash`, `dots`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("solid", "dash", "dots"),
+					},
+				},
+				"span_nulls": schema.BoolAttribute{
+					Optional:    true,
+					Description: "Whether to ignore or replace null values with zeroes or not.",
+				},
+				"show_points": schema.StringAttribute{
+					Optional:            true,
+					Description:         "Choose how to display data points. The choices are: auto, never, always.",
+					MarkdownDescription: "Choose how to display data points. The choices are: `auto`, `never`, `always`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("auto", "never", "always"),
+					},
+				},
+				"point_size": schema.Int64Attribute{
+					Optional:            true,
+					Description:         "The size of the data point. Must be between 1 and 40 (inclusive).",
+					MarkdownDescription: "The size of the data point. Must be between `1` and `40` (inclusive).",
+					Validators: []validator.Int64{
+						int64validator.Between(1, 40),
+					},
+				},
+				"stack_series": schema.StringAttribute{
+					Optional:            true,
+					Description:         "Choose how to stack the series. The choices are: none, normal, percent.",
+					MarkdownDescription: "Choose how to stack the series. The choices are: `none`, `normal`, `percent`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("none", "normal", "percent"),
+					},
 				},
 			},
-			"line_interpolation": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "Choose how to interpolation the line. The choices are: linear, smooth, stepBefore, stepAfter.",
-				MarkdownDescription: "Choose how to interpolation the line. The choices are: `linear`, `smooth`, `stepBefore`, `stepAfter`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("linear", "smooth", "stepBefore", "stepAfter"),
-				},
-			},
-			"line_width": {
-				Type:                types.Int64Type,
-				Optional:            true,
-				Description:         "The width of the line. Must be between 0 and 10 (inclusive).",
-				MarkdownDescription: "The width of the line. Must be between `0` and `10` (inclusive).",
-				Validators: []tfsdk.AttributeValidator{
-					int64validator.Between(0, 10),
-				},
-			},
-			"fill_opacity": {
-				Type:                types.Int64Type,
-				Optional:            true,
-				Description:         "The opacity of the filled areas. Must be between 0 and 100 (inclusive).",
-				MarkdownDescription: "The opacity of the filled areas. Must be between `0` and `100` (inclusive).",
-				Validators: []tfsdk.AttributeValidator{
-					int64validator.Between(0, 100),
-				},
-			},
-			"gradient_mode": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "The gradient mode. The choices are: none, opacity, hue, scheme.",
-				MarkdownDescription: "The gradient mode. The choices are: `none`, `opacity`, `hue`, `scheme`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("none", "opacity", "hue", "scheme"),
-				},
-			},
-			"line_style": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "The style of the line. The choices are: solid, dash, dots.",
-				MarkdownDescription: "The style of the line. The choices are: `solid`, `dash`, `dots`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("solid", "dash", "dots"),
-				},
-			},
-			"span_nulls": {
-				Type:        types.BoolType,
-				Optional:    true,
-				Description: "Whether to ignore or replace null values with zeroes or not.",
-			},
-			"show_points": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "Choose how to display data points. The choices are: auto, never, always.",
-				MarkdownDescription: "Choose how to display data points. The choices are: `auto`, `never`, `always`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("auto", "never", "always"),
-				},
-			},
-			"point_size": {
-				Type:                types.Int64Type,
-				Optional:            true,
-				Description:         "The size of the data point. Must be between 1 and 40 (inclusive).",
-				MarkdownDescription: "The size of the data point. Must be between `1` and `40` (inclusive).",
-				Validators: []tfsdk.AttributeValidator{
-					int64validator.Between(1, 40),
-				},
-			},
-			"stack_series": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "Choose how to stack the series. The choices are: none, normal, percent.",
-				MarkdownDescription: "Choose how to stack the series. The choices are: `none`, `normal`, `percent`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("none", "normal", "percent"),
-				},
-			},
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
 		},
 	}
 }
 
-func timeseriesLegendBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    1,
+func timeseriesLegendBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "Legend options.",
-		Attributes: map[string]tfsdk.Attribute{
-			"calculations": {
-				Type:        types.ListType{ElemType: types.StringType},
-				Optional:    true,
-				Description: "Choose which of the standard calculations to show in the legend: min, max, mean, etc.",
-			},
-			"display_mode": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "Choose how to display the legend. The choices are: list, table, hidden.",
-				MarkdownDescription: "Choose how to display the legend. The choices are: `list`, `table`, `hidden`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("list", "table", "hidden"),
+		NestedObject: schema.NestedBlockObject{
+			Attributes: map[string]schema.Attribute{
+				"calculations": schema.ListAttribute{
+					ElementType: types.StringType,
+					Optional:    true,
+					Description: "Choose which of the standard calculations to show in the legend: min, max, mean, etc.",
+				},
+				"display_mode": schema.StringAttribute{
+					Optional:            true,
+					Description:         "Choose how to display the legend. The choices are: list, table, hidden.",
+					MarkdownDescription: "Choose how to display the legend. The choices are: `list`, `table`, `hidden`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("list", "table", "hidden"),
+					},
+				},
+				"placement": schema.StringAttribute{
+					Optional:            true,
+					Description:         "Choose where to display the legend. The choice are: bottom, right.",
+					MarkdownDescription: "Choose where to display the legend. The choice are: `bottom`, `right`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("bottom", "right"),
+					},
 				},
 			},
-			"placement": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "Choose where to display the legend. The choice are: bottom, right.",
-				MarkdownDescription: "Choose where to display the legend. The choice are: `bottom`, `right`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("bottom", "right"),
-				},
-			},
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
 		},
 	}
 }
 
-func (d *TimeseriesDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (d *TimeseriesDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		Description:         "Time series panel data source.",
 		MarkdownDescription: "Time series panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/time-series/).",
 
-		Blocks: map[string]tfsdk.Block{
+		Blocks: map[string]schema.Block{
 			"queries":   queryBlock(),
 			"legend":    timeseriesLegendBlock(),
 			"tooltip":   timeseriesTooltipBlock(),
@@ -267,16 +261,16 @@ func (d *TimeseriesDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 			"overrides": fieldOverrideBlock(),
 		},
 
-		Attributes: map[string]tfsdk.Attribute{
+		Attributes: map[string]schema.Attribute{
 			"id":          idAttribute(),
 			"json":        jsonAttribute(),
 			"title":       titleAttribute(),
 			"description": descriptionAttribute(),
 		},
-	}, nil
+	}
 }
 
-func (d *TimeseriesDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *TimeseriesDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return

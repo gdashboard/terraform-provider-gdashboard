@@ -4,17 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math"
-	"strconv"
-
-	"github.com/hashicorp/terraform-plugin-framework-validators/schemavalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
+	"math"
+	"strconv"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -96,218 +96,217 @@ type VariableConstant struct {
 	Hide  types.String `tfsdk:"hide"`
 }
 
-func (d *DashboardDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *DashboardDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_dashboard"
 }
 
-func dashboardTimeBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    1,
+func dashboardTimeBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "The default query time range.",
-		Attributes: map[string]tfsdk.Attribute{
-			"from": {
-				Type:        types.StringType,
-				Required:    true,
-				Description: "The start of the range.",
+		NestedObject: schema.NestedBlockObject{
+			Attributes: map[string]schema.Attribute{
+				"from": schema.StringAttribute{
+					Required:    true,
+					Description: "The start of the range.",
+				},
+				"to": schema.StringAttribute{
+					Required:    true,
+					Description: "The end of the range.",
+				},
 			},
-			"to": {
-				Type:        types.StringType,
-				Required:    true,
-				Description: "The end of the range.",
-			},
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
 		},
 	}
 }
 
-func dashboardEditableAttribute() tfsdk.Attribute {
-	return tfsdk.Attribute{
-		Type:        types.BoolType,
+func dashboardEditableAttribute() schema.Attribute {
+	return schema.BoolAttribute{
 		Optional:    true,
 		Description: "Whether to make the dashboard editable or not.",
 	}
 }
 
-func dashboardStyleAttribute() tfsdk.Attribute {
-	return tfsdk.Attribute{
-		Type:                types.StringType,
+func dashboardStyleAttribute() schema.Attribute {
+	return schema.StringAttribute{
 		Optional:            true,
 		Description:         "The dashboard style. The choices are: dark, light.",
 		MarkdownDescription: "The dashboard style. The choices are: `dark`, `light`.",
-		Validators: []tfsdk.AttributeValidator{
+		Validators: []validator.String{
 			stringvalidator.OneOf("dark", "light"),
 		},
 	}
 }
 
-func dashboardGraphTooltipAttribute() tfsdk.Attribute {
-	return tfsdk.Attribute{
-		Type:                types.StringType,
+func dashboardGraphTooltipAttribute() schema.Attribute {
+	return schema.StringAttribute{
 		Optional:            true,
 		Description:         "Controls tooltip and hover highlight behavior across different panels: default, shared-crosshair, shared-tooltip.",
 		MarkdownDescription: "Controls tooltip and hover highlight behavior across different panels: `default`, `shared-crosshair`, `shared-tooltip`.",
-		Validators: []tfsdk.AttributeValidator{
+		Validators: []validator.String{
 			stringvalidator.OneOf("default", "shared-crosshair", "shared-tooltip"),
 		},
 	}
 }
 
-func (d *DashboardDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		Description:         "Dashboard data source.",
 		MarkdownDescription: "Dashboard data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/dashboards/use-dashboards/) for more details.",
 
-		Blocks: map[string]tfsdk.Block{
+		Blocks: map[string]schema.Block{
 			"time": dashboardTimeBlock(),
-			"variables": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MaxItems:    10,
+			"variables": schema.ListNestedBlock{
 				Description: "The variables.",
-				Blocks: map[string]tfsdk.Block{
-					"custom": {
-						NestingMode: tfsdk.BlockNestingModeList,
-						MinItems:    1,
-						MaxItems:    10,
-						Description: "The variable options defined as a comma-separated list.",
-						Blocks: map[string]tfsdk.Block{
-							"option": {
-								NestingMode: tfsdk.BlockNestingModeList,
-								MinItems:    1,
-								MaxItems:    10,
-								Description: "The option entry.",
-								Attributes: map[string]tfsdk.Attribute{
-									"text": {
-										Type:        types.StringType,
-										Required:    true,
-										Description: "The text (label) of the entry.",
-									},
-									"value": {
-										Type:        types.StringType,
-										Required:    true,
-										Description: "The value of the entry.",
-									},
-									"selected": {
-										Type:        types.BoolType,
-										Optional:    true,
-										Description: "Whether to mark the option as selected or not.",
-									},
-								},
-							},
-						},
-						Attributes: map[string]tfsdk.Attribute{
-							"name": {
-								Type:        types.StringType,
-								Required:    true,
-								Description: "The name of the variable.",
-							},
-							"hide": {
-								Type:                types.StringType,
-								Optional:            true,
-								Description:         "Which variable information to hide. The choices are: label, variable.",
-								MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
-								Validators: []tfsdk.AttributeValidator{
-									stringvalidator.OneOf("label", "variable"),
-								},
-							},
-						},
-					},
-					"const": {
-						NestingMode: tfsdk.BlockNestingModeList,
-						MaxItems:    5,
-						Description: "The constant variable.",
-						Attributes: map[string]tfsdk.Attribute{
-							"name": {
-								Type:        types.StringType,
-								Description: "The name of the variable.",
-								Required:    true,
-							},
-							"value": {
-								Type:        types.StringType,
-								Description: "The value of the variable.",
-								Required:    true,
-							},
-							"hide": {
-								Type:                types.StringType,
-								Optional:            true,
-								Description:         "Which variable information to hide. The choices are: label, variable.",
-								MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
-								Validators: []tfsdk.AttributeValidator{
-									stringvalidator.OneOf("label", "variable"),
-								},
-							},
-						},
-					},
-				},
-			},
-			"layout": {
-				NestingMode: tfsdk.BlockNestingModeSingle,
-				Description: "The layout of the dashboard.",
-				Blocks: map[string]tfsdk.Block{
-					"row": {
-						NestingMode: tfsdk.BlockNestingModeList,
-						MaxItems:    40,
-						Description: "The row within the dashboard.",
-						Blocks: map[string]tfsdk.Block{
-							"panel": {
-								MaxItems:    20,
-								NestingMode: tfsdk.BlockNestingModeList,
-								Description: "The definition of the panel within the row.",
-								Attributes: map[string]tfsdk.Attribute{
-									"size": {
-										Description: "The size of the panel.",
-										Required:    true,
-										Attributes: tfsdk.SingleNestedAttributes(
-											map[string]tfsdk.Attribute{
-												"height": {
-													Type:        types.Int64Type,
+				NestedObject: schema.NestedBlockObject{
+					Blocks: map[string]schema.Block{
+						"custom": schema.ListNestedBlock{
+							Description: "The variable options defined as a comma-separated list.",
+
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"option": schema.ListNestedBlock{
+										Description: "The option entry.",
+										NestedObject: schema.NestedBlockObject{
+											Attributes: map[string]schema.Attribute{
+												"text": schema.StringAttribute{
 													Required:    true,
-													Description: "The height of the panel.",
+													Description: "The text (label) of the entry.",
 												},
-												"width": {
-													Type:        types.Int64Type,
+												"value": schema.StringAttribute{
 													Required:    true,
-													Description: "The width of the panel.",
+													Description: "The value of the entry.",
+												},
+												"selected": schema.BoolAttribute{
+													Optional:    true,
+													Description: "Whether to mark the option as selected or not.",
 												},
 											},
-										),
-									},
-									"source": {
-										Type:        types.StringType,
-										Description: "The JSON source of the panel.",
-										Required:    true,
+										},
+										Validators: []validator.List{
+											listvalidator.SizeAtLeast(1),
+											listvalidator.SizeAtMost(10),
+										},
 									},
 								},
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										Required:    true,
+										Description: "The name of the variable.",
+									},
+									"hide": schema.StringAttribute{
+										Optional:            true,
+										Description:         "Which variable information to hide. The choices are: label, variable.",
+										MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
+										Validators: []validator.String{
+											stringvalidator.OneOf("label", "variable"),
+										},
+									},
+								},
+							},
+
+							Validators: []validator.List{
+								listvalidator.SizeAtLeast(1),
+								listvalidator.SizeAtMost(10),
+							},
+						},
+						"const": schema.ListNestedBlock{
+							Description: "The constant variable.",
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										Description: "The name of the variable.",
+										Required:    true,
+									},
+									"value": schema.StringAttribute{
+										Description: "The value of the variable.",
+										Required:    true,
+									},
+									"hide": schema.StringAttribute{
+										Optional:            true,
+										Description:         "Which variable information to hide. The choices are: label, variable.",
+										MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
+										Validators: []validator.String{
+											stringvalidator.OneOf("label", "variable"),
+										},
+									},
+								},
+							},
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(5),
 							},
 						},
 					},
 				},
-				Validators: []tfsdk.AttributeValidator{
-					schemavalidator.AtLeastOneOf(
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(10),
+				},
+			},
+			"layout": schema.SingleNestedBlock{
+				Description: "The layout of the dashboard.",
+				Blocks: map[string]schema.Block{
+					"row": schema.ListNestedBlock{
+						Description: "The row within the dashboard.",
+						NestedObject: schema.NestedBlockObject{
+							Blocks: map[string]schema.Block{
+								"panel": schema.ListNestedBlock{
+									Description: "The definition of the panel within the row.",
+									NestedObject: schema.NestedBlockObject{
+										Attributes: map[string]schema.Attribute{
+											"size": schema.SingleNestedAttribute{
+												Description: "The size of the panel.",
+												Required:    true,
+												Attributes: map[string]schema.Attribute{
+													"height": schema.Int64Attribute{
+														Required:    true,
+														Description: "The height of the panel.",
+													},
+													"width": schema.Int64Attribute{
+														Required:    true,
+														Description: "The width of the panel.",
+													},
+												},
+											},
+											"source": schema.StringAttribute{
+												Description: "The JSON source of the panel.",
+												Required:    true,
+											},
+										},
+									},
+									Validators: []validator.List{
+										listvalidator.SizeAtMost(20),
+									},
+								},
+							},
+						},
+						Validators: []validator.List{
+							listvalidator.SizeAtMost(40),
+						},
+					},
+				},
+				Validators: []validator.Object{
+					objectvalidator.AtLeastOneOf(
 						path.MatchRoot("layout"),
 					),
 				},
 			},
 		},
 
-		Attributes: map[string]tfsdk.Attribute{
-			"id": {
-				Type:     types.StringType,
+		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
 				Computed: true,
 			},
-			"json": {
-				Type:        types.StringType,
+			"json": schema.StringAttribute{
 				Computed:    true,
 				Description: "The Grafana-API-compatible JSON of this panel.",
 			},
-			"title": {
-				Type:        types.StringType,
+			"title": schema.StringAttribute{
 				Required:    true,
 				Description: "The title of the dashboard.",
 			},
-			"uid": {
-				Type:        types.StringType,
+			"uid": schema.StringAttribute{
 				Optional:    true,
 				Description: "The UID of the dashboard.",
 			},
@@ -315,10 +314,10 @@ func (d *DashboardDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag
 			"style":         dashboardStyleAttribute(),
 			"graph_tooltip": dashboardGraphTooltipAttribute(),
 		},
-	}, nil
+	}
 }
 
-func (d *DashboardDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *DashboardDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return

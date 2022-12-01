@@ -2,10 +2,12 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/schemavalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 	"hash/crc32"
@@ -244,634 +246,623 @@ type CloudWatchDimension struct {
 	Value types.String `tfsdk:"value"`
 }
 
-func axisBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    1,
+func axisBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "Axis display options.",
-		Blocks: map[string]tfsdk.Block{
-			"scale": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MinItems:    0,
-				MaxItems:    1,
-				Description: "Can be used to configure the scale of the y-axis.",
-				MarkdownDescription: "Can be used to configure the scale of the y-axis. " +
-					"Another way visualize series that differ by orders of magnitude is to use a logarithmic scales. " +
-					"This is really useful for data usage or latency measurements. " +
-					"The goal here is to avoid one series dominating and delegating all the others to the bottom of the graph.",
-				Attributes: map[string]tfsdk.Attribute{
-					"type": {
-						Type:                types.StringType,
-						Required:            true,
-						Description:         "The type of the scale. The choices are: linear, log.",
-						MarkdownDescription: "The type of the scale. The choices are: `linear`, `log`.",
-						Validators: []tfsdk.AttributeValidator{
-							stringvalidator.OneOf("linear", "log"),
+		NestedObject: schema.NestedBlockObject{
+			Blocks: map[string]schema.Block{
+				"scale": schema.ListNestedBlock{
+					Description: "Can be used to configure the scale of the y-axis.",
+					MarkdownDescription: "Can be used to configure the scale of the y-axis. " +
+						"Another way visualize series that differ by orders of magnitude is to use a logarithmic scales. " +
+						"This is really useful for data usage or latency measurements. " +
+						"The goal here is to avoid one series dominating and delegating all the others to the bottom of the graph.",
+					NestedObject: schema.NestedBlockObject{
+						Attributes: map[string]schema.Attribute{
+							"type": schema.StringAttribute{
+								Required:            true,
+								Description:         "The type of the scale. The choices are: linear, log.",
+								MarkdownDescription: "The type of the scale. The choices are: `linear`, `log`.",
+								Validators: []validator.String{
+									stringvalidator.OneOf("linear", "log"),
+								},
+							},
+							"log": schema.Int64Attribute{
+								Optional:            true,
+								Description:         "The power of the logarithmic scale. The choices are: 2, 10.",
+								MarkdownDescription: "The power of the logarithmic scale. The choices are: `2`, `10`.",
+								Validators: []validator.Int64{
+									int64validator.OneOf(2, 10),
+								},
+							},
 						},
 					},
-					"log": {
-						Type:                types.Int64Type,
-						Optional:            true,
-						Description:         "The power of the logarithmic scale. The choices are: 2, 10.",
-						MarkdownDescription: "The power of the logarithmic scale. The choices are: `2`, `10`.",
-						Validators: []tfsdk.AttributeValidator{
-							int64validator.OneOf(2, 10),
-						},
+					Validators: []validator.List{
+						listvalidator.SizeAtMost(1),
 					},
 				},
+			},
+			Attributes: map[string]schema.Attribute{
+				"label": schema.StringAttribute{
+					Description: "The custom text label for the y-axis.",
+					Optional:    true,
+				},
+				"placement": schema.StringAttribute{
+					Optional:            true,
+					Description:         "The placement of the y-axis. The choices are: auto, left, right, hidden.",
+					MarkdownDescription: "The placement of the y-axis. The choices are: `auto`, `left`, `right`, `hidden`.",
+					Validators: []validator.String{
+						stringvalidator.OneOf("auto", "left", "right", "hidden"),
+					},
+				},
+				"soft_min": schema.Int64Attribute{
+					Optional:    true,
+					Description: "The soft minimum of y-axis.",
+					MarkdownDescription: "The soft minimum of y-axis. " +
+						"By default, the Grafana workspace sets the range for the y-axis automatically based on the data." +
+						"The `soft_min` setting can prevent blips from appearing as mountains when the data is mostly flat, " +
+						"and hard min or max derived from standard min and max field options can prevent intermittent spikes " +
+						"from flattening useful detail by clipping the spikes past a defined point.",
+				},
+				"soft_max": schema.Int64Attribute{
+					Optional:    true,
+					Description: "The soft maximum of y-axis.",
+					MarkdownDescription: "The soft maximum of y-axis. " +
+						"By default, the Grafana workspace sets the range for the y-axis automatically based on the data." +
+						"The `soft_max` setting can prevent blips from appearing as mountains when the data is mostly flat, " +
+						"and hard min or max derived from standard min and max field options can prevent intermittent spikes " +
+						"from flattening useful detail by clipping the spikes past a defined point.",
+				},
+				/*"width": {
+					Type:     types.Int64Type,
+					Optional: true,
+					Description: "The fixed width of the y-axis.",
+					MarkdownDescription: "The fixed width of the y-axis. By default, the Grafana workspace dynamically calculates the axis width. " +
+						"By setting the width of the axis, data whose axes types are different can share the same display proportions. " +
+						"This makes it easier to compare more than one graph’s worth of data because the axes are not shifted or stretched within visual proximity of each other.",
+				},*/
 			},
 		},
-		Attributes: map[string]tfsdk.Attribute{
-			"label": {
-				Type:        types.StringType,
-				Description: "The custom text label for the y-axis.",
-				Optional:    true,
-			},
-			"placement": {
-				Type:                types.StringType,
-				Optional:            true,
-				Description:         "The placement of the y-axis. The choices are: auto, left, right, hidden.",
-				MarkdownDescription: "The placement of the y-axis. The choices are: `auto`, `left`, `right`, `hidden`.",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf("auto", "left", "right", "hidden"),
-				},
-			},
-			"soft_min": {
-				Type:        types.Int64Type,
-				Optional:    true,
-				Description: "The soft minimum of y-axis.",
-				MarkdownDescription: "The soft minimum of y-axis. " +
-					"By default, the Grafana workspace sets the range for the y-axis automatically based on the data." +
-					"The `soft_min` setting can prevent blips from appearing as mountains when the data is mostly flat, " +
-					"and hard min or max derived from standard min and max field options can prevent intermittent spikes " +
-					"from flattening useful detail by clipping the spikes past a defined point.",
-			},
-			"soft_max": {
-				Type:        types.Int64Type,
-				Optional:    true,
-				Description: "The soft maximum of y-axis.",
-				MarkdownDescription: "The soft maximum of y-axis. " +
-					"By default, the Grafana workspace sets the range for the y-axis automatically based on the data." +
-					"The `soft_max` setting can prevent blips from appearing as mountains when the data is mostly flat, " +
-					"and hard min or max derived from standard min and max field options can prevent intermittent spikes " +
-					"from flattening useful detail by clipping the spikes past a defined point.",
-			},
-			/*"width": {
-				Type:     types.Int64Type,
-				Optional: true,
-				Description: "The fixed width of the y-axis.",
-				MarkdownDescription: "The fixed width of the y-axis. By default, the Grafana workspace dynamically calculates the axis width. " +
-					"By setting the width of the axis, data whose axes types are different can share the same display proportions. " +
-					"This makes it easier to compare more than one graph’s worth of data because the axes are not shifted or stretched within visual proximity of each other.",
-			},*/
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
 		},
 	}
 }
 
-func fieldBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    1,
+func fieldBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "The customization of field options.",
-		Blocks: map[string]tfsdk.Block{
-			"color": {
-				NestingMode:         tfsdk.BlockNestingModeList,
-				MinItems:            0,
-				MaxItems:            1,
-				Description:         "Defines how Grafana colors series or fields.",
-				MarkdownDescription: "Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization.",
-				Attributes: map[string]tfsdk.Attribute{
-					"mode": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The colorization mode.",
-						MarkdownDescription: "The colorization mode. The most popular options:\n" +
-							"1) `fixed` - specific color set by using the value of `fixed_color`.\n" +
-							"2) `thresholds` - a color is derived from the matching threshold. This is useful for gauges, stat, and table visualizations.\n" +
-							"3) `palette-classic` - a color is derived from the matching threshold using the classic color palette.",
-						Validators: []tfsdk.AttributeValidator{
-							stringvalidator.OneOf(
-								"fixed", "thresholds", "palette-classic",
-								"continuous-GrYlRd", "continuous-RdYlGr", "continuous-BlYlRd", "continuous-YlRd", "continuous-BlPu", "continuous-YlBl",
-								"continuous-blues", "continuous-reds", "continuous-greens", "continuous-purples",
-							),
-						},
-					},
-					"fixed_color": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The series to use to define the color. This is useful for graphs and pie charts, for example.",
-						Validators: []tfsdk.AttributeValidator{
-							schemavalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("mode")), // todo validate mode == fixed
-						},
-					},
-					"series_by": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The series to use to define the color. This is useful for graphs and pie charts, for example.",
-						Validators: []tfsdk.AttributeValidator{
-							schemavalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("mode")), // todo validate mode == fixed
-						},
-					},
-				},
-			},
-			"thresholds": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MinItems:    0,
-				MaxItems:    1,
-				Description: "Thresholds set the color of the value text depending on conditions that you define.",
-				Blocks: map[string]tfsdk.Block{
-					"step": {
-						NestingMode: tfsdk.BlockNestingModeList,
-						MaxItems:    20,
-						Description: "The threshold steps.",
-						Attributes: map[string]tfsdk.Attribute{
-							"color": {
-								Type:        types.StringType,
-								Required:    true,
-								Description: "The color for the matching values.",
-							},
-							"value": {
-								Type:        types.Float64Type,
+		NestedObject: schema.NestedBlockObject{
+
+			Blocks: map[string]schema.Block{
+				"color": schema.ListNestedBlock{
+					Description:         "Defines how Grafana colors series or fields.",
+					MarkdownDescription: "Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization.",
+					NestedObject: schema.NestedBlockObject{
+						Attributes: map[string]schema.Attribute{
+							"mode": schema.StringAttribute{
 								Optional:    true,
-								Description: "The value to match. Either percentage or absolute. Depends on the mode.",
-								MarkdownDescription: "The value to match. Either percentage or absolute. Depends on the mode. " +
-									"The step without `value` indicates the base color. It is generally the good color.",
+								Description: "The colorization mode.",
+								MarkdownDescription: "The colorization mode. The most popular options:\n" +
+									"1) `fixed` - specific color set by using the value of `fixed_color`.\n" +
+									"2) `thresholds` - a color is derived from the matching threshold. This is useful for gauges, stat, and table visualizations.\n" +
+									"3) `palette-classic` - a color is derived from the matching threshold using the classic color palette.",
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"fixed", "thresholds", "palette-classic",
+										"continuous-GrYlRd", "continuous-RdYlGr", "continuous-BlYlRd", "continuous-YlRd", "continuous-BlPu", "continuous-YlBl",
+										"continuous-blues", "continuous-reds", "continuous-greens", "continuous-purples",
+									),
+								},
+							},
+							"fixed_color": schema.StringAttribute{
+								Optional:    true,
+								Description: "The series to use to define the color. This is useful for graphs and pie charts, for example.",
+							},
+							"series_by": schema.StringAttribute{
+								Optional:    true,
+								Description: "The series to use to define the color. This is useful for graphs and pie charts, for example.",
+							},
+						},
+						/* when fixed_color or series_by is present, mode must be present too
+
+						Validators: []validator.Object{
+							objectvalidator.
+						},*/
+					},
+					Validators: []validator.List{
+						listvalidator.SizeAtMost(1),
+					},
+				},
+				"thresholds": schema.ListNestedBlock{
+					Description: "Thresholds set the color of the value text depending on conditions that you define.",
+					NestedObject: schema.NestedBlockObject{
+						Blocks: map[string]schema.Block{
+							"step": schema.ListNestedBlock{
+								Description: "The threshold steps.",
+								NestedObject: schema.NestedBlockObject{
+									Attributes: map[string]schema.Attribute{
+										"color": schema.StringAttribute{
+											Required:    true,
+											Description: "The color for the matching values.",
+										},
+										"value": schema.Float64Attribute{
+											Optional:    true,
+											Description: "The value to match. Either percentage or absolute. Depends on the mode.",
+											MarkdownDescription: "The value to match. Either percentage or absolute. Depends on the mode. " +
+												"The step without `value` indicates the base color. It is generally the good color.",
+										},
+									},
+								},
+								Validators: []validator.List{
+									listvalidator.SizeAtMost(20),
+								},
+							},
+						},
+						Attributes: map[string]schema.Attribute{
+							"mode": schema.StringAttribute{
+								Optional:    true,
+								Description: "The threshold mode. The choices are: absolute, percentage.",
+								MarkdownDescription: "The threshold mode. The choices are:\n" +
+									"1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. \n" +
+									"2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.",
+								Validators: []validator.String{
+									stringvalidator.OneOf("absolute", "percentage"),
+								},
 							},
 						},
 					},
-				},
-				Attributes: map[string]tfsdk.Attribute{
-					"mode": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The threshold mode. The choices are: absolute, percentage.",
-						MarkdownDescription: "The threshold mode. The choices are:\n" +
-							"1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. \n" +
-							"2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.",
-						Validators: []tfsdk.AttributeValidator{
-							stringvalidator.OneOf("absolute", "percentage"),
-						},
+					Validators: []validator.List{
+						listvalidator.SizeAtMost(1),
 					},
 				},
+				"mappings": mappingsBlock(),
 			},
-			"mappings": mappingsBlock(),
-		},
-		Attributes: map[string]tfsdk.Attribute{
-			"unit": {
-				Type:        types.StringType,
-				Optional:    true,
-				Description: "The unit the field should use.",
-			},
-			"decimals": {
-				Type:                types.Int64Type,
-				Optional:            true,
-				Description:         "The number of decimals to include when rendering a value. Must be between 0 and 20 (inclusive).",
-				MarkdownDescription: "The number of decimals to include when rendering a value. Must be between `0` and `20` (inclusive).",
-				Validators: []tfsdk.AttributeValidator{
-					int64validator.Between(0, 20),
+			Attributes: map[string]schema.Attribute{
+				"unit": schema.StringAttribute{
+					Optional:    true,
+					Description: "The unit the field should use.",
+				},
+				"decimals": schema.Int64Attribute{
+					Optional:            true,
+					Description:         "The number of decimals to include when rendering a value. Must be between 0 and 20 (inclusive).",
+					MarkdownDescription: "The number of decimals to include when rendering a value. Must be between `0` and `20` (inclusive).",
+					Validators: []validator.Int64{
+						int64validator.Between(0, 20),
+					},
+				},
+				"min": schema.Float64Attribute{
+					Optional:    true,
+					Description: "The minimum value used in percentage threshold calculations.",
+				},
+				"max": schema.Float64Attribute{
+					Optional:    true,
+					Description: "The maximum value used in percentage threshold calculations.",
+				},
+				"no_value": schema.Float64Attribute{
+					Optional:    true,
+					Description: "The value to display if the field value is empty or null.",
 				},
 			},
-			"min": {
-				Type:        types.Float64Type,
-				Optional:    true,
-				Description: "The minimum value used in percentage threshold calculations.",
-			},
-			"max": {
-				Type:        types.Float64Type,
-				Optional:    true,
-				Description: "The maximum value used in percentage threshold calculations.",
-			},
-			"no_value": {
-				Type:        types.Float64Type,
-				Optional:    true,
-				Description: "The value to display if the field value is empty or null.",
-			},
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
 		},
 	}
 }
 
-func reduceOptionsBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    1,
+func reduceOptionsBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "Value reduce or calculation options.",
-		Attributes: map[string]tfsdk.Attribute{
-			"values": {
-				Type:        types.BoolType,
-				Optional:    true,
-				Description: "Whether to calculate a single value per column or series or show each row.",
-			},
-			"fields": {
-				Type:        types.StringType,
-				Optional:    true,
-				Description: "The fields that should be included in the panel.", // todo schema validation `values = true`
-			},
-			"limit": {
-				Type:        types.Int64Type,
-				Optional:    true,
-				Description: "The max number of rows to display.", // todo schema validation `values = true`
-			},
-			"calculation": { // todo schema validation `values = false`
-				Type:     types.StringType,
-				Optional: true,
-				Description: "A reducer function or calculation. The choices are: " +
-					"lastNotNull, last, firstNotNull, first, min, max, mean, sum, count, range, " +
-					"delta, step, diff, logmin, allIsZero, allIsNull, changeCount, distinctCount, diffperc, allValues, uniqueValues",
-				MarkdownDescription: "A reducer function or calculation. The choices are: " +
-					"`lastNotNull`, `last`, `firstNotNull`, `first`, `min`, `max`, `mean`, `sum`, `count`, `range`, " +
-					"`delta`, `step`, `diff`, `logmin`, `allIsZero`, `allIsNull`, `changeCount`, `distinctCount`, `diffperc`, `allValues`, `uniqueValues`",
-				Validators: []tfsdk.AttributeValidator{
-					stringvalidator.OneOf(
-						"lastNotNull", "last", "firstNotNull", "first", "min", "max", "mean", "sum", // total
-						"count", "range", "delta", "step", "diff", "logmin", // min above zero
-						"allIsZero", "allIsNull", "changeCount", "distinctCount", "diffperc", "allValues", "uniqueValues",
-					),
+		NestedObject: schema.NestedBlockObject{
+			Attributes: map[string]schema.Attribute{
+				"values": schema.BoolAttribute{
+					Optional:    true,
+					Description: "Whether to calculate a single value per column or series or show each row.",
+				},
+				"fields": schema.StringAttribute{
+					Optional:    true,
+					Description: "The fields that should be included in the panel.", // todo schema validation `values = true`
+				},
+				"limit": schema.Int64Attribute{
+					Optional:    true,
+					Description: "The max number of rows to display.", // todo schema validation `values = true`
+				},
+				"calculation": schema.StringAttribute{ // todo schema validation `values = false`
+					Optional: true,
+					Description: "A reducer function or calculation. The choices are: " +
+						"lastNotNull, last, firstNotNull, first, min, max, mean, sum, count, range, " +
+						"delta, step, diff, logmin, allIsZero, allIsNull, changeCount, distinctCount, diffperc, allValues, uniqueValues",
+					MarkdownDescription: "A reducer function or calculation. The choices are: " +
+						"`lastNotNull`, `last`, `firstNotNull`, `first`, `min`, `max`, `mean`, `sum`, `count`, `range`, " +
+						"`delta`, `step`, `diff`, `logmin`, `allIsZero`, `allIsNull`, `changeCount`, `distinctCount`, `diffperc`, `allValues`, `uniqueValues`",
+					Validators: []validator.String{
+						stringvalidator.OneOf(
+							"lastNotNull", "last", "firstNotNull", "first", "min", "max", "mean", "sum", // total
+							"count", "range", "delta", "step", "diff", "logmin", // min above zero
+							"allIsZero", "allIsNull", "changeCount", "distinctCount", "diffperc", "allValues", "uniqueValues",
+						),
+					},
 				},
 			},
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
 		},
 	}
 }
 
-func textSizeBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    1,
+func textSizeBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "The size of the text elements on the panel.",
-		Attributes: map[string]tfsdk.Attribute{
-			"title": {
-				Type:                types.Int64Type,
-				Optional:            true,
-				Description:         "The size of the title. Must be between 1 and 100 (inclusive).",
-				MarkdownDescription: "The size of the title. Must be between `1` and `100` (inclusive).",
-				Validators: []tfsdk.AttributeValidator{
-					int64validator.Between(1, 100),
-					schemavalidator.AtLeastOneOf(
-						path.MatchRelative().AtParent().AtName("title"),
-						path.MatchRelative().AtParent().AtName("value"),
-					),
+		NestedObject: schema.NestedBlockObject{
+			Attributes: map[string]schema.Attribute{
+				"title": schema.Int64Attribute{
+					Optional:            true,
+					Description:         "The size of the title. Must be between 1 and 100 (inclusive).",
+					MarkdownDescription: "The size of the title. Must be between `1` and `100` (inclusive).",
+					Validators: []validator.Int64{
+						int64validator.Between(1, 100),
+					},
+				},
+				"value": schema.Int64Attribute{
+					Optional:            true,
+					Description:         "The size of the value. Must be between 1 and 100 (inclusive).",
+					MarkdownDescription: "The size of the value. Must be between `1` and `100` (inclusive).",
+					Validators: []validator.Int64{
+						int64validator.Between(1, 100),
+					},
 				},
 			},
-			"value": {
-				Type:                types.Int64Type,
-				Optional:            true,
-				Description:         "The size of the value. Must be between 1 and 100 (inclusive).",
-				MarkdownDescription: "The size of the value. Must be between `1` and `100` (inclusive).",
-				Validators: []tfsdk.AttributeValidator{
-					int64validator.Between(1, 100),
-					schemavalidator.AtLeastOneOf(
-						path.MatchRelative().AtParent().AtName("title"),
-						path.MatchRelative().AtParent().AtName("value"),
-					),
-				},
+			Validators: []validator.Object{
+				objectvalidator.AtLeastOneOf(
+					path.MatchRelative().AtParent().AtName("title"),
+					path.MatchRelative().AtParent().AtName("value"),
+				),
 			},
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
 		},
 	}
 }
 
-func queryBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MaxItems:    3,
+func queryBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "The queries to collect values from data sources.",
-		Blocks: map[string]tfsdk.Block{
-			"prometheus": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MaxItems:    5,
-				Description: "The Prometheus query.",
-				Attributes: map[string]tfsdk.Attribute{
-					"uid": {
-						Type:        types.StringType,
-						Description: "The UID of a Prometheus DataSource to use in this query.",
-						Required:    true,
-					},
-					"expr": {
-						Type:        types.StringType,
-						Required:    true,
-						Description: "The query expression.",
-					},
-					"instant": {
-						Type:        types.BoolType,
-						Optional:    true,
-						Description: "Whether to return the latest value from the time series or not.",
-					},
-					"ref_id": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The ID of the query. The ID can be used to reference queries in math expressions.",
-					},
-					"format": {
-						Type:                types.StringType,
-						Optional:            true,
-						Description:         "The query format. The choices are: time_series, table, heatmap.",
-						MarkdownDescription: "The query format. The choices are: `time_series`, `table`, `heatmap`.",
-						Validators: []tfsdk.AttributeValidator{
-							stringvalidator.OneOf("time_series", "table", "heatmap"),
-						},
-					},
-					"min_interval": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The lower bounds on the interval between data points.",
-					},
-					"legend_format": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The legend name.",
-					},
-				},
-			},
-			"cloudwatch": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MaxItems:    5,
-				Description: "The CloudWatch query.",
-				Blocks: map[string]tfsdk.Block{
-					"dimension": {
-						NestingMode: tfsdk.BlockNestingModeList,
-						MaxItems:    5,
-						Description: "The dimension to filter the metric with.",
-						Attributes: map[string]tfsdk.Attribute{
-							"name": {
-								Type:        types.StringType,
+		NestedObject: schema.NestedBlockObject{
+			Blocks: map[string]schema.Block{
+				"prometheus": schema.ListNestedBlock{
+					Description: "The Prometheus query.",
+					NestedObject: schema.NestedBlockObject{
+						Attributes: map[string]schema.Attribute{
+							"uid": schema.StringAttribute{
+								Description: "The UID of a Prometheus DataSource to use in this query.",
 								Required:    true,
-								Description: "The name of the dimension.",
 							},
-							"value": {
-								Type:        types.StringType,
+							"expr": schema.StringAttribute{
 								Required:    true,
-								Description: "The value of the dimension.",
+								Description: "The query expression.",
+							},
+							"instant": schema.BoolAttribute{
+								Optional:    true,
+								Description: "Whether to return the latest value from the time series or not.",
+							},
+							"ref_id": schema.StringAttribute{
+								Optional:    true,
+								Description: "The ID of the query. The ID can be used to reference queries in math expressions.",
+							},
+							"format": schema.StringAttribute{
+								Optional:            true,
+								Description:         "The query format. The choices are: time_series, table, heatmap.",
+								MarkdownDescription: "The query format. The choices are: `time_series`, `table`, `heatmap`.",
+								Validators: []validator.String{
+									stringvalidator.OneOf("time_series", "table", "heatmap"),
+								},
+							},
+							"min_interval": schema.StringAttribute{
+								Optional:    true,
+								Description: "The lower bounds on the interval between data points.",
+							},
+							"legend_format": schema.StringAttribute{
+								Optional:    true,
+								Description: "The legend name.",
 							},
 						},
 					},
+					Validators: []validator.List{
+						listvalidator.SizeAtMost(5),
+					},
 				},
-				Attributes: map[string]tfsdk.Attribute{
-					"uid": {
-						Type:        types.StringType,
-						Description: "The UID of a CloudWatch DataSource to use in this query.",
-						Required:    true,
+				"cloudwatch": schema.ListNestedBlock{
+					Description: "The CloudWatch query.",
+					NestedObject: schema.NestedBlockObject{
+						Blocks: map[string]schema.Block{
+							"dimension": schema.ListNestedBlock{
+								Description: "The dimension to filter the metric with.",
+								NestedObject: schema.NestedBlockObject{
+									Attributes: map[string]schema.Attribute{
+										"name": schema.StringAttribute{
+											Required:    true,
+											Description: "The name of the dimension.",
+										},
+										"value": schema.StringAttribute{
+											Required:    true,
+											Description: "The value of the dimension.",
+										},
+									},
+								},
+								Validators: []validator.List{
+									listvalidator.SizeAtMost(5),
+								},
+							},
+						},
+						Attributes: map[string]schema.Attribute{
+							"uid": schema.StringAttribute{
+								Description: "The UID of a CloudWatch DataSource to use in this query.",
+								Required:    true,
+							},
+							"namespace": schema.StringAttribute{
+								Required:    true,
+								Description: "The namespace to query the metrics from.",
+							},
+							"metric_name": schema.StringAttribute{
+								Required:            true,
+								Description:         "The name of the metric to query.",
+								MarkdownDescription: "The name of the metric to query. Example: `CPUUtilization`",
+							},
+							"statistic": schema.StringAttribute{
+								Required:    true,
+								Description: "The calculation to apply to the time series.",
+							},
+							"match_exact": schema.BoolAttribute{
+								Optional:            true,
+								Description:         "If enabled you also need to specify all the dimensions of the metric you’re querying.",
+								MarkdownDescription: "If enabled you also need to specify **all** the dimensions of the metric you’re querying.",
+							},
+							"region": schema.StringAttribute{
+								Optional:    true,
+								Description: "The AWS region to query the metrics from.",
+							},
+							"ref_id": schema.StringAttribute{
+								Optional:    true,
+								Description: "The ID of the query. The ID can be used to reference queries in math expressions.",
+							},
+							"period": schema.StringAttribute{
+								Optional:    true,
+								Description: "The minimum interval between points in seconds.",
+							},
+							"label": schema.StringAttribute{
+								Optional:    true,
+								Description: "The legend name.",
+							},
+						},
 					},
-					"namespace": {
-						Type:        types.StringType,
-						Required:    true,
-						Description: "The namespace to query the metrics from.",
-					},
-					"metric_name": {
-						Type:                types.StringType,
-						Required:            true,
-						Description:         "The name of the metric to query.",
-						MarkdownDescription: "The name of the metric to query. Example: `CPUUtilization`",
-					},
-					"statistic": {
-						Type:        types.StringType,
-						Required:    true,
-						Description: "The calculation to apply to the time series.",
-					},
-					"match_exact": {
-						Type:                types.BoolType,
-						Optional:            true,
-						Description:         "If enabled you also need to specify all the dimensions of the metric you’re querying.",
-						MarkdownDescription: "If enabled you also need to specify **all** the dimensions of the metric you’re querying.",
-					},
-					"region": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The AWS region to query the metrics from.",
-					},
-					"ref_id": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The ID of the query. The ID can be used to reference queries in math expressions.",
-					},
-					"period": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The minimum interval between points in seconds.",
-					},
-					"label": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The legend name.",
+					Validators: []validator.List{
+						listvalidator.SizeAtMost(5),
 					},
 				},
 			},
 		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(3),
+		},
 	}
 }
 
-func mappingsBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    1,
+func mappingsBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "The set of rules that translate a field value or range of values into explicit text.",
-		Blocks: map[string]tfsdk.Block{
-			"value": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MaxItems:    10,
-				Description: "Match a specific text value.",
-				Attributes: map[string]tfsdk.Attribute{
-					"value": {
-						Type:        types.StringType,
-						Required:    true,
-						Description: "The exact value to match.",
-					},
-					"display_text": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "Text to display if the condition is met. This field accepts Grafana variables.",
-					},
-					"color": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The color to use if the condition is met.",
-					},
-				},
-			},
-			"range": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MaxItems:    10,
-				Description: "Match a numerical range of values.",
-				Attributes: map[string]tfsdk.Attribute{
-					"from": {
-						Type:        types.Float64Type,
-						Required:    true,
-						Description: "The start of the range.",
-					},
-					"to": {
-						Type:        types.Float64Type,
-						Required:    true,
-						Description: "The end of the range.",
-					},
-					"display_text": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "Text to display if the condition is met. This field accepts Grafana variables.",
-					},
-					"color": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The color to use if the condition is met.",
-					},
-				},
-			},
-			"regex": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MaxItems:    10,
-				Description: "Match a regular expression with replacement.",
-				Attributes: map[string]tfsdk.Attribute{
-					"pattern": {
-						Type:        types.StringType,
-						Required:    true,
-						Description: "The regular expression to match.",
-					},
-					"display_text": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "Text to display if the condition is met. This field accepts Grafana variables.",
-					},
-					"color": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The color to use if the condition is met.",
-					},
-				},
-			},
-			"special": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MaxItems:    10,
-				Description: "Match on null, NaN, boolean and empty values.",
-				Attributes: map[string]tfsdk.Attribute{
-					"match": {
-						Type:                types.StringType,
-						Optional:            true,
-						Description:         "The category to match. The choices are: null, nan, null+nan, true, false, empty.",
-						MarkdownDescription: "The category to match. The choices are: `null`, `nan`, `null+nan`, `true`, `false`, `empty`.",
-						Validators: []tfsdk.AttributeValidator{
-							stringvalidator.OneOf("null", "nan", "null+nan", "true", "false", "empty"),
+		NestedObject: schema.NestedBlockObject{
+			Blocks: map[string]schema.Block{
+				"value": schema.ListNestedBlock{
+					Description: "Match a specific text value.",
+					NestedObject: schema.NestedBlockObject{
+						Attributes: map[string]schema.Attribute{
+							"value": schema.StringAttribute{
+								Required:    true,
+								Description: "The exact value to match.",
+							},
+							"display_text": schema.StringAttribute{
+								Optional:    true,
+								Description: "Text to display if the condition is met. This field accepts Grafana variables.",
+							},
+							"color": schema.StringAttribute{
+								Optional:    true,
+								Description: "The color to use if the condition is met.",
+							},
 						},
 					},
-					"display_text": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "Text to display if the condition is met. This field accepts Grafana variables.",
+					Validators: []validator.List{
+						listvalidator.SizeAtMost(10),
 					},
-					"color": {
-						Type:        types.StringType,
-						Optional:    true,
-						Description: "The color to use if the condition is met.",
+				},
+				"range": schema.ListNestedBlock{
+					Description: "Match a numerical range of values.",
+					NestedObject: schema.NestedBlockObject{
+						Attributes: map[string]schema.Attribute{
+							"from": schema.Float64Attribute{
+								Required:    true,
+								Description: "The start of the range.",
+							},
+							"to": schema.Float64Attribute{
+								Required:    true,
+								Description: "The end of the range.",
+							},
+							"display_text": schema.StringAttribute{
+								Optional:    true,
+								Description: "Text to display if the condition is met. This field accepts Grafana variables.",
+							},
+							"color": schema.StringAttribute{
+								Optional:    true,
+								Description: "The color to use if the condition is met.",
+							},
+						},
+					},
+					Validators: []validator.List{
+						listvalidator.SizeAtMost(10),
+					},
+				},
+				"regex": schema.ListNestedBlock{
+					Description: "Match a regular expression with replacement.",
+					NestedObject: schema.NestedBlockObject{
+						Attributes: map[string]schema.Attribute{
+							"pattern": schema.StringAttribute{
+								Required:    true,
+								Description: "The regular expression to match.",
+							},
+							"display_text": schema.StringAttribute{
+								Optional:    true,
+								Description: "Text to display if the condition is met. This field accepts Grafana variables.",
+							},
+							"color": schema.StringAttribute{
+								Optional:    true,
+								Description: "The color to use if the condition is met.",
+							},
+						},
+					},
+					Validators: []validator.List{
+						listvalidator.SizeAtMost(10),
+					},
+				},
+				"special": schema.ListNestedBlock{
+					Description: "Match on null, NaN, boolean and empty values.",
+					NestedObject: schema.NestedBlockObject{
+						Attributes: map[string]schema.Attribute{
+							"match": schema.StringAttribute{
+								Optional:            true,
+								Description:         "The category to match. The choices are: null, nan, null+nan, true, false, empty.",
+								MarkdownDescription: "The category to match. The choices are: `null`, `nan`, `null+nan`, `true`, `false`, `empty`.",
+								Validators: []validator.String{
+									stringvalidator.OneOf("null", "nan", "null+nan", "true", "false", "empty"),
+								},
+							},
+							"display_text": schema.StringAttribute{
+								Optional:    true,
+								Description: "Text to display if the condition is met. This field accepts Grafana variables.",
+							},
+							"color": schema.StringAttribute{
+								Optional:    true,
+								Description: "The color to use if the condition is met.",
+							},
+						},
+					},
+					Validators: []validator.List{
+						listvalidator.SizeAtMost(10),
 					},
 				},
 			},
 		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
+		},
 	}
 }
 
-func fieldOverrideBlock() tfsdk.Block {
-	return tfsdk.Block{
-		NestingMode: tfsdk.BlockNestingModeList,
-		MinItems:    0,
-		MaxItems:    3,
+func fieldOverrideBlock() schema.Block {
+	return schema.ListNestedBlock{
 		Description: "The set of rules that override attributes of a field.",
-		Blocks: map[string]tfsdk.Block{
-			"by_name": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MinItems:    0,
-				MaxItems:    10,
-				Description: "Override properties for a field with a specific name.",
-				Blocks: map[string]tfsdk.Block{
-					"field": fieldBlock(),
+		NestedObject: schema.NestedBlockObject{
+			Blocks: map[string]schema.Block{
+				"by_name": schema.ListNestedBlock{
+					Description: "Override properties for a field with a specific name.",
+					NestedObject: schema.NestedBlockObject{
+						Blocks: map[string]schema.Block{
+							"field": fieldBlock(),
+						},
+						Attributes: map[string]schema.Attribute{
+							"name": schema.StringAttribute{
+								Required:    true,
+								Description: "The name of the field to override attributes for.",
+							},
+						},
+					},
+					Validators: []validator.List{
+						listvalidator.SizeAtMost(10),
+					},
 				},
-				Attributes: map[string]tfsdk.Attribute{
-					"name": {
-						Type:        types.StringType,
-						Required:    true,
-						Description: "The name of the field to override attributes for.",
+				"by_regex": schema.ListNestedBlock{
+					Description: "Override properties for a field with a matching name.",
+					NestedObject: schema.NestedBlockObject{
+						Blocks: map[string]schema.Block{
+							"field": fieldBlock(),
+						},
+						Attributes: map[string]schema.Attribute{
+							"regex": schema.StringAttribute{
+								Required:    true,
+								Description: "The regex the field's name should match.",
+							},
+						},
+					},
+					Validators: []validator.List{
+						listvalidator.SizeAtMost(10),
+					},
+				},
+				"by_type": schema.ListNestedBlock{
+					Description: "Override properties for a field with a specific type.",
+					NestedObject: schema.NestedBlockObject{
+						Blocks: map[string]schema.Block{
+							"field": fieldBlock(),
+						},
+						Attributes: map[string]schema.Attribute{
+							"type": schema.StringAttribute{
+								Required:    true,
+								Description: "The type of the field to override attributes for.",
+							},
+						},
+					},
+					Validators: []validator.List{
+						listvalidator.SizeAtMost(10),
+					},
+				},
+				"by_query_id": schema.ListNestedBlock{
+					Description: "Override properties for a field returned by a specific query.",
+					NestedObject: schema.NestedBlockObject{
+						Blocks: map[string]schema.Block{
+							"field": fieldBlock(),
+						},
+						Attributes: map[string]schema.Attribute{
+							"query_id": schema.StringAttribute{
+								Required:    true,
+								Description: "The name of the field to override attributes for.",
+							},
+						},
+					},
+					Validators: []validator.List{
+						listvalidator.SizeAtMost(10),
 					},
 				},
 			},
-			"by_regex": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MinItems:    0,
-				MaxItems:    10,
-				Description: "Override properties for a field with a matching name.",
-				Blocks: map[string]tfsdk.Block{
-					"field": fieldBlock(),
-				},
-				Attributes: map[string]tfsdk.Attribute{
-					"regex": {
-						Type:        types.StringType,
-						Required:    true,
-						Description: "The regex the field's name should match.",
-					},
-				},
-			},
-			"by_type": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MinItems:    0,
-				MaxItems:    10,
-				Description: "Override properties for a field with a specific type.",
-				Blocks: map[string]tfsdk.Block{
-					"field": fieldBlock(),
-				},
-				Attributes: map[string]tfsdk.Attribute{
-					"type": {
-						Type:        types.StringType,
-						Required:    true,
-						Description: "The type of the field to override attributes for.",
-					},
-				},
-			},
-			"by_query_id": {
-				NestingMode: tfsdk.BlockNestingModeList,
-				MinItems:    0,
-				MaxItems:    10,
-				Description: "Override properties for a field returned by a specific query.",
-				Blocks: map[string]tfsdk.Block{
-					"field": fieldBlock(),
-				},
-				Attributes: map[string]tfsdk.Attribute{
-					"query_id": {
-						Type:        types.StringType,
-						Required:    true,
-						Description: "The name of the field to override attributes for.",
-					},
-				},
-			},
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(3),
 		},
 	}
 }
 
 // attributes
-func idAttribute() tfsdk.Attribute {
-	return tfsdk.Attribute{
-		Type:     types.StringType,
+func idAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
 		Computed: true,
 	}
 }
 
-func jsonAttribute() tfsdk.Attribute {
-	return tfsdk.Attribute{
-		Type:        types.StringType,
+func jsonAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
 		Computed:    true,
 		Description: "The Grafana-API-compatible JSON of this panel.",
 	}
 }
 
-func titleAttribute() tfsdk.Attribute {
-	return tfsdk.Attribute{
-		Type:        types.StringType,
+func titleAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
 		Required:    true,
 		Description: "The title of this panel.",
 	}
 }
 
-func descriptionAttribute() tfsdk.Attribute {
-	return tfsdk.Attribute{
-		Type:        types.StringType,
+func descriptionAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
 		Optional:    true,
 		Description: "The description of this panel.",
 	}

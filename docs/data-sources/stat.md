@@ -167,10 +167,10 @@ data "gdashboard_stat" "status_2" {
 ### Optional
 
 - `description` (String) The description of this panel.
-- `field` (Block List, Max: 1) The customization of field options. (see [below for nested schema](#nestedblock--field))
-- `graph` (Block List, Max: 1) The visualization options. (see [below for nested schema](#nestedblock--graph))
-- `overrides` (Block List, Max: 3) The set of rules that override attributes of a field. (see [below for nested schema](#nestedblock--overrides))
-- `queries` (Block List, Max: 3) The queries to collect values from data sources. (see [below for nested schema](#nestedblock--queries))
+- `field` (Block List) The customization of field options. (see [below for nested schema](#nestedblock--field))
+- `graph` (Block List) The visualization options. (see [below for nested schema](#nestedblock--graph))
+- `overrides` (Block List) The set of rules that override attributes of a field. (see [below for nested schema](#nestedblock--overrides))
+- `queries` (Block List) The queries to collect values from data sources. (see [below for nested schema](#nestedblock--queries))
 
 ### Read-Only
 
@@ -182,13 +182,13 @@ data "gdashboard_stat" "status_2" {
 
 Optional:
 
-- `color` (Block List, Max: 1) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--field--color))
+- `color` (Block List) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--field--color))
 - `decimals` (Number) The number of decimals to include when rendering a value. Must be between `0` and `20` (inclusive).
-- `mappings` (Block List, Max: 1) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--field--mappings))
+- `mappings` (Block List) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--field--mappings))
 - `max` (Number) The maximum value used in percentage threshold calculations.
 - `min` (Number) The minimum value used in percentage threshold calculations.
 - `no_value` (Number) The value to display if the field value is empty or null.
-- `thresholds` (Block List, Max: 1) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--field--thresholds))
+- `thresholds` (Block List) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--field--thresholds))
 - `unit` (String) The unit the field should use.
 
 <a id="nestedblock--field--color"></a>
@@ -209,10 +209,10 @@ Optional:
 
 Optional:
 
-- `range` (Block List, Max: 10) Match a numerical range of values. (see [below for nested schema](#nestedblock--field--mappings--range))
-- `regex` (Block List, Max: 10) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--field--mappings--regex))
-- `special` (Block List, Max: 10) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--field--mappings--special))
-- `value` (Block List, Max: 10) Match a specific text value. (see [below for nested schema](#nestedblock--field--mappings--value))
+- `range` (Block List) Match a numerical range of values. (see [below for nested schema](#nestedblock--field--mappings--range))
+- `regex` (Block List) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--field--mappings--regex))
+- `special` (Block List) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--field--mappings--special))
+- `value` (Block List) Match a specific text value. (see [below for nested schema](#nestedblock--field--mappings--value))
 
 <a id="nestedblock--field--mappings--range"></a>
 ### Nested Schema for `field.mappings.range`
@@ -273,7 +273,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
-- `step` (Block List, Max: 20) The threshold steps. (see [below for nested schema](#nestedblock--field--thresholds--step))
+- `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--field--thresholds--step))
 
 <a id="nestedblock--field--thresholds--step"></a>
 ### Nested Schema for `field.thresholds.step`
@@ -296,11 +296,11 @@ Optional:
 
 - `color_mode` (String) The color mode. The choices are: `none`, `value`, `background`.
 - `graph_mode` (String) The graph mode. The choices are: `none`, `area`.
-- `options` (Block List, Max: 1) Value reduce or calculation options. (see [below for nested schema](#nestedblock--graph--options))
+- `options` (Block List) Value reduce or calculation options. (see [below for nested schema](#nestedblock--graph--options))
 - `orientation` (String) The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.
 - `text_alignment` (String) The text alignment. The choices are: `auto`, `center`.
 - `text_mode` (String) What show on panel. The choices are: `auto`, `value`, `value_and_name`, `name`, `none`.
-- `text_size` (Block List, Max: 1) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--graph--text_size))
+- `text_size` (Block List) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--graph--text_size))
 
 <a id="nestedblock--graph--options"></a>
 ### Nested Schema for `graph.options`
@@ -328,10 +328,10 @@ Optional:
 
 Optional:
 
-- `by_name` (Block List, Max: 10) Override properties for a field with a specific name. (see [below for nested schema](#nestedblock--overrides--by_name))
-- `by_query_id` (Block List, Max: 10) Override properties for a field returned by a specific query. (see [below for nested schema](#nestedblock--overrides--by_query_id))
-- `by_regex` (Block List, Max: 10) Override properties for a field with a matching name. (see [below for nested schema](#nestedblock--overrides--by_regex))
-- `by_type` (Block List, Max: 10) Override properties for a field with a specific type. (see [below for nested schema](#nestedblock--overrides--by_type))
+- `by_name` (Block List) Override properties for a field with a specific name. (see [below for nested schema](#nestedblock--overrides--by_name))
+- `by_query_id` (Block List) Override properties for a field returned by a specific query. (see [below for nested schema](#nestedblock--overrides--by_query_id))
+- `by_regex` (Block List) Override properties for a field with a matching name. (see [below for nested schema](#nestedblock--overrides--by_regex))
+- `by_type` (Block List) Override properties for a field with a specific type. (see [below for nested schema](#nestedblock--overrides--by_type))
 
 <a id="nestedblock--overrides--by_name"></a>
 ### Nested Schema for `overrides.by_name`
@@ -342,20 +342,20 @@ Required:
 
 Optional:
 
-- `field` (Block List, Max: 1) The customization of field options. (see [below for nested schema](#nestedblock--overrides--by_name--field))
+- `field` (Block List) The customization of field options. (see [below for nested schema](#nestedblock--overrides--by_name--field))
 
 <a id="nestedblock--overrides--by_name--field"></a>
 ### Nested Schema for `overrides.by_name.field`
 
 Optional:
 
-- `color` (Block List, Max: 1) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--overrides--by_name--field--color))
+- `color` (Block List) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--overrides--by_name--field--color))
 - `decimals` (Number) The number of decimals to include when rendering a value. Must be between `0` and `20` (inclusive).
-- `mappings` (Block List, Max: 1) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--overrides--by_name--field--mappings))
+- `mappings` (Block List) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--overrides--by_name--field--mappings))
 - `max` (Number) The maximum value used in percentage threshold calculations.
 - `min` (Number) The minimum value used in percentage threshold calculations.
 - `no_value` (Number) The value to display if the field value is empty or null.
-- `thresholds` (Block List, Max: 1) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--overrides--by_name--field--thresholds))
+- `thresholds` (Block List) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--overrides--by_name--field--thresholds))
 - `unit` (String) The unit the field should use.
 
 <a id="nestedblock--overrides--by_name--field--color"></a>
@@ -376,10 +376,10 @@ Optional:
 
 Optional:
 
-- `range` (Block List, Max: 10) Match a numerical range of values. (see [below for nested schema](#nestedblock--overrides--by_name--field--mappings--range))
-- `regex` (Block List, Max: 10) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--overrides--by_name--field--mappings--regex))
-- `special` (Block List, Max: 10) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--overrides--by_name--field--mappings--special))
-- `value` (Block List, Max: 10) Match a specific text value. (see [below for nested schema](#nestedblock--overrides--by_name--field--mappings--value))
+- `range` (Block List) Match a numerical range of values. (see [below for nested schema](#nestedblock--overrides--by_name--field--mappings--range))
+- `regex` (Block List) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--overrides--by_name--field--mappings--regex))
+- `special` (Block List) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--overrides--by_name--field--mappings--special))
+- `value` (Block List) Match a specific text value. (see [below for nested schema](#nestedblock--overrides--by_name--field--mappings--value))
 
 <a id="nestedblock--overrides--by_name--field--mappings--range"></a>
 ### Nested Schema for `overrides.by_name.field.mappings.range`
@@ -440,7 +440,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
-- `step` (Block List, Max: 20) The threshold steps. (see [below for nested schema](#nestedblock--overrides--by_name--field--thresholds--step))
+- `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--overrides--by_name--field--thresholds--step))
 
 <a id="nestedblock--overrides--by_name--field--thresholds--step"></a>
 ### Nested Schema for `overrides.by_name.field.thresholds.step`
@@ -466,20 +466,20 @@ Required:
 
 Optional:
 
-- `field` (Block List, Max: 1) The customization of field options. (see [below for nested schema](#nestedblock--overrides--by_query_id--field))
+- `field` (Block List) The customization of field options. (see [below for nested schema](#nestedblock--overrides--by_query_id--field))
 
 <a id="nestedblock--overrides--by_query_id--field"></a>
 ### Nested Schema for `overrides.by_query_id.field`
 
 Optional:
 
-- `color` (Block List, Max: 1) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--color))
+- `color` (Block List) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--color))
 - `decimals` (Number) The number of decimals to include when rendering a value. Must be between `0` and `20` (inclusive).
-- `mappings` (Block List, Max: 1) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--mappings))
+- `mappings` (Block List) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--mappings))
 - `max` (Number) The maximum value used in percentage threshold calculations.
 - `min` (Number) The minimum value used in percentage threshold calculations.
 - `no_value` (Number) The value to display if the field value is empty or null.
-- `thresholds` (Block List, Max: 1) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--thresholds))
+- `thresholds` (Block List) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--thresholds))
 - `unit` (String) The unit the field should use.
 
 <a id="nestedblock--overrides--by_query_id--field--color"></a>
@@ -500,10 +500,10 @@ Optional:
 
 Optional:
 
-- `range` (Block List, Max: 10) Match a numerical range of values. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--mappings--range))
-- `regex` (Block List, Max: 10) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--mappings--regex))
-- `special` (Block List, Max: 10) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--mappings--special))
-- `value` (Block List, Max: 10) Match a specific text value. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--mappings--value))
+- `range` (Block List) Match a numerical range of values. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--mappings--range))
+- `regex` (Block List) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--mappings--regex))
+- `special` (Block List) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--mappings--special))
+- `value` (Block List) Match a specific text value. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--mappings--value))
 
 <a id="nestedblock--overrides--by_query_id--field--mappings--range"></a>
 ### Nested Schema for `overrides.by_query_id.field.mappings.range`
@@ -564,7 +564,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
-- `step` (Block List, Max: 20) The threshold steps. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--thresholds--step))
+- `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--thresholds--step))
 
 <a id="nestedblock--overrides--by_query_id--field--thresholds--step"></a>
 ### Nested Schema for `overrides.by_query_id.field.thresholds.step`
@@ -590,20 +590,20 @@ Required:
 
 Optional:
 
-- `field` (Block List, Max: 1) The customization of field options. (see [below for nested schema](#nestedblock--overrides--by_regex--field))
+- `field` (Block List) The customization of field options. (see [below for nested schema](#nestedblock--overrides--by_regex--field))
 
 <a id="nestedblock--overrides--by_regex--field"></a>
 ### Nested Schema for `overrides.by_regex.field`
 
 Optional:
 
-- `color` (Block List, Max: 1) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--overrides--by_regex--field--color))
+- `color` (Block List) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--overrides--by_regex--field--color))
 - `decimals` (Number) The number of decimals to include when rendering a value. Must be between `0` and `20` (inclusive).
-- `mappings` (Block List, Max: 1) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--overrides--by_regex--field--mappings))
+- `mappings` (Block List) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--overrides--by_regex--field--mappings))
 - `max` (Number) The maximum value used in percentage threshold calculations.
 - `min` (Number) The minimum value used in percentage threshold calculations.
 - `no_value` (Number) The value to display if the field value is empty or null.
-- `thresholds` (Block List, Max: 1) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--overrides--by_regex--field--thresholds))
+- `thresholds` (Block List) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--overrides--by_regex--field--thresholds))
 - `unit` (String) The unit the field should use.
 
 <a id="nestedblock--overrides--by_regex--field--color"></a>
@@ -624,10 +624,10 @@ Optional:
 
 Optional:
 
-- `range` (Block List, Max: 10) Match a numerical range of values. (see [below for nested schema](#nestedblock--overrides--by_regex--field--mappings--range))
-- `regex` (Block List, Max: 10) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--overrides--by_regex--field--mappings--regex))
-- `special` (Block List, Max: 10) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--overrides--by_regex--field--mappings--special))
-- `value` (Block List, Max: 10) Match a specific text value. (see [below for nested schema](#nestedblock--overrides--by_regex--field--mappings--value))
+- `range` (Block List) Match a numerical range of values. (see [below for nested schema](#nestedblock--overrides--by_regex--field--mappings--range))
+- `regex` (Block List) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--overrides--by_regex--field--mappings--regex))
+- `special` (Block List) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--overrides--by_regex--field--mappings--special))
+- `value` (Block List) Match a specific text value. (see [below for nested schema](#nestedblock--overrides--by_regex--field--mappings--value))
 
 <a id="nestedblock--overrides--by_regex--field--mappings--range"></a>
 ### Nested Schema for `overrides.by_regex.field.mappings.range`
@@ -688,7 +688,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
-- `step` (Block List, Max: 20) The threshold steps. (see [below for nested schema](#nestedblock--overrides--by_regex--field--thresholds--step))
+- `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--overrides--by_regex--field--thresholds--step))
 
 <a id="nestedblock--overrides--by_regex--field--thresholds--step"></a>
 ### Nested Schema for `overrides.by_regex.field.thresholds.step`
@@ -714,20 +714,20 @@ Required:
 
 Optional:
 
-- `field` (Block List, Max: 1) The customization of field options. (see [below for nested schema](#nestedblock--overrides--by_type--field))
+- `field` (Block List) The customization of field options. (see [below for nested schema](#nestedblock--overrides--by_type--field))
 
 <a id="nestedblock--overrides--by_type--field"></a>
 ### Nested Schema for `overrides.by_type.field`
 
 Optional:
 
-- `color` (Block List, Max: 1) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--overrides--by_type--field--color))
+- `color` (Block List) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--overrides--by_type--field--color))
 - `decimals` (Number) The number of decimals to include when rendering a value. Must be between `0` and `20` (inclusive).
-- `mappings` (Block List, Max: 1) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--overrides--by_type--field--mappings))
+- `mappings` (Block List) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--overrides--by_type--field--mappings))
 - `max` (Number) The maximum value used in percentage threshold calculations.
 - `min` (Number) The minimum value used in percentage threshold calculations.
 - `no_value` (Number) The value to display if the field value is empty or null.
-- `thresholds` (Block List, Max: 1) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--overrides--by_type--field--thresholds))
+- `thresholds` (Block List) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--overrides--by_type--field--thresholds))
 - `unit` (String) The unit the field should use.
 
 <a id="nestedblock--overrides--by_type--field--color"></a>
@@ -748,10 +748,10 @@ Optional:
 
 Optional:
 
-- `range` (Block List, Max: 10) Match a numerical range of values. (see [below for nested schema](#nestedblock--overrides--by_type--field--mappings--range))
-- `regex` (Block List, Max: 10) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--overrides--by_type--field--mappings--regex))
-- `special` (Block List, Max: 10) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--overrides--by_type--field--mappings--special))
-- `value` (Block List, Max: 10) Match a specific text value. (see [below for nested schema](#nestedblock--overrides--by_type--field--mappings--value))
+- `range` (Block List) Match a numerical range of values. (see [below for nested schema](#nestedblock--overrides--by_type--field--mappings--range))
+- `regex` (Block List) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--overrides--by_type--field--mappings--regex))
+- `special` (Block List) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--overrides--by_type--field--mappings--special))
+- `value` (Block List) Match a specific text value. (see [below for nested schema](#nestedblock--overrides--by_type--field--mappings--value))
 
 <a id="nestedblock--overrides--by_type--field--mappings--range"></a>
 ### Nested Schema for `overrides.by_type.field.mappings.range`
@@ -812,7 +812,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
-- `step` (Block List, Max: 20) The threshold steps. (see [below for nested schema](#nestedblock--overrides--by_type--field--thresholds--step))
+- `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--overrides--by_type--field--thresholds--step))
 
 <a id="nestedblock--overrides--by_type--field--thresholds--step"></a>
 ### Nested Schema for `overrides.by_type.field.thresholds.step`
@@ -835,8 +835,8 @@ Optional:
 
 Optional:
 
-- `cloudwatch` (Block List, Max: 5) The CloudWatch query. (see [below for nested schema](#nestedblock--queries--cloudwatch))
-- `prometheus` (Block List, Max: 5) The Prometheus query. (see [below for nested schema](#nestedblock--queries--prometheus))
+- `cloudwatch` (Block List) The CloudWatch query. (see [below for nested schema](#nestedblock--queries--cloudwatch))
+- `prometheus` (Block List) The Prometheus query. (see [below for nested schema](#nestedblock--queries--prometheus))
 
 <a id="nestedblock--queries--cloudwatch"></a>
 ### Nested Schema for `queries.cloudwatch`
@@ -850,7 +850,7 @@ Required:
 
 Optional:
 
-- `dimension` (Block List, Max: 5) The dimension to filter the metric with. (see [below for nested schema](#nestedblock--queries--cloudwatch--dimension))
+- `dimension` (Block List) The dimension to filter the metric with. (see [below for nested schema](#nestedblock--queries--cloudwatch--dimension))
 - `label` (String) The legend name.
 - `match_exact` (Boolean) If enabled you also need to specify **all** the dimensions of the metric you’re querying.
 - `period` (String) The minimum interval between points in seconds.

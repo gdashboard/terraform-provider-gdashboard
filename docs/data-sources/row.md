@@ -31,7 +31,7 @@ data "gdashboard_row" "overview" {
 
 ### Optional
 
-- `graph` (Block List, Max: 1) (see [below for nested schema](#nestedblock--graph))
+- `graph` (Block List) (see [below for nested schema](#nestedblock--graph))
 
 ### Read-Only
 
