@@ -289,7 +289,7 @@ Required:
 
 Optional:
 
-- `value` (String) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
+- `value` (Number) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
 
 
 
@@ -454,7 +454,7 @@ Required:
 
 Optional:
 
-- `value` (String) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
+- `value` (Number) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
 
 
 
@@ -578,7 +578,7 @@ Required:
 
 Optional:
 
-- `value` (String) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
+- `value` (Number) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
 
 
 
@@ -702,7 +702,7 @@ Required:
 
 Optional:
 
-- `value` (String) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
+- `value` (Number) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
 
 
 
@@ -826,7 +826,7 @@ Required:
 
 Optional:
 
-- `value` (String) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
+- `value` (Number) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
 
 
 

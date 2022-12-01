@@ -178,6 +178,6 @@ Required:
 
 Optional:
 
-- `selected` (String) Whether to mark the option as selected or not.
+- `selected` (Boolean) Whether to mark the option as selected or not.
 
 
