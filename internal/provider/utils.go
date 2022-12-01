@@ -713,6 +713,7 @@ func mappingsBlock() schema.Block {
 								Description: "The regular expression to match.",
 							},
 							"display_text": schema.StringAttribute{
+								Optional:    true,
 								Description: "Text to display if the condition is met. This field accepts Grafana variables.",
 							},
 							"color": schema.StringAttribute{

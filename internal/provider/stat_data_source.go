@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 )
@@ -126,8 +125,8 @@ func statGraphBlock() schema.Block {
 	}
 }
 
-func (d *StatDataSource) GetSchema(_ context.Context) (schema.Schema, diag.Diagnostics) {
-	return schema.Schema{
+func (d *StatDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		Description:         "Stat panel data source.",
 		MarkdownDescription: "Stat panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/stat/) for more details.",
@@ -145,7 +144,7 @@ func (d *StatDataSource) GetSchema(_ context.Context) (schema.Schema, diag.Diagn
 			"title":       titleAttribute(),
 			"description": descriptionAttribute(),
 		},
-	}, nil
+	}
 }
 
 func (d *StatDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

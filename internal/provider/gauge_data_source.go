@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 )
@@ -98,8 +97,8 @@ func gaugeGraphBlock() schema.Block {
 	}
 }
 
-func (d *GaugeDataSource) GetSchema(_ context.Context) (schema.Schema, diag.Diagnostics) {
-	return schema.Schema{
+func (d *GaugeDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		Description:         "Gauge panel data source.",
 		MarkdownDescription: "Gauge panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/). for more details",
@@ -117,7 +116,7 @@ func (d *GaugeDataSource) GetSchema(_ context.Context) (schema.Schema, diag.Diag
 			"title":       titleAttribute(),
 			"description": descriptionAttribute(),
 		},
-	}, nil
+	}
 }
 
 func (d *GaugeDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

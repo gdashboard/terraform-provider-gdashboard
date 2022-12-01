@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -85,8 +84,8 @@ func (p *GrafanaDashboardBuilderProvider) Metadata(_ context.Context, req provid
 	resp.Version = p.version
 }
 
-func (p *GrafanaDashboardBuilderProvider) GetSchema(_ context.Context) (schema.Schema, diag.Diagnostics) {
-	return schema.Schema{
+func (p *GrafanaDashboardBuilderProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		Description: "The provider offers a handy syntax to define Grafana dashboards: time series, gauge, bar gauge, stat, etc.",
 		Blocks: map[string]schema.Block{
 			"defaults": schema.ListNestedBlock{
@@ -167,7 +166,7 @@ func (p *GrafanaDashboardBuilderProvider) GetSchema(_ context.Context) (schema.S
 				},
 			},
 		},
-	}, nil
+	}
 }
 
 func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {

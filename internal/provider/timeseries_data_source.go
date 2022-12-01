@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 )
@@ -246,8 +245,8 @@ func timeseriesLegendBlock() schema.Block {
 	}
 }
 
-func (d *TimeseriesDataSource) GetSchema(_ context.Context) (schema.Schema, diag.Diagnostics) {
-	return schema.Schema{
+func (d *TimeseriesDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		Description:         "Time series panel data source.",
 		MarkdownDescription: "Time series panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/time-series/).",
@@ -268,7 +267,7 @@ func (d *TimeseriesDataSource) GetSchema(_ context.Context) (schema.Schema, diag
 			"title":       titleAttribute(),
 			"description": descriptionAttribute(),
 		},
-	}, nil
+	}
 }
 
 func (d *TimeseriesDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

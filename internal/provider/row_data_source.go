@@ -10,7 +10,6 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 )
@@ -58,8 +57,8 @@ func rowGraphBlock() schema.Block {
 	}
 }
 
-func (d *RowDataSource) GetSchema(_ context.Context) (schema.Schema, diag.Diagnostics) {
-	return schema.Schema{
+func (d *RowDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Row panel data source.",
 
@@ -72,7 +71,7 @@ func (d *RowDataSource) GetSchema(_ context.Context) (schema.Schema, diag.Diagno
 			"json":  jsonAttribute(),
 			"title": titleAttribute(),
 		},
-	}, nil
+	}
 }
 
 func (d *RowDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {

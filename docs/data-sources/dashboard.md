@@ -83,9 +83,9 @@ data "gdashboard_dashboard" "jvm_dashboard" {
 - `graph_tooltip` (String) Controls tooltip and hover highlight behavior across different panels: `default`, `shared-crosshair`, `shared-tooltip`.
 - `layout` (Block, Optional) The layout of the dashboard. (see [below for nested schema](#nestedblock--layout))
 - `style` (String) The dashboard style. The choices are: `dark`, `light`.
-- `time` (Block List, Max: 1) The default query time range. (see [below for nested schema](#nestedblock--time))
+- `time` (Block List) The default query time range. (see [below for nested schema](#nestedblock--time))
 - `uid` (String) The UID of the dashboard.
-- `variables` (Block List, Max: 10) The variables. (see [below for nested schema](#nestedblock--variables))
+- `variables` (Block List) The variables. (see [below for nested schema](#nestedblock--variables))
 
 ### Read-Only
 
@@ -97,14 +97,14 @@ data "gdashboard_dashboard" "jvm_dashboard" {
 
 Optional:
 
-- `row` (Block List, Max: 40) The row within the dashboard. (see [below for nested schema](#nestedblock--layout--row))
+- `row` (Block List) The row within the dashboard. (see [below for nested schema](#nestedblock--layout--row))
 
 <a id="nestedblock--layout--row"></a>
 ### Nested Schema for `layout.row`
 
 Optional:
 
-- `panel` (Block List, Max: 20) The definition of the panel within the row. (see [below for nested schema](#nestedblock--layout--row--panel))
+- `panel` (Block List) The definition of the panel within the row. (see [below for nested schema](#nestedblock--layout--row--panel))
 
 <a id="nestedblock--layout--row--panel"></a>
 ### Nested Schema for `layout.row.panel`
@@ -138,39 +138,10 @@ Required:
 <a id="nestedblock--variables"></a>
 ### Nested Schema for `variables`
 
-Required:
-
-- `custom` (Block List, Min: 1, Max: 10) The variable options defined as a comma-separated list. (see [below for nested schema](#nestedblock--variables--custom))
-
 Optional:
 
-- `const` (Block List, Max: 5) The constant variable. (see [below for nested schema](#nestedblock--variables--const))
-
-<a id="nestedblock--variables--custom"></a>
-### Nested Schema for `variables.custom`
-
-Required:
-
-- `name` (String) The name of the variable.
-- `option` (Block List, Min: 1, Max: 10) The option entry. (see [below for nested schema](#nestedblock--variables--custom--option))
-
-Optional:
-
-- `hide` (String) Which variable information to hide. The choices are: `label`, `variable`.
-
-<a id="nestedblock--variables--custom--option"></a>
-### Nested Schema for `variables.custom.option`
-
-Required:
-
-- `text` (String) The text (label) of the entry.
-- `value` (String) The value of the entry.
-
-Optional:
-
-- `selected` (Boolean) Whether to mark the option as selected or not.
-
-
+- `const` (Block List) The constant variable. (see [below for nested schema](#nestedblock--variables--const))
+- `custom` (Block List) The variable options defined as a comma-separated list. (see [below for nested schema](#nestedblock--variables--custom))
 
 <a id="nestedblock--variables--const"></a>
 ### Nested Schema for `variables.const`
@@ -183,5 +154,30 @@ Required:
 Optional:
 
 - `hide` (String) Which variable information to hide. The choices are: `label`, `variable`.
+
+
+<a id="nestedblock--variables--custom"></a>
+### Nested Schema for `variables.custom`
+
+Required:
+
+- `name` (String) The name of the variable.
+
+Optional:
+
+- `hide` (String) Which variable information to hide. The choices are: `label`, `variable`.
+- `option` (Block List) The option entry. (see [below for nested schema](#nestedblock--variables--custom--option))
+
+<a id="nestedblock--variables--custom--option"></a>
+### Nested Schema for `variables.custom.option`
+
+Required:
+
+- `text` (String) The text (label) of the entry.
+- `value` (String) The value of the entry.
+
+Optional:
+
+- `selected` (String) Whether to mark the option as selected or not.
 
 

@@ -120,39 +120,39 @@ data "gdashboard_timeseries" "override_defaults" {
 
 ### Optional
 
-- `defaults` (Block List, Max: 1) The default values to use with when an attribute is missing in the data source definition. (see [below for nested schema](#nestedblock--defaults))
+- `defaults` (Block List) The default values to use with when an attribute is missing in the data source definition. (see [below for nested schema](#nestedblock--defaults))
 
 <a id="nestedblock--defaults"></a>
 ### Nested Schema for `defaults`
 
 Optional:
 
-- `bar_gauge` (Block List, Max: 1) Bar gauge defaults. (see [below for nested schema](#nestedblock--defaults--bar_gauge))
-- `dashboard` (Block List, Max: 1) Dashboard defaults. (see [below for nested schema](#nestedblock--defaults--dashboard))
-- `gauge` (Block List, Max: 1) Gauge defaults. (see [below for nested schema](#nestedblock--defaults--gauge))
-- `stat` (Block List, Max: 1) Stat defaults. (see [below for nested schema](#nestedblock--defaults--stat))
-- `timeseries` (Block List, Max: 1) Timeseries defaults. (see [below for nested schema](#nestedblock--defaults--timeseries))
+- `bar_gauge` (Block List) Bar gauge defaults. (see [below for nested schema](#nestedblock--defaults--bar_gauge))
+- `dashboard` (Block List) Dashboard defaults. (see [below for nested schema](#nestedblock--defaults--dashboard))
+- `gauge` (Block List) Gauge defaults. (see [below for nested schema](#nestedblock--defaults--gauge))
+- `stat` (Block List) Stat defaults. (see [below for nested schema](#nestedblock--defaults--stat))
+- `timeseries` (Block List) Timeseries defaults. (see [below for nested schema](#nestedblock--defaults--timeseries))
 
 <a id="nestedblock--defaults--bar_gauge"></a>
 ### Nested Schema for `defaults.bar_gauge`
 
 Optional:
 
-- `field` (Block List, Max: 1) The customization of field options. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field))
-- `graph` (Block List, Max: 1) The visualization options. (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph))
+- `field` (Block List) The customization of field options. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field))
+- `graph` (Block List) The visualization options. (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph))
 
 <a id="nestedblock--defaults--bar_gauge--field"></a>
 ### Nested Schema for `defaults.bar_gauge.field`
 
 Optional:
 
-- `color` (Block List, Max: 1) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--color))
+- `color` (Block List) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--color))
 - `decimals` (Number) The number of decimals to include when rendering a value. Must be between `0` and `20` (inclusive).
-- `mappings` (Block List, Max: 1) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--mappings))
+- `mappings` (Block List) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--mappings))
 - `max` (Number) The maximum value used in percentage threshold calculations.
 - `min` (Number) The minimum value used in percentage threshold calculations.
 - `no_value` (Number) The value to display if the field value is empty or null.
-- `thresholds` (Block List, Max: 1) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--thresholds))
+- `thresholds` (Block List) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--thresholds))
 - `unit` (String) The unit the field should use.
 
 <a id="nestedblock--defaults--bar_gauge--field--color"></a>
@@ -173,10 +173,10 @@ Optional:
 
 Optional:
 
-- `range` (Block List, Max: 10) Match a numerical range of values. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--mappings--range))
-- `regex` (Block List, Max: 10) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--mappings--regex))
-- `special` (Block List, Max: 10) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--mappings--special))
-- `value` (Block List, Max: 10) Match a specific text value. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--mappings--value))
+- `range` (Block List) Match a numerical range of values. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--mappings--range))
+- `regex` (Block List) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--mappings--regex))
+- `special` (Block List) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--mappings--special))
+- `value` (Block List) Match a specific text value. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--mappings--value))
 
 <a id="nestedblock--defaults--bar_gauge--field--mappings--range"></a>
 ### Nested Schema for `defaults.bar_gauge.field.mappings.range`
@@ -237,7 +237,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
-- `step` (Block List, Max: 20) The threshold steps. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--thresholds--step))
+- `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--thresholds--step))
 
 <a id="nestedblock--defaults--bar_gauge--field--thresholds--step"></a>
 ### Nested Schema for `defaults.bar_gauge.field.thresholds.step`
@@ -248,7 +248,7 @@ Required:
 
 Optional:
 
-- `value` (Number) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
+- `value` (String) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
 
 
 
@@ -259,10 +259,10 @@ Optional:
 Optional:
 
 - `display_mode` (String) The display mode. The choices are: `gradient`, `lcd`, `basic`.
-- `options` (Block List, Max: 1) Value reduce or calculation options. (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph--options))
+- `options` (Block List) Value reduce or calculation options. (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph--options))
 - `orientation` (String) The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.
 - `text_alignment` (String) The text alignment. The choices are: `auto`, `center`.
-- `text_size` (Block List, Max: 1) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph--text_size))
+- `text_size` (Block List) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph--text_size))
 
 <a id="nestedblock--defaults--bar_gauge--graph--options"></a>
 ### Nested Schema for `defaults.bar_gauge.graph.options`
@@ -294,7 +294,7 @@ Optional:
 - `editable` (Boolean) Whether to make the dashboard editable or not.
 - `graph_tooltip` (String) Controls tooltip and hover highlight behavior across different panels: `default`, `shared-crosshair`, `shared-tooltip`.
 - `style` (String) The dashboard style. The choices are: `dark`, `light`.
-- `time` (Block List, Max: 1) The default query time range. (see [below for nested schema](#nestedblock--defaults--dashboard--time))
+- `time` (Block List) The default query time range. (see [below for nested schema](#nestedblock--defaults--dashboard--time))
 
 <a id="nestedblock--defaults--dashboard--time"></a>
 ### Nested Schema for `defaults.dashboard.time`
@@ -311,21 +311,21 @@ Required:
 
 Optional:
 
-- `field` (Block List, Max: 1) The customization of field options. (see [below for nested schema](#nestedblock--defaults--gauge--field))
-- `graph` (Block List, Max: 1) The visualization options. (see [below for nested schema](#nestedblock--defaults--gauge--graph))
+- `field` (Block List) The customization of field options. (see [below for nested schema](#nestedblock--defaults--gauge--field))
+- `graph` (Block List) The visualization options. (see [below for nested schema](#nestedblock--defaults--gauge--graph))
 
 <a id="nestedblock--defaults--gauge--field"></a>
 ### Nested Schema for `defaults.gauge.field`
 
 Optional:
 
-- `color` (Block List, Max: 1) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--defaults--gauge--field--color))
+- `color` (Block List) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--defaults--gauge--field--color))
 - `decimals` (Number) The number of decimals to include when rendering a value. Must be between `0` and `20` (inclusive).
-- `mappings` (Block List, Max: 1) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings))
+- `mappings` (Block List) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings))
 - `max` (Number) The maximum value used in percentage threshold calculations.
 - `min` (Number) The minimum value used in percentage threshold calculations.
 - `no_value` (Number) The value to display if the field value is empty or null.
-- `thresholds` (Block List, Max: 1) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--defaults--gauge--field--thresholds))
+- `thresholds` (Block List) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--defaults--gauge--field--thresholds))
 - `unit` (String) The unit the field should use.
 
 <a id="nestedblock--defaults--gauge--field--color"></a>
@@ -346,10 +346,10 @@ Optional:
 
 Optional:
 
-- `range` (Block List, Max: 10) Match a numerical range of values. (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings--range))
-- `regex` (Block List, Max: 10) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings--regex))
-- `special` (Block List, Max: 10) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings--special))
-- `value` (Block List, Max: 10) Match a specific text value. (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings--value))
+- `range` (Block List) Match a numerical range of values. (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings--range))
+- `regex` (Block List) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings--regex))
+- `special` (Block List) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings--special))
+- `value` (Block List) Match a specific text value. (see [below for nested schema](#nestedblock--defaults--gauge--field--mappings--value))
 
 <a id="nestedblock--defaults--gauge--field--mappings--range"></a>
 ### Nested Schema for `defaults.gauge.field.mappings.range`
@@ -410,7 +410,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
-- `step` (Block List, Max: 20) The threshold steps. (see [below for nested schema](#nestedblock--defaults--gauge--field--thresholds--step))
+- `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--defaults--gauge--field--thresholds--step))
 
 <a id="nestedblock--defaults--gauge--field--thresholds--step"></a>
 ### Nested Schema for `defaults.gauge.field.thresholds.step`
@@ -421,7 +421,7 @@ Required:
 
 Optional:
 
-- `value` (Number) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
+- `value` (String) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
 
 
 
@@ -431,11 +431,11 @@ Optional:
 
 Optional:
 
-- `options` (Block List, Max: 1) Value reduce or calculation options. (see [below for nested schema](#nestedblock--defaults--gauge--graph--options))
+- `options` (Block List) Value reduce or calculation options. (see [below for nested schema](#nestedblock--defaults--gauge--graph--options))
 - `orientation` (String) The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.
 - `show_threshold_labels` (Boolean) Whether to render the threshold values around the gauge bar or not.
 - `show_threshold_markers` (Boolean) Whether to render the thresholds as an outer bar or not.
-- `text_size` (Block List, Max: 1) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--defaults--gauge--graph--text_size))
+- `text_size` (Block List) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--defaults--gauge--graph--text_size))
 
 <a id="nestedblock--defaults--gauge--graph--options"></a>
 ### Nested Schema for `defaults.gauge.graph.options`
@@ -464,21 +464,21 @@ Optional:
 
 Optional:
 
-- `field` (Block List, Max: 1) The customization of field options. (see [below for nested schema](#nestedblock--defaults--stat--field))
-- `graph` (Block List, Max: 1) The visualization options. (see [below for nested schema](#nestedblock--defaults--stat--graph))
+- `field` (Block List) The customization of field options. (see [below for nested schema](#nestedblock--defaults--stat--field))
+- `graph` (Block List) The visualization options. (see [below for nested schema](#nestedblock--defaults--stat--graph))
 
 <a id="nestedblock--defaults--stat--field"></a>
 ### Nested Schema for `defaults.stat.field`
 
 Optional:
 
-- `color` (Block List, Max: 1) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--defaults--stat--field--color))
+- `color` (Block List) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--defaults--stat--field--color))
 - `decimals` (Number) The number of decimals to include when rendering a value. Must be between `0` and `20` (inclusive).
-- `mappings` (Block List, Max: 1) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--defaults--stat--field--mappings))
+- `mappings` (Block List) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--defaults--stat--field--mappings))
 - `max` (Number) The maximum value used in percentage threshold calculations.
 - `min` (Number) The minimum value used in percentage threshold calculations.
 - `no_value` (Number) The value to display if the field value is empty or null.
-- `thresholds` (Block List, Max: 1) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--defaults--stat--field--thresholds))
+- `thresholds` (Block List) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--defaults--stat--field--thresholds))
 - `unit` (String) The unit the field should use.
 
 <a id="nestedblock--defaults--stat--field--color"></a>
@@ -499,10 +499,10 @@ Optional:
 
 Optional:
 
-- `range` (Block List, Max: 10) Match a numerical range of values. (see [below for nested schema](#nestedblock--defaults--stat--field--mappings--range))
-- `regex` (Block List, Max: 10) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--defaults--stat--field--mappings--regex))
-- `special` (Block List, Max: 10) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--defaults--stat--field--mappings--special))
-- `value` (Block List, Max: 10) Match a specific text value. (see [below for nested schema](#nestedblock--defaults--stat--field--mappings--value))
+- `range` (Block List) Match a numerical range of values. (see [below for nested schema](#nestedblock--defaults--stat--field--mappings--range))
+- `regex` (Block List) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--defaults--stat--field--mappings--regex))
+- `special` (Block List) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--defaults--stat--field--mappings--special))
+- `value` (Block List) Match a specific text value. (see [below for nested schema](#nestedblock--defaults--stat--field--mappings--value))
 
 <a id="nestedblock--defaults--stat--field--mappings--range"></a>
 ### Nested Schema for `defaults.stat.field.mappings.range`
@@ -563,7 +563,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
-- `step` (Block List, Max: 20) The threshold steps. (see [below for nested schema](#nestedblock--defaults--stat--field--thresholds--step))
+- `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--defaults--stat--field--thresholds--step))
 
 <a id="nestedblock--defaults--stat--field--thresholds--step"></a>
 ### Nested Schema for `defaults.stat.field.thresholds.step`
@@ -574,7 +574,7 @@ Required:
 
 Optional:
 
-- `value` (Number) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
+- `value` (String) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
 
 
 
@@ -586,11 +586,11 @@ Optional:
 
 - `color_mode` (String) The color mode. The choices are: `none`, `value`, `background`.
 - `graph_mode` (String) The graph mode. The choices are: `none`, `area`.
-- `options` (Block List, Max: 1) Value reduce or calculation options. (see [below for nested schema](#nestedblock--defaults--stat--graph--options))
+- `options` (Block List) Value reduce or calculation options. (see [below for nested schema](#nestedblock--defaults--stat--graph--options))
 - `orientation` (String) The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.
 - `text_alignment` (String) The text alignment. The choices are: `auto`, `center`.
 - `text_mode` (String) What show on panel. The choices are: `auto`, `value`, `value_and_name`, `name`, `none`.
-- `text_size` (Block List, Max: 1) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--defaults--stat--graph--text_size))
+- `text_size` (Block List) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--defaults--stat--graph--text_size))
 
 <a id="nestedblock--defaults--stat--graph--options"></a>
 ### Nested Schema for `defaults.stat.graph.options`
@@ -619,11 +619,11 @@ Optional:
 
 Optional:
 
-- `axis` (Block List, Max: 1) Axis display options. (see [below for nested schema](#nestedblock--defaults--timeseries--axis))
-- `field` (Block List, Max: 1) The customization of field options. (see [below for nested schema](#nestedblock--defaults--timeseries--field))
-- `graph` (Block List, Max: 1) The visualization options. (see [below for nested schema](#nestedblock--defaults--timeseries--graph))
-- `legend` (Block List, Max: 1) Legend options. (see [below for nested schema](#nestedblock--defaults--timeseries--legend))
-- `tooltip` (Block List, Max: 1) The tooltip visualization options. (see [below for nested schema](#nestedblock--defaults--timeseries--tooltip))
+- `axis` (Block List) Axis display options. (see [below for nested schema](#nestedblock--defaults--timeseries--axis))
+- `field` (Block List) The customization of field options. (see [below for nested schema](#nestedblock--defaults--timeseries--field))
+- `graph` (Block List) The visualization options. (see [below for nested schema](#nestedblock--defaults--timeseries--graph))
+- `legend` (Block List) Legend options. (see [below for nested schema](#nestedblock--defaults--timeseries--legend))
+- `tooltip` (Block List) The tooltip visualization options. (see [below for nested schema](#nestedblock--defaults--timeseries--tooltip))
 
 <a id="nestedblock--defaults--timeseries--axis"></a>
 ### Nested Schema for `defaults.timeseries.axis`
@@ -632,7 +632,7 @@ Optional:
 
 - `label` (String) The custom text label for the y-axis.
 - `placement` (String) The placement of the y-axis. The choices are: `auto`, `left`, `right`, `hidden`.
-- `scale` (Block List, Max: 1) Can be used to configure the scale of the y-axis. Another way visualize series that differ by orders of magnitude is to use a logarithmic scales. This is really useful for data usage or latency measurements. The goal here is to avoid one series dominating and delegating all the others to the bottom of the graph. (see [below for nested schema](#nestedblock--defaults--timeseries--axis--scale))
+- `scale` (Block List) Can be used to configure the scale of the y-axis. Another way visualize series that differ by orders of magnitude is to use a logarithmic scales. This is really useful for data usage or latency measurements. The goal here is to avoid one series dominating and delegating all the others to the bottom of the graph. (see [below for nested schema](#nestedblock--defaults--timeseries--axis--scale))
 - `soft_max` (Number) The soft maximum of y-axis. By default, the Grafana workspace sets the range for the y-axis automatically based on the data.The `soft_max` setting can prevent blips from appearing as mountains when the data is mostly flat, and hard min or max derived from standard min and max field options can prevent intermittent spikes from flattening useful detail by clipping the spikes past a defined point.
 - `soft_min` (Number) The soft minimum of y-axis. By default, the Grafana workspace sets the range for the y-axis automatically based on the data.The `soft_min` setting can prevent blips from appearing as mountains when the data is mostly flat, and hard min or max derived from standard min and max field options can prevent intermittent spikes from flattening useful detail by clipping the spikes past a defined point.
 
@@ -654,13 +654,13 @@ Optional:
 
 Optional:
 
-- `color` (Block List, Max: 1) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--defaults--timeseries--field--color))
+- `color` (Block List) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--defaults--timeseries--field--color))
 - `decimals` (Number) The number of decimals to include when rendering a value. Must be between `0` and `20` (inclusive).
-- `mappings` (Block List, Max: 1) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--defaults--timeseries--field--mappings))
+- `mappings` (Block List) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--defaults--timeseries--field--mappings))
 - `max` (Number) The maximum value used in percentage threshold calculations.
 - `min` (Number) The minimum value used in percentage threshold calculations.
 - `no_value` (Number) The value to display if the field value is empty or null.
-- `thresholds` (Block List, Max: 1) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--defaults--timeseries--field--thresholds))
+- `thresholds` (Block List) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--defaults--timeseries--field--thresholds))
 - `unit` (String) The unit the field should use.
 
 <a id="nestedblock--defaults--timeseries--field--color"></a>
@@ -681,10 +681,10 @@ Optional:
 
 Optional:
 
-- `range` (Block List, Max: 10) Match a numerical range of values. (see [below for nested schema](#nestedblock--defaults--timeseries--field--mappings--range))
-- `regex` (Block List, Max: 10) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--defaults--timeseries--field--mappings--regex))
-- `special` (Block List, Max: 10) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--defaults--timeseries--field--mappings--special))
-- `value` (Block List, Max: 10) Match a specific text value. (see [below for nested schema](#nestedblock--defaults--timeseries--field--mappings--value))
+- `range` (Block List) Match a numerical range of values. (see [below for nested schema](#nestedblock--defaults--timeseries--field--mappings--range))
+- `regex` (Block List) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--defaults--timeseries--field--mappings--regex))
+- `special` (Block List) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--defaults--timeseries--field--mappings--special))
+- `value` (Block List) Match a specific text value. (see [below for nested schema](#nestedblock--defaults--timeseries--field--mappings--value))
 
 <a id="nestedblock--defaults--timeseries--field--mappings--range"></a>
 ### Nested Schema for `defaults.timeseries.field.mappings.range`
@@ -745,7 +745,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
-- `step` (Block List, Max: 20) The threshold steps. (see [below for nested schema](#nestedblock--defaults--timeseries--field--thresholds--step))
+- `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--defaults--timeseries--field--thresholds--step))
 
 <a id="nestedblock--defaults--timeseries--field--thresholds--step"></a>
 ### Nested Schema for `defaults.timeseries.field.thresholds.step`
@@ -756,7 +756,7 @@ Required:
 
 Optional:
 
-- `value` (Number) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
+- `value` (String) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
 
 
 
