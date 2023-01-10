@@ -13,7 +13,6 @@ import (
 
 // Ensure GrafanaDashboardBuilderProvider satisfies various provider interfaces.
 var _ provider.Provider = &GrafanaDashboardBuilderProvider{}
-var _ provider.ProviderWithMetadata = &GrafanaDashboardBuilderProvider{}
 
 // GrafanaDashboardBuilderProvider defines the provider implementation.
 type GrafanaDashboardBuilderProvider struct {
