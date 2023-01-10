@@ -10,7 +10,8 @@ hestia.shell.mkShell {
   shellScripts = [];
 
   packages = [
-    pkgs.go_1_19
+    pkgs.go
+    pkgs.go-tools
     pkgs.terraform
   ];
 }

@@ -2,8 +2,7 @@
   description = "Grafana Dashboard Provider";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/22.05";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/release-22.11";
     hestia.url = "github:iRevive/hestia-nix";
     flake-utils.url = "github:numtide/flake-utils";
     flake-compat = {
@@ -12,21 +11,11 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, flake-utils, hestia, ... }:
-    let
-      pkgs-unstable = import nixpkgs-unstable {
-        localSystem = "aarch64-darwin";
-      };
-
-      terraform-overrides = final: prev: {
-        go_1_19 = pkgs-unstable.go_1_19;
-      };
-    in
-    flake-utils.lib.simpleFlake { # todo use forEachSystem to keep flake crossplatform
+  outputs = { self, nixpkgs, flake-utils, hestia, ... }:
+    flake-utils.lib.simpleFlake { 
       inherit self nixpkgs;
       name = "gdashboard";
       overlay = hestia.overlays.default;
-      preOverlays = [terraform-overrides];
       shell = ./shell-impl.nix;
     };
 }
