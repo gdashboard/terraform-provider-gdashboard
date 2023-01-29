@@ -123,7 +123,6 @@ const testAccDashboardDataSourceConfigExpectedJson = `{
   "timezone": "",
   "editable": false,
   "hideControls": false,
-  "sharedCrosshair": false,
   "panels": [
     {
       "editable": false,
@@ -303,7 +302,6 @@ const testAccDashboardDataSourceProviderCustomDefaultsConfigExpectedJson = `{
   "timezone": "",
   "editable": false,
   "hideControls": false,
-  "sharedCrosshair": false,
   "panels": [],
   "templating": {
     "list": []
@@ -344,7 +342,6 @@ const testAccDashboardDataSourceProviderDefaultsConfigExpectedJson = `{
   "timezone": "",
   "editable": true,
   "hideControls": false,
-  "sharedCrosshair": false,
   "panels": [],
   "templating": {
     "list": []
