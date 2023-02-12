@@ -1,24 +1,39 @@
 ---
-page_title: "gdashboard_gauge Data Source - terraform-provider-gdashboard"
+page_title: "gdashboard_table Data Source - terraform-provider-gdashboard"
 subcategory: ""
 description: |-
-  Gauge panel data source. See Grafana documentation https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/. for more details
+  Table panel data source. See Grafana documentation https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/table/ for more details.
 ---
 
-# gdashboard_gauge (Data Source)
+# gdashboard_table (Data Source)
 
-Gauge panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/). for more details
+Table panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/table/) for more details.
 
 ## Minimal Example
 
 ```terraform
-data "gdashboard_gauge" "jvm_memory" {
-  title = "JVM Memory"
+data "gdashboard_table" "status" {
+  title = "Example"
+
+  graph {
+    column {
+      filterable = true
+    }
+
+    cell {
+      inspectable  = true
+      display_mode = "basic"
+    }
+
+    footer {
+      pagination = true
+    }
+  }
 
   queries {
     prometheus {
       uid     = "prometheus"
-      expr    = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"
+      expr    = "up{container_name='container'}"
       instant = true
     }
   }
@@ -28,11 +43,43 @@ data "gdashboard_gauge" "jvm_memory" {
 ## Configuration Example
 
 ```terraform
-data "gdashboard_gauge" "jvm_memory" {
-  title = "JVM Memory"
+data "gdashboard_table" "test" {
+  title       = "Example"
+  description = "Table description"
+
+  graph {
+    show_header = false
+
+    column {
+      align      = "right"
+      filterable = true
+      width      = 30
+      min_width  = 50
+    }
+
+    cell {
+      inspectable  = true
+      display_mode = "basic"
+    }
+
+    footer {
+      pagination   = true
+      fields       = ["a", "b"]
+      calculations = ["min", "max"]
+    }
+  }
 
   field {
-    unit = "percent"
+    unit     = "bytes"
+    decimals = 1
+    min      = 0
+    max      = 10000
+
+    color {
+      mode        = "palette-classic"
+      fixed_color = "red"
+      series_by   = "first"
+    }
 
     thresholds {
       mode = "percentage"
@@ -53,52 +100,37 @@ data "gdashboard_gauge" "jvm_memory" {
     }
   }
 
-  overrides {
-    by_query_id {
-      query_id = "Prometheus_Query"
-      field {
-        color {
-          mode        = "fixed"
-          fixed_color = "red"
-        }
-      }
-    }
-  }
-
-  graph {
-    orientation            = "horizontal"
-    show_threshold_labels  = true
-    show_threshold_markers = true
-
-    options {
-      calculation = "lastNotNull"
-    }
-  }
-
   queries {
     prometheus {
-      uid           = "prometheus"
-      expr          = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"
-      min_interval  = "30"
-      legend_format = "{{job_type}}"
-      ref_id        = "Prometheus_Query"
-      instant       = true
+      uid     = "prometheus"
+      expr    = "up{container_name='container'}"
+      instant = true
     }
   }
+
 }
 ```
 
 ## Provider Defaults Example
 
-You can define default attributes for the gauge data source via provider.
+You can define default attributes for the table data source via provider.
 In the example below, both panels inherit default attributes from the provider.
 
 ```terraform
 provider "gdashboard" {
   defaults {
-    gauge {
+    table {
       field {
-        unit = "percent"
+        unit     = "bytes"
+        decimals = 1
+        min      = 0
+        max      = 10000
+
+        color {
+          mode        = "palette-classic"
+          fixed_color = "red"
+          series_by   = "first"
+        }
 
         thresholds {
           mode = "percentage"
@@ -118,44 +150,35 @@ provider "gdashboard" {
           }
         }
       }
+    }
+  }
+}
 
-      graph {
-        orientation            = "horizontal"
-        show_threshold_labels  = true
-        show_threshold_markers = true
+data "gdashboard_table" "test" {
+  title = "Example"
 
-        options {
-          calculation = "lastNotNull"
-        }
+  graph {
+    graph {
+      show_header = false
+
+      column {
+        align      = "right"
+        filterable = true
+        width      = 30
+        min_width  = 50
+      }
+
+      cell {
+        inspectable = true
       }
     }
   }
-}
-
-data "gdashboard_gauge" "jvm_memory" {
-  title = "JVM Memory"
 
   queries {
     prometheus {
-      uid           = "prometheus"
-      expr          = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"
-      min_interval  = "30"
-      legend_format = "{{job_type}}"
-      instant       = true
-    }
-  }
-}
-
-data "gdashboard_gauge" "native_memory" {
-  title = "Native Memory"
-
-  queries {
-    prometheus {
-      uid           = "prometheus"
-      expr          = "sum(increase(native_total{container_name='container'}[$__rate_interval]))"
-      min_interval  = "30"
-      legend_format = "{{job_type}}"
-      instant       = true
+      uid     = "prometheus"
+      expr    = "up{container_name='container_1'}"
+      instant = true
     }
   }
 }
@@ -299,30 +322,39 @@ Optional:
 
 Optional:
 
-- `options` (Block List) Reduction or calculation options for a value. (see [below for nested schema](#nestedblock--graph--options))
-- `orientation` (String) The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.
-- `show_threshold_labels` (Boolean) Whether to render the threshold values around the gauge bar or not.
-- `show_threshold_markers` (Boolean) Whether to render the thresholds as an outer bar or not.
-- `text_size` (Block List) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--graph--text_size))
+- `cell` (Block List) Table column options. (see [below for nested schema](#nestedblock--graph--cell))
+- `column` (Block List) Table column options. (see [below for nested schema](#nestedblock--graph--column))
+- `footer` (Block List) Table footer options. (see [below for nested schema](#nestedblock--graph--footer))
+- `show_header` (Boolean) Whether to show table header or not.
 
-<a id="nestedblock--graph--options"></a>
-### Nested Schema for `graph.options`
-
-Optional:
-
-- `calculation` (String) A reducer function or calculation. The choices are: `lastNotNull`, `last`, `firstNotNull`, `first`, `min`, `max`, `mean`, `sum`, `count`, `range`, `delta`, `step`, `diff`, `logmin`, `allIsZero`, `allIsNull`, `changeCount`, `distinctCount`, `diffperc`, `allValues`, `uniqueValues`
-- `fields` (String) The fields that should be included in the panel.
-- `limit` (Number) The max number of rows to display.
-- `values` (Boolean) Whether to calculate a single value per column or series or show each row.
-
-
-<a id="nestedblock--graph--text_size"></a>
-### Nested Schema for `graph.text_size`
+<a id="nestedblock--graph--cell"></a>
+### Nested Schema for `graph.cell`
 
 Optional:
 
-- `title` (Number) The size of the title. Must be between `1` and `100` (inclusive).
-- `value` (Number) The size of the value. Must be between `1` and `100` (inclusive).
+- `display_mode` (String) The alignment of cell content: `auto`, `color-text`, `color-background`, `color-background-solid`, `gradient-gauge`, `lcd-gauge`, `basic`, `json-view`, `image`.
+- `inspectable` (Boolean) Whether to make cells inspectable or not.
+
+
+<a id="nestedblock--graph--column"></a>
+### Nested Schema for `graph.column`
+
+Optional:
+
+- `align` (String) The alignment of cell content: `auto`, `center`, `left`, `right`.
+- `filterable` (Boolean) Whether to make table filterable or not.
+- `min_width` (Number) The minimum width for columns in pixels for auto resizing.
+- `width` (Number) The width for columns in pixels.
+
+
+<a id="nestedblock--graph--footer"></a>
+### Nested Schema for `graph.footer`
+
+Optional:
+
+- `calculations` (List of String) A reducer function or calculation. The choices are: `lastNotNull`, `last`, `firstNotNull`, `first`, `min`, `max`, `mean`, `sum`, `count`, `range`, `delta`, `step`, `diff`, `logmin`, `allIsZero`, `allIsNull`, `changeCount`, `distinctCount`, `diffperc`, `allValues`, `uniqueValues`
+- `fields` (List of String) Choose the fields should appear in calculations.
+- `pagination` (Boolean) Whether to enable pagination or not.
 
 
 

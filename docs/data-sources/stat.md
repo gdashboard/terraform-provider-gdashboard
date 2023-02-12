@@ -296,7 +296,7 @@ Optional:
 
 - `color_mode` (String) The color mode. The choices are: `none`, `value`, `background`.
 - `graph_mode` (String) The graph mode. The choices are: `none`, `area`.
-- `options` (Block List) Value reduce or calculation options. (see [below for nested schema](#nestedblock--graph--options))
+- `options` (Block List) Reduction or calculation options for a value. (see [below for nested schema](#nestedblock--graph--options))
 - `orientation` (String) The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.
 - `text_alignment` (String) The text alignment. The choices are: `auto`, `center`.
 - `text_mode` (String) What show on panel. The choices are: `auto`, `value`, `value_and_name`, `name`, `none`.
