@@ -13,7 +13,7 @@ Text panel data source. See Grafana [documentation](https://grafana.com/docs/gra
 
 ```terraform
 data "gdashboard_text" "text" {
-  title       = "Text"
+  title       = "Markdown example"
   description = "Some text"
 
   graph {

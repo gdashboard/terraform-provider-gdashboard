@@ -28,6 +28,7 @@ type Defaults struct {
 	BarGauge   BarGaugeDefaults
 	Stat       StatDefaults
 	Gauge      GaugeDefaults
+	Table      TableDefaults
 }
 
 // GrafanaDashboardBuilderProviderModel describes the provider data model.
@@ -41,6 +42,7 @@ type DefaultsModel struct {
 	BarGuage   []BarGaugeDefaultsModel   `tfsdk:"bar_gauge"`
 	Stat       []StatDefaultsModel       `tfsdk:"stat"`
 	Gauge      []GaugeDefaultsModel      `tfsdk:"gauge"`
+	Table      []TableDefaultsModel      `tfsdk:"table"`
 }
 
 type DashboardDefaultsModel struct {
@@ -71,6 +73,10 @@ type StatDefaultsModel struct {
 type GaugeDefaultsModel struct {
 	Field []FieldOptions `tfsdk:"field"`
 	Graph []GaugeOptions `tfsdk:"graph"`
+}
+
+type TableDefaultsModel struct {
+	Field []FieldOptions `tfsdk:"field"`
 }
 
 type TimeModel struct {
@@ -152,6 +158,17 @@ func (p *GrafanaDashboardBuilderProvider) Schema(ctx context.Context, req provid
 								Blocks: map[string]schema.Block{
 									"field": fieldBlock(),
 									"graph": gaugeGraphBlock(),
+								},
+							},
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(1),
+							},
+						},
+						"table": schema.ListNestedBlock{
+							Description: "Table defaults.",
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"field": fieldBlock(),
 								},
 							},
 							Validators: []validator.List{
@@ -246,6 +263,9 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 				ShowThresholdMarkers: true,
 				ReduceOptions:        NewReduceOptionDefaults(),
 			},
+		},
+		Table: TableDefaults{
+			Field: NewFieldDefaults(),
 		},
 	}
 
@@ -449,6 +469,12 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 		}
 	}
 
+	if len(data.Defaults) > 0 && len(data.Defaults[0].Table) > 0 {
+		opts := data.Defaults[0].Table[0]
+
+		updateFieldDefaults(&defaults.Table.Field, opts.Field)
+	}
+
 	resp.DataSourceData = defaults
 	resp.ResourceData = defaults
 }
@@ -566,6 +592,7 @@ func (p *GrafanaDashboardBuilderProvider) DataSources(ctx context.Context) []fun
 		NewRowDataSource,
 		NewGaugeDataSource,
 		NewTextDataSource,
+		NewTableDataSource,
 	}
 }
 

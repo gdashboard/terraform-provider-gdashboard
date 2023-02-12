@@ -202,13 +202,20 @@ type (
 		MsResolution bool   `json:"msResolution,omitempty"` // was added in Grafana 3.x
 		Sort         int    `json:"sort,omitempty"`
 	}
+	TableFooter struct {
+		Show             bool     `json:"show"`
+		EnablePagination bool     `json:"enablePagination"`
+		Fields           []string `json:"fields,omitempty"`
+		Reducer          []string `json:"reducer,omitempty"`
+	}
+	TableOptions struct {
+		ShowHeader bool        `json:"showHeader"`
+		Footer     TableFooter `json:"footer"`
+	}
 	TablePanel struct {
-		Columns   []Column      `json:"columns"`
-		Sort      *Sort         `json:"sort,omitempty"`
-		Styles    []ColumnStyle `json:"styles"`
-		Transform string        `json:"transform"`
-		Targets   []Target      `json:"targets,omitempty"`
-		Scroll    bool          `json:"scroll"` // from grafana 3.x
+		Targets     []Target     `json:"targets,omitempty"`
+		Options     TableOptions `json:"options,omitempty"`
+		FieldConfig FieldConfig  `json:"fieldConfig"`
 	}
 	CodeOptions struct {
 		Language        string `json:"language"`
@@ -419,6 +426,14 @@ type (
 		ThresholdsStyle struct {
 			Mode string `json:"mode"`
 		} `json:"thresholdsStyle"`
+
+		// Table
+		Align       string `json:"align,omitempty"`
+		DisplayMode string `json:"displayMode,omitempty"`
+		Inspect     bool   `json:"inspect,omitempty"`
+		Filterable  bool   `json:"filterable,omitempty"`
+		Width       int64  `json:"width,omitempty"`
+		MinWidth    int64  `json:"minWidth,omitempty"`
 	}
 	Thresholds struct {
 		Mode  string          `json:"mode"`

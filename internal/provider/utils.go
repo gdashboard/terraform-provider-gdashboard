@@ -453,7 +453,7 @@ func fieldBlock() schema.Block {
 
 func reduceOptionsBlock() schema.Block {
 	return schema.ListNestedBlock{
-		Description: "Value reduce or calculation options.",
+		Description: "Reduction or calculation options for a value.",
 		NestedObject: schema.NestedBlockObject{
 			Attributes: map[string]schema.Attribute{
 				"values": schema.BoolAttribute{

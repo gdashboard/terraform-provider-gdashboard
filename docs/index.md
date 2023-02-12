@@ -131,6 +131,7 @@ Optional:
 - `dashboard` (Block List) Dashboard defaults. (see [below for nested schema](#nestedblock--defaults--dashboard))
 - `gauge` (Block List) Gauge defaults. (see [below for nested schema](#nestedblock--defaults--gauge))
 - `stat` (Block List) Stat defaults. (see [below for nested schema](#nestedblock--defaults--stat))
+- `table` (Block List) Table defaults. (see [below for nested schema](#nestedblock--defaults--table))
 - `timeseries` (Block List) Timeseries defaults. (see [below for nested schema](#nestedblock--defaults--timeseries))
 
 <a id="nestedblock--defaults--bar_gauge"></a>
@@ -259,7 +260,7 @@ Optional:
 Optional:
 
 - `display_mode` (String) The display mode. The choices are: `gradient`, `lcd`, `basic`.
-- `options` (Block List) Value reduce or calculation options. (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph--options))
+- `options` (Block List) Reduction or calculation options for a value. (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph--options))
 - `orientation` (String) The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.
 - `text_alignment` (String) The text alignment. The choices are: `auto`, `center`.
 - `text_size` (Block List) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--defaults--bar_gauge--graph--text_size))
@@ -431,7 +432,7 @@ Optional:
 
 Optional:
 
-- `options` (Block List) Value reduce or calculation options. (see [below for nested schema](#nestedblock--defaults--gauge--graph--options))
+- `options` (Block List) Reduction or calculation options for a value. (see [below for nested schema](#nestedblock--defaults--gauge--graph--options))
 - `orientation` (String) The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.
 - `show_threshold_labels` (Boolean) Whether to render the threshold values around the gauge bar or not.
 - `show_threshold_markers` (Boolean) Whether to render the thresholds as an outer bar or not.
@@ -586,7 +587,7 @@ Optional:
 
 - `color_mode` (String) The color mode. The choices are: `none`, `value`, `background`.
 - `graph_mode` (String) The graph mode. The choices are: `none`, `area`.
-- `options` (Block List) Value reduce or calculation options. (see [below for nested schema](#nestedblock--defaults--stat--graph--options))
+- `options` (Block List) Reduction or calculation options for a value. (see [below for nested schema](#nestedblock--defaults--stat--graph--options))
 - `orientation` (String) The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.
 - `text_alignment` (String) The text alignment. The choices are: `auto`, `center`.
 - `text_mode` (String) What show on panel. The choices are: `auto`, `value`, `value_and_name`, `name`, `none`.
@@ -610,6 +611,126 @@ Optional:
 
 - `title` (Number) The size of the title. Must be between `1` and `100` (inclusive).
 - `value` (Number) The size of the value. Must be between `1` and `100` (inclusive).
+
+
+
+
+<a id="nestedblock--defaults--table"></a>
+### Nested Schema for `defaults.table`
+
+Optional:
+
+- `field` (Block List) The customization of field options. (see [below for nested schema](#nestedblock--defaults--table--field))
+
+<a id="nestedblock--defaults--table--field"></a>
+### Nested Schema for `defaults.table.field`
+
+Optional:
+
+- `color` (Block List) Defines how Grafana colors series or fields. There are multiple modes here that work differently, and their utility depends largely on the currently selected visualization. (see [below for nested schema](#nestedblock--defaults--table--field--color))
+- `decimals` (Number) The number of decimals to include when rendering a value. Must be between `0` and `20` (inclusive).
+- `mappings` (Block List) The set of rules that translate a field value or range of values into explicit text. (see [below for nested schema](#nestedblock--defaults--table--field--mappings))
+- `max` (Number) The maximum value used in percentage threshold calculations.
+- `min` (Number) The minimum value used in percentage threshold calculations.
+- `no_value` (Number) The value to display if the field value is empty or null.
+- `thresholds` (Block List) Thresholds set the color of the value text depending on conditions that you define. (see [below for nested schema](#nestedblock--defaults--table--field--thresholds))
+- `unit` (String) The unit the field should use.
+
+<a id="nestedblock--defaults--table--field--color"></a>
+### Nested Schema for `defaults.table.field.color`
+
+Optional:
+
+- `fixed_color` (String) The series to use to define the color. This is useful for graphs and pie charts, for example.
+- `mode` (String) The colorization mode. The most popular options:
+1) `fixed` - specific color set by using the value of `fixed_color`.
+2) `thresholds` - a color is derived from the matching threshold. This is useful for gauges, stat, and table visualizations.
+3) `palette-classic` - a color is derived from the matching threshold using the classic color palette.
+- `series_by` (String) The series to use to define the color. This is useful for graphs and pie charts, for example.
+
+
+<a id="nestedblock--defaults--table--field--mappings"></a>
+### Nested Schema for `defaults.table.field.mappings`
+
+Optional:
+
+- `range` (Block List) Match a numerical range of values. (see [below for nested schema](#nestedblock--defaults--table--field--mappings--range))
+- `regex` (Block List) Match a regular expression with replacement. (see [below for nested schema](#nestedblock--defaults--table--field--mappings--regex))
+- `special` (Block List) Match on null, NaN, boolean and empty values. (see [below for nested schema](#nestedblock--defaults--table--field--mappings--special))
+- `value` (Block List) Match a specific text value. (see [below for nested schema](#nestedblock--defaults--table--field--mappings--value))
+
+<a id="nestedblock--defaults--table--field--mappings--range"></a>
+### Nested Schema for `defaults.table.field.mappings.range`
+
+Required:
+
+- `from` (Number) The start of the range.
+- `to` (Number) The end of the range.
+
+Optional:
+
+- `color` (String) The color to use if the condition is met.
+- `display_text` (String) Text to display if the condition is met. This field accepts Grafana variables.
+
+
+<a id="nestedblock--defaults--table--field--mappings--regex"></a>
+### Nested Schema for `defaults.table.field.mappings.regex`
+
+Required:
+
+- `pattern` (String) The regular expression to match.
+
+Optional:
+
+- `color` (String) The color to use if the condition is met.
+- `display_text` (String) Text to display if the condition is met. This field accepts Grafana variables.
+
+
+<a id="nestedblock--defaults--table--field--mappings--special"></a>
+### Nested Schema for `defaults.table.field.mappings.special`
+
+Optional:
+
+- `color` (String) The color to use if the condition is met.
+- `display_text` (String) Text to display if the condition is met. This field accepts Grafana variables.
+- `match` (String) The category to match. The choices are: `null`, `nan`, `null+nan`, `true`, `false`, `empty`.
+
+
+<a id="nestedblock--defaults--table--field--mappings--value"></a>
+### Nested Schema for `defaults.table.field.mappings.value`
+
+Required:
+
+- `value` (String) The exact value to match.
+
+Optional:
+
+- `color` (String) The color to use if the condition is met.
+- `display_text` (String) Text to display if the condition is met. This field accepts Grafana variables.
+
+
+
+<a id="nestedblock--defaults--table--field--thresholds"></a>
+### Nested Schema for `defaults.table.field.thresholds`
+
+Optional:
+
+- `mode` (String) The threshold mode. The choices are:
+1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
+2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
+- `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--defaults--table--field--thresholds--step))
+
+<a id="nestedblock--defaults--table--field--thresholds--step"></a>
+### Nested Schema for `defaults.table.field.thresholds.step`
+
+Required:
+
+- `color` (String) The color for the matching values.
+
+Optional:
+
+- `value` (Number) The value to match. Either percentage or absolute. Depends on the mode. The step without `value` indicates the base color. It is generally the good color.
+
 
 
 

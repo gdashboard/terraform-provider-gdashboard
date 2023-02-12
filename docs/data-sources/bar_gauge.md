@@ -262,7 +262,7 @@ Optional:
 Optional:
 
 - `display_mode` (String) The display mode. The choices are: `gradient`, `lcd`, `basic`.
-- `options` (Block List) Value reduce or calculation options. (see [below for nested schema](#nestedblock--graph--options))
+- `options` (Block List) Reduction or calculation options for a value. (see [below for nested schema](#nestedblock--graph--options))
 - `orientation` (String) The layout orientation. The choices are: `auto`, `horizontal`, `vertical`.
 - `text_alignment` (String) The text alignment. The choices are: `auto`, `center`.
 - `text_size` (Block List) The size of the text elements on the panel. (see [below for nested schema](#nestedblock--graph--text_size))
