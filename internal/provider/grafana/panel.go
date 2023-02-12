@@ -210,19 +210,18 @@ type (
 		Targets   []Target      `json:"targets,omitempty"`
 		Scroll    bool          `json:"scroll"` // from grafana 3.x
 	}
+	CodeOptions struct {
+		Language        string `json:"language"`
+		ShowLineNumbers bool   `json:"showLineNumbers"`
+		ShowMiniMap     bool   `json:"showMiniMap"`
+	}
+	TextPanelOptions struct {
+		Mode    string      `json:"mode"`
+		Content string      `json:"content"`
+		Code    CodeOptions `json:"code"`
+	}
 	TextPanel struct {
-		Content     string        `json:"content"`
-		Mode        string        `json:"mode"`
-		PageSize    uint          `json:"pageSize"`
-		Scroll      bool          `json:"scroll"`
-		ShowHeader  bool          `json:"showHeader"`
-		Sort        Sort          `json:"sort"`
-		Styles      []ColumnStyle `json:"styles"`
-		FieldConfig FieldConfig   `json:"fieldConfig"`
-		Options     struct {
-			Content string `json:"content"`
-			Mode    string `json:"mode"`
-		} `json:"options"`
+		Options TextPanelOptions `json:"options"`
 	}
 	SinglestatPanel struct {
 		Colors          []string   `json:"colors"`
