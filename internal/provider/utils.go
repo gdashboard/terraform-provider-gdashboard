@@ -11,7 +11,53 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 	"hash/crc32"
+	"strings"
 )
+
+// constants
+
+// CalculationTypes The following table contains a list of calculations you can perform in Grafana.
+// You can find these calculations in the Transform tab and in the bar gauge, gauge, and stat visualizations.
+func CalculationTypes() []string {
+	return []string{
+		"lastNotNull",   // Last (not null) - Last, not null value
+		"last",          // Last - Last value
+		"firstNotNull",  // First (not null) - First, not null value
+		"first",         // First - First value
+		"min",           // Min - Minimum value of a field
+		"max",           // Max - Maximum value of a field
+		"mean",          // Mean - Mean value of all values in a field
+		"sum",           // Total - Sum of all values in a field
+		"count",         // Count - Number of values in a field
+		"range",         // Range - Difference between maximum and minimum values of a field
+		"delta",         // Delta - Cumulative change in value, only counts increments
+		"step",          // Step - Minimal interval between values of a field
+		"diff",          // Difference - Difference between first and last value of a field
+		"diffperc",      // Difference percent - Percentage change between first and last value of a field
+		"logmin",        // Min (above zero) - Minimum, positive value of a field
+		"allIsZero",     // All zeros - True when all values are 0
+		"allIsNull",     // All nulls - True when all values are null
+		"changeCount",   // Change count - Number of times the field’s value changes
+		"distinctCount", // Distinct count - Number of unique values in a field
+		"stdDev",        // StdDev - Standard deviation of all values in a field
+		"variance",      // Variance - Variance of all values in a field
+		"allValues",     // All values - Returns an array with all values
+		"uniqueValues",  // All unique values - Returns an array with all unique values
+	}
+}
+
+func CalculationTypesString() string {
+	return strings.Join(CalculationTypes(), ", ")
+}
+
+func CalculationTypesMarkdown() string {
+	res := make([]string, 0)
+	for _, tpe := range CalculationTypes() {
+		res = append(res, "`"+tpe+"`")
+	}
+
+	return strings.Join(res, ", ")
+}
 
 // defaults
 
@@ -469,19 +515,11 @@ func reduceOptionsBlock() schema.Block {
 					Description: "The max number of rows to display.", // todo schema validation `values = true`
 				},
 				"calculation": schema.StringAttribute{ // todo schema validation `values = false`
-					Optional: true,
-					Description: "A reducer function or calculation. The choices are: " +
-						"lastNotNull, last, firstNotNull, first, min, max, mean, sum, count, range, " +
-						"delta, step, diff, logmin, allIsZero, allIsNull, changeCount, distinctCount, diffperc, allValues, uniqueValues",
-					MarkdownDescription: "A reducer function or calculation. The choices are: " +
-						"`lastNotNull`, `last`, `firstNotNull`, `first`, `min`, `max`, `mean`, `sum`, `count`, `range`, " +
-						"`delta`, `step`, `diff`, `logmin`, `allIsZero`, `allIsNull`, `changeCount`, `distinctCount`, `diffperc`, `allValues`, `uniqueValues`",
+					Optional:            true,
+					Description:         "A reducer function or calculation. The choices are: " + CalculationTypesString() + ".",
+					MarkdownDescription: "A reducer function or calculation. The choices are: " + CalculationTypesMarkdown() + ".",
 					Validators: []validator.String{
-						stringvalidator.OneOf(
-							"lastNotNull", "last", "firstNotNull", "first", "min", "max", "mean", "sum", // total
-							"count", "range", "delta", "step", "diff", "logmin", // min above zero
-							"allIsZero", "allIsNull", "changeCount", "distinctCount", "diffperc", "allValues", "uniqueValues",
-						),
+						stringvalidator.OneOf(CalculationTypes()...),
 					},
 				},
 			},

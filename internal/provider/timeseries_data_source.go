@@ -61,17 +61,18 @@ type TimeseriesLegendDefault struct {
 
 // TimeseriesDataSourceModel describes the data source data model.
 type TimeseriesDataSourceModel struct {
-	Id          types.String               `tfsdk:"id"`
-	Json        types.String               `tfsdk:"json"`
-	Title       types.String               `tfsdk:"title"`
-	Description types.String               `tfsdk:"description"`
-	Queries     []Query                    `tfsdk:"queries"`
-	Legend      []TimeseriesLegendOptions  `tfsdk:"legend"`
-	Tooltip     []TimeseriesTooltipOptions `tfsdk:"tooltip"`
-	Field       []FieldOptions             `tfsdk:"field"`
-	Axis        []AxisOptions              `tfsdk:"axis"`
-	Graph       []TimeseriesGraphOptions   `tfsdk:"graph"`
-	Overrides   []FieldOverrideOptions     `tfsdk:"overrides"`
+	Id              types.String               `tfsdk:"id"`
+	Json            types.String               `tfsdk:"json"`
+	Title           types.String               `tfsdk:"title"`
+	Description     types.String               `tfsdk:"description"`
+	Queries         []Query                    `tfsdk:"queries"`
+	Legend          []TimeseriesLegendOptions  `tfsdk:"legend"`
+	Tooltip         []TimeseriesTooltipOptions `tfsdk:"tooltip"`
+	Field           []FieldOptions             `tfsdk:"field"`
+	Axis            []AxisOptions              `tfsdk:"axis"`
+	Graph           []TimeseriesGraphOptions   `tfsdk:"graph"`
+	Overrides       []FieldOverrideOptions     `tfsdk:"overrides"`
+	Transformations []Transformations          `tfsdk:"transform"`
 }
 
 type TimeseriesLegendOptions struct {
@@ -259,6 +260,7 @@ func (d *TimeseriesDataSource) Schema(ctx context.Context, req datasource.Schema
 			"axis":      axisBlock(),
 			"graph":     timeseriesGraphBlock(),
 			"overrides": fieldOverrideBlock(),
+			"transform": transformationsBlock(),
 		},
 
 		Attributes: map[string]schema.Attribute{
@@ -299,6 +301,7 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 
 	targets := createTargets(data.Queries)
+	transformations := createTransformations(data.Transformations)
 
 	legendOptions := grafana.TimeseriesLegendOptions{
 		Calcs:       d.Defaults.Legend.Calculations,
@@ -431,11 +434,12 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 
 	panel := &grafana.Panel{
 		CommonPanel: grafana.CommonPanel{
-			OfType: grafana.TimeseriesType,
-			Title:  data.Title.ValueString(),
-			Type:   "timeseries",
-			Span:   12,
-			IsNew:  true,
+			OfType:          grafana.TimeseriesType,
+			Title:           data.Title.ValueString(),
+			Type:            "timeseries",
+			Span:            12,
+			IsNew:           true,
+			Transformations: transformations,
 		},
 		TimeseriesPanel: &grafana.TimeseriesPanel{
 			Targets: targets,

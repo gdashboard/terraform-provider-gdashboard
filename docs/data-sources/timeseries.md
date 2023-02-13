@@ -184,6 +184,7 @@ data "gdashboard_timeseries" "native_memory" {
 - `overrides` (Block List) The set of rules that override attributes of a field. (see [below for nested schema](#nestedblock--overrides))
 - `queries` (Block List) The queries to collect values from data sources. (see [below for nested schema](#nestedblock--queries))
 - `tooltip` (Block List) The tooltip visualization options. (see [below for nested schema](#nestedblock--tooltip))
+- `transform` (Block List) The (see [below for nested schema](#nestedblock--transform))
 
 ### Read-Only
 
@@ -921,3 +922,67 @@ Optional:
 Required:
 
 - `mode` (String) Choose the how to display the tooltip. The choices are: `multi`, `single`, `hidden`.
+
+
+<a id="nestedblock--transform"></a>
+### Nested Schema for `transform`
+
+Optional:
+
+- `step` (Block List) The transform step. (see [below for nested schema](#nestedblock--transform--step))
+
+<a id="nestedblock--transform--step"></a>
+### Nested Schema for `transform.step`
+
+Optional:
+
+- `group_by` (Block List) Group the data by a specified field (column) value and processes calculations on each group. (see [below for nested schema](#nestedblock--transform--step--group_by))
+- `grouping_to_matrix` (Block List) Limit the number of rows displayed. (see [below for nested schema](#nestedblock--transform--step--grouping_to_matrix))
+- `limit` (Block List) Limit the number of rows displayed. (see [below for nested schema](#nestedblock--transform--step--limit))
+- `series_to_rows` (Block List) Create a row for each field and a column for each calculation. (see [below for nested schema](#nestedblock--transform--step--series_to_rows))
+- `sort_by` (Block List) Sort each frame by the configured field. (see [below for nested schema](#nestedblock--transform--step--sort_by))
+
+<a id="nestedblock--transform--step--group_by"></a>
+### Nested Schema for `transform.step.group_by`
+
+Required:
+
+- `by` (List of String) Fields (columns) to group the records by.
+
+Optional:
+
+- `aggregate` (Map of List of String) Choose the fields should appear in calculations.
+
+
+<a id="nestedblock--transform--step--grouping_to_matrix"></a>
+### Nested Schema for `transform.step.grouping_to_matrix`
+
+Required:
+
+- `cell` (String) The value to display in a cell.
+- `column` (String) The column to group the records by.
+- `row` (String) The row to group the records by.
+
+
+<a id="nestedblock--transform--step--limit"></a>
+### Nested Schema for `transform.step.limit`
+
+Required:
+
+- `limit` (Number) How many rows to display.
+
+
+<a id="nestedblock--transform--step--series_to_rows"></a>
+### Nested Schema for `transform.step.series_to_rows`
+
+
+<a id="nestedblock--transform--step--sort_by"></a>
+### Nested Schema for `transform.step.sort_by`
+
+Required:
+
+- `field` (String) The field to sort the frame by.
+
+Optional:
+
+- `reverse` (Boolean) Whether to sort frames in a reverse order.

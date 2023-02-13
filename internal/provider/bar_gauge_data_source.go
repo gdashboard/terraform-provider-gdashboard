@@ -42,14 +42,15 @@ type BarGaugeGraphDefault struct {
 
 // BarGaugeDataSourceModel describes the data source data model.
 type BarGaugeDataSourceModel struct {
-	Id          types.String           `tfsdk:"id"`
-	Json        types.String           `tfsdk:"json"`
-	Title       types.String           `tfsdk:"title"`
-	Description types.String           `tfsdk:"description"`
-	Queries     []Query                `tfsdk:"queries"`
-	Field       []FieldOptions         `tfsdk:"field"`
-	Graph       []BarGaugeOptions      `tfsdk:"graph"`
-	Overrides   []FieldOverrideOptions `tfsdk:"overrides"`
+	Id              types.String           `tfsdk:"id"`
+	Json            types.String           `tfsdk:"json"`
+	Title           types.String           `tfsdk:"title"`
+	Description     types.String           `tfsdk:"description"`
+	Queries         []Query                `tfsdk:"queries"`
+	Field           []FieldOptions         `tfsdk:"field"`
+	Graph           []BarGaugeOptions      `tfsdk:"graph"`
+	Overrides       []FieldOverrideOptions `tfsdk:"overrides"`
+	Transformations []Transformations      `tfsdk:"transform"`
 }
 
 type BarGaugeOptions struct {
@@ -116,6 +117,7 @@ func (d *BarGaugeDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 			"field":     fieldBlock(),
 			"graph":     barGaugeGraphBlock(),
 			"overrides": fieldOverrideBlock(),
+			"transform": transformationsBlock(),
 		},
 
 		Attributes: map[string]schema.Attribute{
@@ -157,6 +159,7 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	targets := createTargets(data.Queries)
 	fieldConfig := createFieldConfig(d.Defaults.Field, data.Field)
+	transformations := createTransformations(data.Transformations)
 
 	options := grafana.Options{
 		Orientation: d.Defaults.Graph.Orientation,
@@ -193,11 +196,12 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	panel := &grafana.Panel{
 		CommonPanel: grafana.CommonPanel{
-			OfType: grafana.BarGaugeType,
-			Title:  data.Title.ValueString(),
-			Type:   "bargauge",
-			Span:   12,
-			IsNew:  true,
+			OfType:          grafana.BarGaugeType,
+			Title:           data.Title.ValueString(),
+			Type:            "bargauge",
+			Span:            12,
+			IsNew:           true,
+			Transformations: transformations,
 		},
 		BarGaugePanel: &grafana.BarGaugePanel{
 			Targets: targets,

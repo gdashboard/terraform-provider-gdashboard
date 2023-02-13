@@ -44,14 +44,15 @@ type StatGraphDefaults struct {
 
 // StatDataSourceModel describes the data source data model.
 type StatDataSourceModel struct {
-	Id          types.String           `tfsdk:"id"`
-	Json        types.String           `tfsdk:"json"`
-	Title       types.String           `tfsdk:"title"`
-	Description types.String           `tfsdk:"description"`
-	Queries     []Query                `tfsdk:"queries"`
-	Field       []FieldOptions         `tfsdk:"field"`
-	Graph       []StatOptions          `tfsdk:"graph"`
-	Overrides   []FieldOverrideOptions `tfsdk:"overrides"`
+	Id              types.String           `tfsdk:"id"`
+	Json            types.String           `tfsdk:"json"`
+	Title           types.String           `tfsdk:"title"`
+	Description     types.String           `tfsdk:"description"`
+	Queries         []Query                `tfsdk:"queries"`
+	Field           []FieldOptions         `tfsdk:"field"`
+	Graph           []StatOptions          `tfsdk:"graph"`
+	Overrides       []FieldOverrideOptions `tfsdk:"overrides"`
+	Transformations []Transformations      `tfsdk:"transform"`
 }
 
 type StatOptions struct {
@@ -136,6 +137,7 @@ func (d *StatDataSource) Schema(ctx context.Context, req datasource.SchemaReques
 			"field":     fieldBlock(),
 			"graph":     statGraphBlock(),
 			"overrides": fieldOverrideBlock(),
+			"transform": transformationsBlock(),
 		},
 
 		Attributes: map[string]schema.Attribute{
@@ -177,6 +179,7 @@ func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	targets := createTargets(data.Queries)
 	fieldConfig := createFieldConfig(d.Defaults.Field, data.Field)
+	transformations := createTransformations(data.Transformations)
 
 	options := grafana.Options{
 		Orientation: d.Defaults.Graph.Orientation,
@@ -223,11 +226,12 @@ func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	panel := &grafana.Panel{
 		CommonPanel: grafana.CommonPanel{
-			OfType: grafana.StatType,
-			Title:  data.Title.ValueString(),
-			Type:   "stat",
-			Span:   12,
-			IsNew:  true,
+			OfType:          grafana.StatType,
+			Title:           data.Title.ValueString(),
+			Type:            "stat",
+			Span:            12,
+			IsNew:           true,
+			Transformations: transformations,
 		},
 		StatPanel: &grafana.StatPanel{
 			Targets: targets,
