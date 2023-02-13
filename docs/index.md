@@ -270,7 +270,7 @@ Optional:
 
 Optional:
 
-- `calculation` (String) A reducer function or calculation. The choices are: `lastNotNull`, `last`, `firstNotNull`, `first`, `min`, `max`, `mean`, `sum`, `count`, `range`, `delta`, `step`, `diff`, `logmin`, `allIsZero`, `allIsNull`, `changeCount`, `distinctCount`, `diffperc`, `allValues`, `uniqueValues`
+- `calculation` (String) A reducer function or calculation. The choices are: `lastNotNull`, `last`, `firstNotNull`, `first`, `min`, `max`, `mean`, `sum`, `count`, `range`, `delta`, `step`, `diff`, `diffperc`, `logmin`, `allIsZero`, `allIsNull`, `changeCount`, `distinctCount`, `stdDev`, `variance`, `allValues`, `uniqueValues`.
 - `fields` (String) The fields that should be included in the panel.
 - `limit` (Number) The max number of rows to display.
 - `values` (Boolean) Whether to calculate a single value per column or series or show each row.
@@ -443,7 +443,7 @@ Optional:
 
 Optional:
 
-- `calculation` (String) A reducer function or calculation. The choices are: `lastNotNull`, `last`, `firstNotNull`, `first`, `min`, `max`, `mean`, `sum`, `count`, `range`, `delta`, `step`, `diff`, `logmin`, `allIsZero`, `allIsNull`, `changeCount`, `distinctCount`, `diffperc`, `allValues`, `uniqueValues`
+- `calculation` (String) A reducer function or calculation. The choices are: `lastNotNull`, `last`, `firstNotNull`, `first`, `min`, `max`, `mean`, `sum`, `count`, `range`, `delta`, `step`, `diff`, `diffperc`, `logmin`, `allIsZero`, `allIsNull`, `changeCount`, `distinctCount`, `stdDev`, `variance`, `allValues`, `uniqueValues`.
 - `fields` (String) The fields that should be included in the panel.
 - `limit` (Number) The max number of rows to display.
 - `values` (Boolean) Whether to calculate a single value per column or series or show each row.
@@ -598,7 +598,7 @@ Optional:
 
 Optional:
 
-- `calculation` (String) A reducer function or calculation. The choices are: `lastNotNull`, `last`, `firstNotNull`, `first`, `min`, `max`, `mean`, `sum`, `count`, `range`, `delta`, `step`, `diff`, `logmin`, `allIsZero`, `allIsNull`, `changeCount`, `distinctCount`, `diffperc`, `allValues`, `uniqueValues`
+- `calculation` (String) A reducer function or calculation. The choices are: `lastNotNull`, `last`, `firstNotNull`, `first`, `min`, `max`, `mean`, `sum`, `count`, `range`, `delta`, `step`, `diff`, `diffperc`, `logmin`, `allIsZero`, `allIsNull`, `changeCount`, `distinctCount`, `stdDev`, `variance`, `allValues`, `uniqueValues`.
 - `fields` (String) The fields that should be included in the panel.
 - `limit` (Number) The max number of rows to display.
 - `values` (Boolean) Whether to calculate a single value per column or series or show each row.

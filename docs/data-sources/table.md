@@ -199,6 +199,7 @@ data "gdashboard_table" "test" {
 - `graph` (Block List) The visualization options. (see [below for nested schema](#nestedblock--graph))
 - `overrides` (Block List) The set of rules that override attributes of a field. (see [below for nested schema](#nestedblock--overrides))
 - `queries` (Block List) The queries to collect values from data sources. (see [below for nested schema](#nestedblock--queries))
+- `transform` (Block List) The (see [below for nested schema](#nestedblock--transform))
 
 ### Read-Only
 
@@ -352,7 +353,7 @@ Optional:
 
 Optional:
 
-- `calculations` (List of String) A reducer function or calculation. The choices are: `lastNotNull`, `last`, `firstNotNull`, `first`, `min`, `max`, `mean`, `sum`, `count`, `range`, `delta`, `step`, `diff`, `logmin`, `allIsZero`, `allIsNull`, `changeCount`, `distinctCount`, `diffperc`, `allValues`, `uniqueValues`
+- `calculations` (List of String) A reducer function or calculation. The choices are: `lastNotNull`, `last`, `firstNotNull`, `first`, `min`, `max`, `mean`, `sum`, `count`, `range`, `delta`, `step`, `diff`, `diffperc`, `logmin`, `allIsZero`, `allIsNull`, `changeCount`, `distinctCount`, `stdDev`, `variance`, `allValues`, `uniqueValues`.
 - `fields` (List of String) Choose the fields should appear in calculations.
 - `pagination` (Boolean) Whether to enable pagination or not.
 
@@ -917,3 +918,68 @@ Optional:
 - `legend_format` (String) The legend name.
 - `min_interval` (String) The lower bounds on the interval between data points.
 - `ref_id` (String) The ID of the query. The ID can be used to reference queries in math expressions.
+
+
+
+<a id="nestedblock--transform"></a>
+### Nested Schema for `transform`
+
+Optional:
+
+- `step` (Block List) The transform step. (see [below for nested schema](#nestedblock--transform--step))
+
+<a id="nestedblock--transform--step"></a>
+### Nested Schema for `transform.step`
+
+Optional:
+
+- `group_by` (Block List) Group the data by a specified field (column) value and processes calculations on each group. (see [below for nested schema](#nestedblock--transform--step--group_by))
+- `grouping_to_matrix` (Block List) Limit the number of rows displayed. (see [below for nested schema](#nestedblock--transform--step--grouping_to_matrix))
+- `limit` (Block List) Limit the number of rows displayed. (see [below for nested schema](#nestedblock--transform--step--limit))
+- `series_to_rows` (Block List) Create a row for each field and a column for each calculation. (see [below for nested schema](#nestedblock--transform--step--series_to_rows))
+- `sort_by` (Block List) Sort each frame by the configured field. (see [below for nested schema](#nestedblock--transform--step--sort_by))
+
+<a id="nestedblock--transform--step--group_by"></a>
+### Nested Schema for `transform.step.group_by`
+
+Required:
+
+- `by` (List of String) Fields (columns) to group the records by.
+
+Optional:
+
+- `aggregate` (Map of List of String) Choose the fields should appear in calculations.
+
+
+<a id="nestedblock--transform--step--grouping_to_matrix"></a>
+### Nested Schema for `transform.step.grouping_to_matrix`
+
+Required:
+
+- `cell` (String) The value to display in a cell.
+- `column` (String) The column to group the records by.
+- `row` (String) The row to group the records by.
+
+
+<a id="nestedblock--transform--step--limit"></a>
+### Nested Schema for `transform.step.limit`
+
+Required:
+
+- `limit` (Number) How many rows to display.
+
+
+<a id="nestedblock--transform--step--series_to_rows"></a>
+### Nested Schema for `transform.step.series_to_rows`
+
+
+<a id="nestedblock--transform--step--sort_by"></a>
+### Nested Schema for `transform.step.sort_by`
+
+Required:
+
+- `field` (String) The field to sort the frame by.
+
+Optional:
+
+- `reverse` (Boolean) Whether to sort frames in a reverse order.

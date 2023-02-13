@@ -42,14 +42,15 @@ type GaugeGraphDefault struct {
 
 // GaugeDataSourceModel describes the data source data model.
 type GaugeDataSourceModel struct {
-	Id          types.String           `tfsdk:"id"`
-	Json        types.String           `tfsdk:"json"`
-	Title       types.String           `tfsdk:"title"`
-	Description types.String           `tfsdk:"description"`
-	Queries     []Query                `tfsdk:"queries"`
-	Field       []FieldOptions         `tfsdk:"field"`
-	Graph       []GaugeOptions         `tfsdk:"graph"`
-	Overrides   []FieldOverrideOptions `tfsdk:"overrides"`
+	Id              types.String           `tfsdk:"id"`
+	Json            types.String           `tfsdk:"json"`
+	Title           types.String           `tfsdk:"title"`
+	Description     types.String           `tfsdk:"description"`
+	Queries         []Query                `tfsdk:"queries"`
+	Field           []FieldOptions         `tfsdk:"field"`
+	Graph           []GaugeOptions         `tfsdk:"graph"`
+	Overrides       []FieldOverrideOptions `tfsdk:"overrides"`
+	Transformations []Transformations      `tfsdk:"transform"`
 }
 
 type GaugeOptions struct {
@@ -108,6 +109,7 @@ func (d *GaugeDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 			"field":     fieldBlock(),
 			"graph":     gaugeGraphBlock(),
 			"overrides": fieldOverrideBlock(),
+			"transform": transformationsBlock(),
 		},
 
 		Attributes: map[string]schema.Attribute{
@@ -149,6 +151,7 @@ func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	targets := createTargets(data.Queries)
 	fieldConfig := createFieldConfig(d.Defaults.Field, data.Field)
+	transformations := createTransformations(data.Transformations)
 
 	options := grafana.Options{
 		Orientation:          d.Defaults.Graph.Orientation,
@@ -187,11 +190,12 @@ func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	panel := &grafana.Panel{
 		CommonPanel: grafana.CommonPanel{
-			OfType: grafana.GaugeType,
-			Title:  data.Title.ValueString(),
-			Type:   "gauge",
-			Span:   12,
-			IsNew:  true,
+			OfType:          grafana.GaugeType,
+			Title:           data.Title.ValueString(),
+			Type:            "gauge",
+			Span:            12,
+			IsNew:           true,
+			Transformations: transformations,
 		},
 		GaugePanel: &grafana.GaugePanel{
 			Targets: targets,

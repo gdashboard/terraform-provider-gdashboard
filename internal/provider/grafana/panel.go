@@ -74,12 +74,13 @@ type (
 			Text     string `json:"text"`
 			Value    string `json:"value"`
 		} `json:"scopedVars,omitempty"`
-		Span        float32 `json:"span"`                  // general
-		Title       string  `json:"title"`                 // general
-		Description *string `json:"description,omitempty"` // general
-		Transparent bool    `json:"transparent"`
-		Type        string  `json:"type"`
-		Alert       *Alert  `json:"alert,omitempty"`
+		Span            float32          `json:"span"`                  // general
+		Title           string           `json:"title"`                 // general
+		Description     *string          `json:"description,omitempty"` // general
+		Transparent     bool             `json:"transparent"`
+		Type            string           `json:"type"`
+		Alert           *Alert           `json:"alert,omitempty"`
+		Transformations []Transformation `json:"transformations,omitempty"`
 	}
 	AlertEvaluator struct {
 		Params []float64 `json:"params,omitempty"`
@@ -596,6 +597,11 @@ type RangeMap struct {
 	From *string `json:"from,omitempty"`
 	Text *string `json:"text,omitempty"`
 	To   *string `json:"to,omitempty"`
+}
+
+type Transformation struct {
+	Id      string                 `json:"id"`
+	Options map[string]interface{} `json:"options"`
 }
 
 type probePanel struct {
