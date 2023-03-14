@@ -609,7 +609,7 @@ func queryBlock() schema.Block {
 						},
 					},
 					Validators: []validator.List{
-						listvalidator.SizeAtMost(5),
+						listvalidator.SizeAtMost(26),
 					},
 				},
 				"cloudwatch": schema.ListNestedBlock{
@@ -677,7 +677,7 @@ func queryBlock() schema.Block {
 						},
 					},
 					Validators: []validator.List{
-						listvalidator.SizeAtMost(5),
+						listvalidator.SizeAtMost(26),
 					},
 				},
 			},
@@ -816,7 +816,7 @@ func fieldOverrideBlock() schema.Block {
 						},
 					},
 					Validators: []validator.List{
-						listvalidator.SizeAtMost(10),
+						listvalidator.SizeAtMost(100),
 					},
 				},
 				"by_regex": schema.ListNestedBlock{
@@ -833,7 +833,7 @@ func fieldOverrideBlock() schema.Block {
 						},
 					},
 					Validators: []validator.List{
-						listvalidator.SizeAtMost(10),
+						listvalidator.SizeAtMost(100),
 					},
 				},
 				"by_type": schema.ListNestedBlock{
@@ -850,7 +850,7 @@ func fieldOverrideBlock() schema.Block {
 						},
 					},
 					Validators: []validator.List{
-						listvalidator.SizeAtMost(10),
+						listvalidator.SizeAtMost(100),
 					},
 				},
 				"by_query_id": schema.ListNestedBlock{
@@ -867,13 +867,13 @@ func fieldOverrideBlock() schema.Block {
 						},
 					},
 					Validators: []validator.List{
-						listvalidator.SizeAtMost(10),
+						listvalidator.SizeAtMost(100),
 					},
 				},
 			},
 		},
 		Validators: []validator.List{
-			listvalidator.SizeAtMost(3),
+			listvalidator.SizeAtMost(10),
 		},
 	}
 }
