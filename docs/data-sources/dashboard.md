@@ -144,6 +144,7 @@ Optional:
 - `const` (Block List) The constant variable. Defines a hidden constant. (see [below for nested schema](#nestedblock--variables--const))
 - `custom` (Block List) The variable options defined as a comma-separated list. (see [below for nested schema](#nestedblock--variables--custom))
 - `datasource` (Block List) The datasource variable. Quickly change the data source for an entire dashboard. (see [below for nested schema](#nestedblock--variables--datasource))
+- `interval` (Block List) The interval variable. Represents time spans such as `1m`, `1h`, `1d`. You can think of them as a dashboard-wide 'group by time' command. Interval variables change how the data is grouped in the visualization. (see [below for nested schema](#nestedblock--variables--interval))
 - `query` (Block List) The query variable. Allows adding a query that can return a list of metric names, tag values, or keys. (see [below for nested schema](#nestedblock--variables--query))
 - `textbox` (Block List) The textbox variable. Displays a free text input field with an optional default value. (see [below for nested schema](#nestedblock--variables--textbox))
 
@@ -158,7 +159,7 @@ Optional:
 
 - `datasource` (Block List) The datasource to use. (see [below for nested schema](#nestedblock--variables--adhoc--datasource))
 - `description` (String) The description of the variable.
-- `hide` (String) Which variable information to hide. The choices are: `label`, `variable`.
+- `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
 - `label` (String) The optional display name.
 
 <a id="nestedblock--variables--adhoc--datasource"></a>
@@ -195,7 +196,7 @@ Required:
 Optional:
 
 - `description` (String) The description of the variable.
-- `hide` (String) Which variable information to hide. The choices are: `label`, `variable`.
+- `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
 - `include_all` (Block List) An option to include all variables. If `custom_value` is blank, then the Grafana concatenates (adds together) all the values in the query. (see [below for nested schema](#nestedblock--variables--custom--include_all))
 - `label` (String) The optional display name.
 - `multi_value` (Boolean) Whether to allow selecting multiple values at the same time or not.
@@ -237,7 +238,7 @@ Required:
 Optional:
 
 - `description` (String) The description of the variable.
-- `hide` (String) Which variable information to hide. The choices are: `label`, `variable`.
+- `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
 - `include_all` (Block List) An option to include all variables. If `custom_value` is blank, then the Grafana concatenates (adds together) all the values in the query. (see [below for nested schema](#nestedblock--variables--datasource--include_all))
 - `label` (String) The optional display name.
 - `multi_value` (Boolean) Whether to allow selecting multiple values at the same time or not.
@@ -268,6 +269,32 @@ Optional:
 
 
 
+<a id="nestedblock--variables--interval"></a>
+### Nested Schema for `variables.interval`
+
+Required:
+
+- `intervals` (List of String) The time range intervals that you want to appear in the variable drop-down list. The following time units are supported: `s (seconds)`, `m (minutes)`, `h (hours)`, `d (days)`, `w (weeks)`, `M (months)`, and `y (years)`. You can also accept or edit the default values: `1m`, `10m`, `30m`, `1h`, `6h`, `12h`, `1d`, `7d`, `14d`, `30d`.
+- `name` (String) The name of the variable.
+
+Optional:
+
+- `auto` (Block List) Defines how many times the current time range should be divided to calculate the current auto time span. (see [below for nested schema](#nestedblock--variables--interval--auto))
+- `description` (String) The description of the variable.
+- `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
+- `label` (String) The optional display name.
+
+<a id="nestedblock--variables--interval--auto"></a>
+### Nested Schema for `variables.interval.auto`
+
+Required:
+
+- `enabled` (Boolean) Whether to enable calculation of auto time spans or not.
+- `min_interval` (String) The calculated value will not go below this threshold.
+- `step_count` (Number) How many times the current time range should be divided to calculate the value. The choices are: `1`, `2`, `3`, `4`, `5`, `10`, `20`, `30`, `40`, `50`, `100`, `200`, `300`, `400`, `500`.
+
+
+
 <a id="nestedblock--variables--query"></a>
 ### Nested Schema for `variables.query`
 
@@ -278,7 +305,7 @@ Required:
 Optional:
 
 - `description` (String) The description of the variable.
-- `hide` (String) Which variable information to hide. The choices are: `label`, `variable`.
+- `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
 - `include_all` (Block List) An option to include all variables. If `custom_value` is blank, then the Grafana concatenates (adds together) all the values in the query. (see [below for nested schema](#nestedblock--variables--query--include_all))
 - `label` (String) The optional display name.
 - `multi_value` (Boolean) Whether to allow selecting multiple values at the same time or not.
@@ -340,7 +367,7 @@ Optional:
 
 - `default_value` (String) The default value of the variable to use when the textbox is empty.
 - `description` (String) The description of the variable.
-- `hide` (String) Which variable information to hide. The choices are: `label`, `variable`.
+- `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
 - `label` (String) The optional display name.
 
 

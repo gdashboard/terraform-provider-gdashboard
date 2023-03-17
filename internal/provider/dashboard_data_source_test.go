@@ -70,6 +70,14 @@ func TestAccDashboardDataSource(t *testing.T) {
 				Config: testAccDashboardDataSourceProvider_Variable_Query_Valid,
 				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Variable_Query_Valid_ExpectedJson),
 			},
+			{
+				Config:      testAccDashboardDataSourceProvider_Variable_Interval_MissingFields,
+				ExpectError: regexp.MustCompile("The argument \"name\" is required, but no definition was found"),
+			},
+			{
+				Config: testAccDashboardDataSourceProvider_Variable_Interval_Valid,
+				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Variable_Interval_Valid_ExpectedJson),
+			},
 		},
 	})
 }
@@ -510,8 +518,7 @@ data "gdashboard_dashboard" "test" {
   layout {
 
   }
-}
-`
+}`
 
 const testAccDashboardDataSourceProvider_Variable_TextBox_Valid_ExpectedJson = `{
   "slug": "",
@@ -572,8 +579,7 @@ data "gdashboard_dashboard" "test" {
   }
 
   layout { }
-}
-`
+}`
 
 //// Textbox end
 
@@ -598,8 +604,7 @@ data "gdashboard_dashboard" "test" {
   }
 
   layout { }
-}
-`
+}`
 
 const testAccDashboardDataSourceProvider_Variable_Adhoc_Valid_ExpectedJson = `{
   "slug": "",
@@ -664,8 +669,7 @@ data "gdashboard_dashboard" "test" {
   }
  
   layout { }
-}
-`
+}`
 
 //// Adhoc end
 
@@ -696,8 +700,7 @@ data "gdashboard_dashboard" "test" {
   }
 
   layout { }
-}
-`
+}`
 
 const testAccDashboardDataSourceProvider_Variable_Datasource_Valid_ExpectedJson = `{
   "slug": "",
@@ -758,8 +761,7 @@ data "gdashboard_dashboard" "test" {
   }
  
   layout { }
-}
-`
+}`
 
 //// Datasource end
 
@@ -777,7 +779,7 @@ data "gdashboard_dashboard" "test" {
 	  hide          = "label"
 	  multi_value   = true
       refresh 		= "time-range-change"
- 	  regex  		= "$prod^"
+ 	  regex  		= "^prod$"
 
  	  include_all {
         enabled      = true
@@ -799,8 +801,7 @@ data "gdashboard_dashboard" "test" {
   }
 
   layout { }
-}
-`
+}`
 
 const testAccDashboardDataSourceProvider_Variable_Query_Valid_ExpectedJson = `{
   "slug": "",
@@ -832,7 +833,7 @@ const testAccDashboardDataSourceProvider_Variable_Query_Valid_ExpectedJson = `{
           "query": "up{service='test'}",
           "refId": "StandardVariableQuery"
         },
-        "regex": "$prod^",
+        "regex": "^prod$",
         "current": {
           "text": null,
           "value": ""
@@ -869,7 +870,151 @@ data "gdashboard_dashboard" "test" {
   }
  
   layout { }
-}
-`
+}`
 
 //// Query end
+
+//// Interval start
+
+const testAccDashboardDataSourceProvider_Variable_Interval_Valid = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+
+  variables {
+    interval {
+	  name          = "custom"
+	  label         = "Label"
+      description   = "Description"
+	  hide          = "label"
+	  intervals 	= ["1m", "10m", "30m", "1h", "6h", "12h", "1d", "7d", "14d", "30d"]
+
+	  auto {
+		enabled 	 = true
+		step_count 	 = 30
+		min_interval = "10s"
+	  }
+    }
+  }
+
+  layout { }
+}`
+
+const testAccDashboardDataSourceProvider_Variable_Interval_Valid_ExpectedJson = `{
+  "slug": "",
+  "title": "Test",
+  "originalTitle": "",
+  "style": "dark",
+  "timezone": "",
+  "editable": true,
+  "hideControls": false,
+  "panels": [],
+  "templating": {
+    "list": [
+      {
+        "type": "interval",
+        "name": "custom",
+        "description": "Description",
+        "label": "Label",
+        "hide": 1,
+        "auto": true,
+        "auto_count": 30,
+        "auto_min": "10s",
+        "refresh": false,
+        "options": [
+          {
+            "text": "auto",
+            "value": "$__auto_interval_custom",
+            "selected": false
+          },
+          {
+            "text": "1m",
+            "value": "1m",
+            "selected": true
+          },
+          {
+            "text": "10m",
+            "value": "10m",
+            "selected": false
+          },
+          {
+            "text": "30m",
+            "value": "30m",
+            "selected": false
+          },
+          {
+            "text": "1h",
+            "value": "1h",
+            "selected": false
+          },
+          {
+            "text": "6h",
+            "value": "6h",
+            "selected": false
+          },
+          {
+            "text": "12h",
+            "value": "12h",
+            "selected": false
+          },
+          {
+            "text": "1d",
+            "value": "1d",
+            "selected": false
+          },
+          {
+            "text": "7d",
+            "value": "7d",
+            "selected": false
+          },
+          {
+            "text": "14d",
+            "value": "14d",
+            "selected": false
+          },
+          {
+            "text": "30d",
+            "value": "30d",
+            "selected": false
+          }
+        ],
+        "includeAll": false,
+        "allValue": "",
+        "multi": false,
+        "query": "1m,10m,30m,1h,6h,12h,1d,7d,14d,30d",
+        "regex": "",
+        "current": {
+          "text": null,
+          "value": ""
+        },
+        "sort": 0
+      }
+    ]
+  },
+  "annotations": {
+    "list": null
+  },
+  "schemaVersion": 0,
+  "version": 1,
+  "links": null,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": null,
+    "time_options": null
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Variable_Interval_MissingFields = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+
+  variables {
+    interval { }
+  }
+ 
+  layout { }
+}`
+
+//// Interval end

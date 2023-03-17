@@ -59,7 +59,7 @@ type (
 		Label       string                 `json:"label"`                 // constant, custom, textbox, adhoc, datasource, query, interval
 		Hide        uint8                  `json:"hide"`                  // ________, custom, textbox, adhoc, datasource, query, interval
 		Auto        bool                   `json:"auto,omitempty"`        // ________, ______, _______, _____, __________, _____, interval
-		AutoCount   *int                   `json:"auto_count,omitempty"`  // ________, ______, _______, _____, __________, _____, interval
+		AutoCount   *int64                 `json:"auto_count,omitempty"`  // ________, ______, _______, _____, __________, _____, interval
 		AutoMin     *string                `json:"auto_min,omitempty"`    // ________, ______, _______, _____, __________, _____, interval
 		Datasource  *TemplateVarDataSource `json:"datasource,omitempty"`  // ________, ______, _______, adhoc, __________, _____, ________
 		Refresh     BoolInt                `json:"refresh"`               // ________, ______, _______, _____, __________, query, ________

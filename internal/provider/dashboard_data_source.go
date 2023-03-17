@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -14,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 	"math"
+	"regexp"
 	"strconv"
 )
 
@@ -80,6 +82,7 @@ type Variable struct {
 	AdHoc      []VariableAdHoc      `tfsdk:"adhoc"`
 	DataSource []VariableDataSource `tfsdk:"datasource"`
 	Query      []VariableQuery      `tfsdk:"query"`
+	Interval   []VariableInterval   `tfsdk:"interval"`
 }
 
 type VariableCustom struct {
@@ -173,6 +176,21 @@ type VariableQueryTargetPrometheus struct {
 	Expr types.String `tfsdk:"expr"`
 }
 
+type VariableInterval struct {
+	Name        types.String           `tfsdk:"name"`
+	Label       types.String           `tfsdk:"label"`
+	Description types.String           `tfsdk:"description"`
+	Hide        types.String           `tfsdk:"hide"`
+	Intervals   []types.String         `tfsdk:"intervals"`
+	Auto        []VariableIntervalAuto `tfsdk:"auto"`
+}
+
+type VariableIntervalAuto struct {
+	Enabled     types.Bool   `tfsdk:"enabled"`
+	StepCount   types.Int64  `tfsdk:"step_count"`
+	MinInterval types.String `tfsdk:"min_interval"`
+}
+
 func (d *DashboardDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_dashboard"
 }
@@ -255,7 +273,9 @@ func variableNameAttribute() schema.Attribute {
 		Description: "The name of the variable.",
 		Required:    true,
 		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
 			stringvalidator.LengthAtMost(50),
+			stringvalidator.RegexMatches(regexp.MustCompile("^\\w+$"), "Only word and digit characters are allowed in variable names"),
 		},
 	}
 }
@@ -604,6 +624,75 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 								listvalidator.SizeAtMost(20),
 							},
 						},
+
+						"interval": schema.ListNestedBlock{
+							Description: "The interval variable. Represents time spans such as 1m, 1h, 1d. You can think of them as a dashboard-wide 'group by time' command. " +
+								"Interval variables change how the data is grouped in the visualization.",
+
+							MarkdownDescription: "The interval variable. Represents time spans such as `1m`, `1h`, `1d`. You can think of them as a dashboard-wide 'group by time' command. " +
+								"Interval variables change how the data is grouped in the visualization.",
+
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"auto": schema.ListNestedBlock{
+										Description: "Defines how many times the current time range should be divided to calculate the current auto time span.",
+										NestedObject: schema.NestedBlockObject{
+											Attributes: map[string]schema.Attribute{
+												"enabled": schema.BoolAttribute{
+													Required:    true,
+													Description: "Whether to enable calculation of auto time spans or not.",
+												},
+												"step_count": schema.Int64Attribute{
+													Required: true,
+													Description: "How many times the current time range should be divided to calculate the value. " +
+														"The choices are: 1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500.",
+													MarkdownDescription: "How many times the current time range should be divided to calculate the value. " +
+														"The choices are: `1`, `2`, `3`, `4`, `5`, `10`, `20`, `30`, `40`, `50`, `100`, `200`, `300`, `400`, `500`.",
+													Validators: []validator.Int64{
+														int64validator.OneOf(1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500),
+													},
+												},
+												"min_interval": schema.StringAttribute{
+													Required:    true,
+													Description: "The calculated value will not go below this threshold.",
+												},
+											},
+										},
+										Validators: []validator.List{
+											listvalidator.SizeAtLeast(1),
+											listvalidator.SizeAtMost(1),
+										},
+									},
+								},
+
+								Attributes: map[string]schema.Attribute{
+									"name": variableNameAttribute(),
+									"label": schema.StringAttribute{
+										Optional:    true,
+										Description: "The optional display name.",
+									},
+									"description": schema.StringAttribute{
+										Optional:    true,
+										Description: "The description of the variable.",
+									},
+									"hide": variableHideAttribute(),
+									"intervals": schema.ListAttribute{
+										ElementType: types.StringType,
+										Required:    true,
+										Description: "The time range intervals that you want to appear in the variable drop-down list. " +
+											"The following time units are supported: s (seconds), m (minutes), h (hours), d (days), w (weeks), M (months), and y (years). " +
+											"You can also accept or edit the default values: 1m, 10m, 30m, 1h, 6h, 12h, 1d, 7d, 14d, 30d.",
+										MarkdownDescription: "The time range intervals that you want to appear in the variable drop-down list. " +
+											"The following time units are supported: `s (seconds)`, `m (minutes)`, `h (hours)`, `d (days)`, `w (weeks)`, `M (months)`, and `y (years)`. " +
+											"You can also accept or edit the default values: `1m`, `10m`, `30m`, `1h`, `6h`, `12h`, `1d`, `7d`, `14d`, `30d`.",
+									},
+								},
+							},
+
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(20),
+							},
+						},
 					},
 				},
 				Validators: []validator.List{
@@ -935,6 +1024,60 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 
 				if !all.CustomValue.IsNull() {
 					v.AllValue = all.CustomValue.ValueString()
+				}
+			}
+
+			vars = append(vars, v)
+		}
+
+		for _, interval := range variable.Interval {
+			query := ""
+			totalIntervals := len(interval.Intervals)
+			opts := make([]grafana.Option, totalIntervals)
+
+			for i, intervalValue := range interval.Intervals {
+				opts[i] = grafana.Option{
+					Text:     intervalValue.ValueString(),
+					Value:    intervalValue.ValueString(),
+					Selected: i == 0,
+				}
+
+				query = query + intervalValue.ValueString()
+
+				if i < (totalIntervals - 1) {
+					query = query + ","
+				}
+			}
+
+			v := grafana.TemplateVar{
+				Type:        "interval",
+				Options:     opts,
+				Name:        interval.Name.ValueString(),
+				Label:       interval.Label.ValueString(),
+				Description: interval.Description.ValueString(),
+				Hide:        decodeHide(interval.Hide),
+				Query:       query,
+			}
+
+			for _, auto := range interval.Auto {
+				v.Auto = auto.Enabled.ValueBool()
+
+				if !auto.StepCount.IsNull() {
+					value := auto.StepCount.ValueInt64()
+					v.AutoCount = &value
+				}
+
+				if !auto.MinInterval.IsNull() {
+					value := auto.MinInterval.ValueString()
+					v.AutoMin = &value
+				}
+
+				if v.Auto {
+					autoOpt := grafana.Option{
+						Text:  "auto",
+						Value: "$__auto_interval_" + interval.Name.ValueString(),
+					}
+					v.Options = append([]grafana.Option{autoOpt}, opts...)
 				}
 			}
 
