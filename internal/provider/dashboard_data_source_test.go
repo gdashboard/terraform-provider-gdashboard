@@ -410,7 +410,7 @@ data "gdashboard_dashboard" "test" {
 	  label         = "Label"
       description   = "Description"
 	  hide          = "label"
-	  multi_value   = true
+	  multi   = true
       
  	  include_all {
         enabled      = true
@@ -686,7 +686,7 @@ data "gdashboard_dashboard" "test" {
 	  label         = "Label"
       description   = "Description"
 	  hide          = "label"
-	  multi_value   = true
+	  multi   = true
       
  	  include_all {
         enabled      = true
@@ -779,7 +779,7 @@ data "gdashboard_dashboard" "test" {
 	  label         = "Label"
       description   = "Description"
 	  hide          = "label"
-	  multi_value   = true
+	  multi   = true
       refresh 		= "time-range-change"
  	  regex  		= "^prod$"
 

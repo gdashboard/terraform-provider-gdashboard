@@ -91,7 +91,7 @@ type VariableCustom struct {
 	Description types.String           `tfsdk:"description"`
 	Hide        types.String           `tfsdk:"hide"`
 	Options     []VariableCustomOption `tfsdk:"option"`
-	MultiValue  types.Bool             `tfsdk:"multi_value"`
+	Multi       types.Bool             `tfsdk:"multi"`
 	IncludeAll  []VariableIncludeAll   `tfsdk:"include_all"`
 }
 
@@ -139,7 +139,7 @@ type VariableDataSource struct {
 	Label       types.String                 `tfsdk:"label"`
 	Description types.String                 `tfsdk:"description"`
 	Hide        types.String                 `tfsdk:"hide"`
-	MultiValue  types.Bool                   `tfsdk:"multi_value"`
+	Multi       types.Bool                   `tfsdk:"multi"`
 	IncludeAll  []VariableIncludeAll         `tfsdk:"include_all"`
 	DataSource  []VariableDataSourceSelector `tfsdk:"source"`
 }
@@ -155,7 +155,7 @@ type VariableQuery struct {
 	Description types.String          `tfsdk:"description"`
 	Hide        types.String          `tfsdk:"hide"`
 	Refresh     types.String          `tfsdk:"refresh"`
-	MultiValue  types.Bool            `tfsdk:"multi_value"`
+	Multi       types.Bool            `tfsdk:"multi"`
 	IncludeAll  []VariableIncludeAll  `tfsdk:"include_all"`
 	Sort        []VariableQuerySort   `tfsdk:"sort"`
 	Regex       types.String          `tfsdk:"regex"`
@@ -343,7 +343,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 										Optional:    true,
 										Description: "The description of the variable.",
 									},
-									"multi_value": schema.BoolAttribute{
+									"multi": schema.BoolAttribute{
 										Optional:    true,
 										Description: "Whether to allow selecting multiple values at the same time or not.",
 									},
@@ -500,7 +500,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 										Optional:    true,
 										Description: "The description of the variable.",
 									},
-									"multi_value": schema.BoolAttribute{
+									"multi": schema.BoolAttribute{
 										Optional:    true,
 										Description: "Whether to allow selecting multiple values at the same time or not.",
 									},
@@ -595,7 +595,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 										Optional:    true,
 										Description: "The description of the variable.",
 									},
-									"multi_value": schema.BoolAttribute{
+									"multi": schema.BoolAttribute{
 										Optional:    true,
 										Description: "Whether to allow selecting multiple values at the same time or not.",
 									},
@@ -848,7 +848,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				Name:        custom.Name.ValueString(),
 				Label:       custom.Label.ValueString(),
 				Description: custom.Description.ValueString(),
-				Multi:       custom.MultiValue.ValueBool(),
+				Multi:       custom.Multi.ValueBool(),
 				Options:     opts,
 				Query:       query,
 				Current:     current,
@@ -919,7 +919,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				Name:        ds.Name.ValueString(),
 				Label:       ds.Label.ValueString(),
 				Description: ds.Description.ValueString(),
-				Multi:       ds.MultiValue.ValueBool(),
+				Multi:       ds.Multi.ValueBool(),
 				Query:       ds.DataSource[0].Type.ValueString(),
 				Regex:       ds.DataSource[0].Filter.ValueString(),
 				Hide:        decodeHide(ds.Hide),
@@ -991,7 +991,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				Name:        query.Name.ValueString(),
 				Label:       query.Label.ValueString(),
 				Description: query.Description.ValueString(),
-				Multi:       query.MultiValue.ValueBool(),
+				Multi:       query.Multi.ValueBool(),
 				Hide:        decodeHide(query.Hide),
 				Sort:        sort,
 				Refresh:     grafana.BoolInt{Value: &refresh},

@@ -199,7 +199,7 @@ Optional:
 - `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
 - `include_all` (Block List) An option to include all variables. If `custom_value` is blank, then the Grafana concatenates (adds together) all the values in the query. (see [below for nested schema](#nestedblock--variables--custom--include_all))
 - `label` (String) The optional display name.
-- `multi_value` (Boolean) Whether to allow selecting multiple values at the same time or not.
+- `multi` (Boolean) Whether to allow selecting multiple values at the same time or not.
 - `option` (Block List) The option entry. (see [below for nested schema](#nestedblock--variables--custom--option))
 
 <a id="nestedblock--variables--custom--include_all"></a>
@@ -241,7 +241,7 @@ Optional:
 - `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
 - `include_all` (Block List) An option to include all variables. If `custom_value` is blank, then the Grafana concatenates (adds together) all the values in the query. (see [below for nested schema](#nestedblock--variables--datasource--include_all))
 - `label` (String) The optional display name.
-- `multi_value` (Boolean) Whether to allow selecting multiple values at the same time or not.
+- `multi` (Boolean) Whether to allow selecting multiple values at the same time or not.
 - `source` (Block List) The datasource selector. (see [below for nested schema](#nestedblock--variables--datasource--source))
 
 <a id="nestedblock--variables--datasource--include_all"></a>
@@ -308,7 +308,7 @@ Optional:
 - `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
 - `include_all` (Block List) An option to include all variables. If `custom_value` is blank, then the Grafana concatenates (adds together) all the values in the query. (see [below for nested schema](#nestedblock--variables--query--include_all))
 - `label` (String) The optional display name.
-- `multi_value` (Boolean) Whether to allow selecting multiple values at the same time or not.
+- `multi` (Boolean) Whether to allow selecting multiple values at the same time or not.
 - `refresh` (String) When to update the values of this variable. The choices are: `dashboard-load`, `time-range-change`.
 - `regex` (String) The regex expression to filter or capture specific parts of the names returned by your data source query. Example: `/.*instance="([^"]*).*/`.
 - `sort` (Block List) The sort order for values to be displayed in the dropdown list. (see [below for nested schema](#nestedblock--variables--query--sort))
