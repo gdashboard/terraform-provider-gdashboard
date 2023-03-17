@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -14,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 	"math"
+	"regexp"
 	"strconv"
 )
 
@@ -74,14 +76,23 @@ type Size struct {
 }
 
 type Variable struct {
-	Custom   []VariableCustom   `tfsdk:"custom"`
-	Constant []VariableConstant `tfsdk:"const"`
+	Custom     []VariableCustom     `tfsdk:"custom"`
+	Constant   []VariableConstant   `tfsdk:"const"`
+	TextBox    []VariableTextBox    `tfsdk:"textbox"`
+	AdHoc      []VariableAdHoc      `tfsdk:"adhoc"`
+	DataSource []VariableDataSource `tfsdk:"datasource"`
+	Query      []VariableQuery      `tfsdk:"query"`
+	Interval   []VariableInterval   `tfsdk:"interval"`
 }
 
 type VariableCustom struct {
-	Name    types.String           `tfsdk:"name"`
-	Hide    types.String           `tfsdk:"hide"`
-	Options []VariableCustomOption `tfsdk:"option"`
+	Name        types.String           `tfsdk:"name"`
+	Label       types.String           `tfsdk:"label"`
+	Description types.String           `tfsdk:"description"`
+	Hide        types.String           `tfsdk:"hide"`
+	Options     []VariableCustomOption `tfsdk:"option"`
+	Multi       types.Bool             `tfsdk:"multi"`
+	IncludeAll  []VariableIncludeAll   `tfsdk:"include_all"`
 }
 
 type VariableCustomOption struct {
@@ -90,10 +101,94 @@ type VariableCustomOption struct {
 	Value    types.String `tfsdk:"value"`
 }
 
+type VariableIncludeAll struct {
+	Enabled     types.Bool   `tfsdk:"enabled"`
+	CustomValue types.String `tfsdk:"custom_value"`
+}
+
 type VariableConstant struct {
-	Name  types.String `tfsdk:"name"`
-	Value types.String `tfsdk:"value"`
-	Hide  types.String `tfsdk:"hide"`
+	Name        types.String `tfsdk:"name"`
+	Label       types.String `tfsdk:"label"`
+	Description types.String `tfsdk:"description"`
+	Value       types.String `tfsdk:"value"`
+}
+
+type VariableTextBox struct {
+	Name         types.String `tfsdk:"name"`
+	Label        types.String `tfsdk:"label"`
+	Description  types.String `tfsdk:"description"`
+	DefaultValue types.String `tfsdk:"default_value"`
+	Hide         types.String `tfsdk:"hide"`
+}
+
+type VariableAdHoc struct {
+	Name        types.String              `tfsdk:"name"`
+	Label       types.String              `tfsdk:"label"`
+	Description types.String              `tfsdk:"description"`
+	Hide        types.String              `tfsdk:"hide"`
+	DataSource  []VariableAdHocDataSource `tfsdk:"datasource"`
+}
+
+type VariableAdHocDataSource struct {
+	Type types.String `tfsdk:"type"`
+	UID  types.String `tfsdk:"uid"`
+}
+
+type VariableDataSource struct {
+	Name        types.String                 `tfsdk:"name"`
+	Label       types.String                 `tfsdk:"label"`
+	Description types.String                 `tfsdk:"description"`
+	Hide        types.String                 `tfsdk:"hide"`
+	Multi       types.Bool                   `tfsdk:"multi"`
+	IncludeAll  []VariableIncludeAll         `tfsdk:"include_all"`
+	DataSource  []VariableDataSourceSelector `tfsdk:"source"`
+}
+
+type VariableDataSourceSelector struct {
+	Type   types.String `tfsdk:"type"`
+	Filter types.String `tfsdk:"filter"`
+}
+
+type VariableQuery struct {
+	Name        types.String          `tfsdk:"name"`
+	Label       types.String          `tfsdk:"label"`
+	Description types.String          `tfsdk:"description"`
+	Hide        types.String          `tfsdk:"hide"`
+	Refresh     types.String          `tfsdk:"refresh"`
+	Multi       types.Bool            `tfsdk:"multi"`
+	IncludeAll  []VariableIncludeAll  `tfsdk:"include_all"`
+	Sort        []VariableQuerySort   `tfsdk:"sort"`
+	Regex       types.String          `tfsdk:"regex"`
+	Target      []VariableQueryTarget `tfsdk:"target"`
+}
+
+type VariableQuerySort struct {
+	Type  types.String `tfsdk:"type"`
+	Order types.String `tfsdk:"order"`
+}
+
+type VariableQueryTarget struct {
+	Prometheus []VariableQueryTargetPrometheus `tfsdk:"prometheus"`
+}
+
+type VariableQueryTargetPrometheus struct {
+	UID  types.String `tfsdk:"uid"`
+	Expr types.String `tfsdk:"expr"`
+}
+
+type VariableInterval struct {
+	Name        types.String           `tfsdk:"name"`
+	Label       types.String           `tfsdk:"label"`
+	Description types.String           `tfsdk:"description"`
+	Hide        types.String           `tfsdk:"hide"`
+	Intervals   []types.String         `tfsdk:"intervals"`
+	Auto        []VariableIntervalAuto `tfsdk:"auto"`
+}
+
+type VariableIntervalAuto struct {
+	Enabled     types.Bool   `tfsdk:"enabled"`
+	StepCount   types.Int64  `tfsdk:"step_count"`
+	MinInterval types.String `tfsdk:"min_interval"`
 }
 
 func (d *DashboardDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -150,6 +245,52 @@ func dashboardGraphTooltipAttribute() schema.Attribute {
 	}
 }
 
+func variableIncludeAllBlock() schema.ListNestedBlock {
+	return schema.ListNestedBlock{
+		Description:         "An option to include all variables. If 'custom_value' is blank, then the Grafana concatenates (adds together) all the values in the query.",
+		MarkdownDescription: "An option to include all variables. If `custom_value` is blank, then the Grafana concatenates (adds together) all the values in the query.",
+		NestedObject: schema.NestedBlockObject{
+			Attributes: map[string]schema.Attribute{
+				"enabled": schema.BoolAttribute{
+					Required:    true,
+					Description: "Whether to enable the option to include all variables or not.",
+				},
+				"custom_value": schema.StringAttribute{
+					Optional:            true,
+					Description:         "The value to use when 'include_all' is enabled",
+					MarkdownDescription: "The value to use when `include_all` is enabled. Example: `*`, `all`, etc.",
+				},
+			},
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
+		},
+	}
+}
+
+func variableNameAttribute() schema.Attribute {
+	return schema.StringAttribute{
+		Description: "The name of the variable.",
+		Required:    true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+			stringvalidator.LengthAtMost(50),
+			stringvalidator.RegexMatches(regexp.MustCompile("^\\w+$"), "Only word and digit characters are allowed in variable names"),
+		},
+	}
+}
+
+func variableHideAttribute() schema.Attribute {
+	return schema.StringAttribute{
+		Optional:            true,
+		Description:         "Which variable information to hide from the dashboard. The choices are: label, variable.",
+		MarkdownDescription: "Which variable information to hide from the dashboard. The choices are: `label`, `variable`.",
+		Validators: []validator.String{
+			stringvalidator.OneOf("label", "variable"),
+		},
+	}
+}
+
 func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
@@ -190,52 +331,366 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 											listvalidator.SizeAtMost(10),
 										},
 									},
+									"include_all": variableIncludeAllBlock(),
 								},
 								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										Required:    true,
-										Description: "The name of the variable.",
+									"name": variableNameAttribute(),
+									"label": schema.StringAttribute{
+										Optional:    true,
+										Description: "The optional display name.",
 									},
-									"hide": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Which variable information to hide. The choices are: label, variable.",
-										MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
-										Validators: []validator.String{
-											stringvalidator.OneOf("label", "variable"),
-										},
+									"description": schema.StringAttribute{
+										Optional:    true,
+										Description: "The description of the variable.",
 									},
+									"multi": schema.BoolAttribute{
+										Optional:    true,
+										Description: "Whether to allow selecting multiple values at the same time or not.",
+									},
+									"hide": variableHideAttribute(),
 								},
 							},
 
 							Validators: []validator.List{
 								listvalidator.SizeAtLeast(1),
-								listvalidator.SizeAtMost(10),
+								listvalidator.SizeAtMost(20),
 							},
 						},
+
 						"const": schema.ListNestedBlock{
-							Description: "The constant variable.",
+							Description: "The constant variable. Defines a hidden constant.",
 							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										Description: "The name of the variable.",
-										Required:    true,
+									"name": variableNameAttribute(),
+									"label": schema.StringAttribute{
+										Optional:    true,
+										Description: "The optional display name.",
+									},
+									"description": schema.StringAttribute{
+										Optional:    true,
+										Description: "The description of the variable.",
 									},
 									"value": schema.StringAttribute{
 										Description: "The value of the variable.",
 										Required:    true,
 									},
-									"hide": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Which variable information to hide. The choices are: label, variable.",
-										MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
-										Validators: []validator.String{
-											stringvalidator.OneOf("label", "variable"),
-										},
-									},
 								},
 							},
 							Validators: []validator.List{
-								listvalidator.SizeAtMost(5),
+								listvalidator.SizeAtMost(20),
+							},
+						},
+
+						"textbox": schema.ListNestedBlock{
+							Description: "The textbox variable. Displays a free text input field with an optional default value.",
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									"name": variableNameAttribute(),
+									"label": schema.StringAttribute{
+										Optional:    true,
+										Description: "The optional display name.",
+									},
+									"description": schema.StringAttribute{
+										Optional:    true,
+										Description: "The description of the variable.",
+									},
+									"default_value": schema.StringAttribute{
+										Description: "The default value of the variable to use when the textbox is empty.",
+										Optional:    true,
+									},
+									"hide": variableHideAttribute(),
+								},
+							},
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(20),
+							},
+						},
+
+						"adhoc": schema.ListNestedBlock{
+							Description: "The adhoc variable. " +
+								"Allows adding key/value filters that are automatically added to all metric queries that use the specified data source. " +
+								"Unlike other variables, you do not use ad hoc filters in queries. Instead, you use ad hoc filters to write filters for existing queries.",
+
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"datasource": schema.ListNestedBlock{
+										Description: "The datasource to use.",
+										NestedObject: schema.NestedBlockObject{
+											Attributes: map[string]schema.Attribute{
+												"type": schema.StringAttribute{
+													Required:            true,
+													Description:         "The type of the datasource. The choices are: prometheus, loki, influxdb, elasticsearch.",
+													MarkdownDescription: "The type of the datasource. The choices are: `prometheus`, `loki`, `influxdb`, `elasticsearch`.",
+													Validators: []validator.String{
+														stringvalidator.OneOf("prometheus", "loki", "influxdb", "elasticsearch"),
+													},
+												},
+												"uid": schema.StringAttribute{
+													Required:    true,
+													Description: "The uid of the datasource.",
+												},
+											},
+										},
+										Validators: []validator.List{
+											listvalidator.SizeAtLeast(1),
+											listvalidator.SizeAtMost(1),
+										},
+									},
+								},
+
+								Attributes: map[string]schema.Attribute{
+									"name": variableNameAttribute(),
+									"label": schema.StringAttribute{
+										Optional:    true,
+										Description: "The optional display name.",
+									},
+									"description": schema.StringAttribute{
+										Optional:    true,
+										Description: "The description of the variable.",
+									},
+									"hide": variableHideAttribute(),
+								},
+
+								Validators: []validator.Object{
+									objectvalidator.AlsoRequires(path.MatchRelative().AtName("datasource")),
+								},
+							},
+
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(20),
+							},
+						},
+
+						"datasource": schema.ListNestedBlock{
+							Description: "The datasource variable. Quickly change the data source for an entire dashboard.",
+
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"source": schema.ListNestedBlock{
+										Description: "The datasource selector.",
+										NestedObject: schema.NestedBlockObject{
+											Attributes: map[string]schema.Attribute{
+												"type": schema.StringAttribute{
+													Required:            true,
+													Description:         "The type of the datasource. Example: prometheus, loki, influxdb, elasticsearch, cloudwatch, etc.",
+													MarkdownDescription: "The type of the datasource. Example: `prometheus`, `loki`, `influxdb`, `elasticsearch`, `cloudwatch`, etc.",
+												},
+												"filter": schema.StringAttribute{
+													Optional:            true,
+													Description:         "Regex filter for which data source instances to choose from in the variable value list. Leave empty for all. Example: /^prod/.",
+													MarkdownDescription: "Regex filter for which data source instances to choose from in the variable value list. Leave empty for all. Example: `/^prod/`.",
+												},
+											},
+										},
+										Validators: []validator.List{
+											listvalidator.SizeAtLeast(1),
+											listvalidator.SizeAtMost(1),
+										},
+									},
+									"include_all": variableIncludeAllBlock(),
+								},
+
+								Attributes: map[string]schema.Attribute{
+									"name": variableNameAttribute(),
+									"label": schema.StringAttribute{
+										Optional:    true,
+										Description: "The optional display name.",
+									},
+									"description": schema.StringAttribute{
+										Optional:    true,
+										Description: "The description of the variable.",
+									},
+									"multi": schema.BoolAttribute{
+										Optional:    true,
+										Description: "Whether to allow selecting multiple values at the same time or not.",
+									},
+									"hide": variableHideAttribute(),
+								},
+
+								Validators: []validator.Object{
+									objectvalidator.AlsoRequires(path.MatchRelative().AtName("source")),
+								},
+							},
+
+							Validators: []validator.List{
+								listvalidator.SizeAtLeast(1),
+								listvalidator.SizeAtMost(20),
+							},
+						},
+
+						"query": schema.ListNestedBlock{
+							Description: "The query variable. Allows adding a query that can return a list of metric names, tag values, or keys.",
+
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"sort": schema.ListNestedBlock{
+										Description: "The sort order for values to be displayed in the dropdown list.",
+										NestedObject: schema.NestedBlockObject{
+											Attributes: map[string]schema.Attribute{
+												"type": schema.StringAttribute{
+													Required:            true,
+													Description:         "The type of sorting. The choices are: disabled, alphabetical, numerical, alphabetical-case-insensitive.",
+													MarkdownDescription: "The type of sorting. The choices are: `disabled`, `alphabetical`, `numerical`, `alphabetical-case-insensitive`.",
+													Validators: []validator.String{
+														stringvalidator.OneOf("disabled", "alphabetical", "numerical", "alphabetical-case-insensitive"),
+													},
+												},
+												"order": schema.StringAttribute{
+													Optional:            true,
+													Description:         "The order of the sorting. The choices are: asc, desc.",
+													MarkdownDescription: "The order of the sorting. The choices are: `asc`, `desc`.",
+													Validators: []validator.String{
+														stringvalidator.OneOf("asc", "desc"),
+													},
+												},
+											},
+										},
+										Validators: []validator.List{
+											listvalidator.SizeAtLeast(1),
+											listvalidator.SizeAtMost(1),
+										},
+									},
+									"target": schema.ListNestedBlock{
+										Description: "The datasource-specific query.",
+										NestedObject: schema.NestedBlockObject{
+											Blocks: map[string]schema.Block{
+												"prometheus": schema.ListNestedBlock{
+													NestedObject: schema.NestedBlockObject{
+														Attributes: map[string]schema.Attribute{
+															"uid": schema.StringAttribute{
+																Required:    true,
+																Description: "The uid of the datasource.",
+															},
+															"expr": schema.StringAttribute{
+																Required:    true,
+																Description: "The query expression.",
+															},
+														},
+													},
+													Validators: []validator.List{
+														listvalidator.SizeAtLeast(1),
+														listvalidator.SizeAtMost(1),
+													},
+												},
+											},
+											Validators: []validator.Object{
+												objectvalidator.AlsoRequires(path.MatchRelative().AtName("prometheus")),
+											},
+										},
+										Validators: []validator.List{
+											listvalidator.SizeAtLeast(1),
+											listvalidator.SizeAtMost(1),
+										},
+									},
+									"include_all": variableIncludeAllBlock(),
+								},
+
+								Attributes: map[string]schema.Attribute{
+									"name": variableNameAttribute(),
+									"label": schema.StringAttribute{
+										Optional:    true,
+										Description: "The optional display name.",
+									},
+									"description": schema.StringAttribute{
+										Optional:    true,
+										Description: "The description of the variable.",
+									},
+									"multi": schema.BoolAttribute{
+										Optional:    true,
+										Description: "Whether to allow selecting multiple values at the same time or not.",
+									},
+									"refresh": schema.StringAttribute{
+										Optional:            true,
+										Description:         "When to update the values of this variable. The choices are: dashboard-load, time-range-change.",
+										MarkdownDescription: "When to update the values of this variable. The choices are: `dashboard-load`, `time-range-change`.",
+										Validators: []validator.String{
+											stringvalidator.OneOf("dashboard-load", "time-range-change"),
+										},
+									},
+									"regex": schema.StringAttribute{
+										Optional:            true,
+										Description:         "The regex expression to filter or capture specific parts of the names returned by your data source query. Example: /.*instance=\"([^\"]*).*/.",
+										MarkdownDescription: "The regex expression to filter or capture specific parts of the names returned by your data source query. Example: `/.*instance=\"([^\"]*).*/`.",
+									},
+									"hide": variableHideAttribute(),
+								},
+
+								Validators: []validator.Object{
+									objectvalidator.AlsoRequires(path.MatchRelative().AtName("target")),
+								},
+							},
+
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(20),
+							},
+						},
+
+						"interval": schema.ListNestedBlock{
+							Description: "The interval variable. Represents time spans such as 1m, 1h, 1d. You can think of them as a dashboard-wide 'group by time' command. " +
+								"Interval variables change how the data is grouped in the visualization.",
+
+							MarkdownDescription: "The interval variable. Represents time spans such as `1m`, `1h`, `1d`. You can think of them as a dashboard-wide 'group by time' command. " +
+								"Interval variables change how the data is grouped in the visualization.",
+
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"auto": schema.ListNestedBlock{
+										Description: "Defines how many times the current time range should be divided to calculate the current auto time span.",
+										NestedObject: schema.NestedBlockObject{
+											Attributes: map[string]schema.Attribute{
+												"enabled": schema.BoolAttribute{
+													Required:    true,
+													Description: "Whether to enable calculation of auto time spans or not.",
+												},
+												"step_count": schema.Int64Attribute{
+													Required: true,
+													Description: "How many times the current time range should be divided to calculate the value. " +
+														"The choices are: 1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500.",
+													MarkdownDescription: "How many times the current time range should be divided to calculate the value. " +
+														"The choices are: `1`, `2`, `3`, `4`, `5`, `10`, `20`, `30`, `40`, `50`, `100`, `200`, `300`, `400`, `500`.",
+													Validators: []validator.Int64{
+														int64validator.OneOf(1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500),
+													},
+												},
+												"min_interval": schema.StringAttribute{
+													Required:    true,
+													Description: "The calculated value will not go below this threshold.",
+												},
+											},
+										},
+										Validators: []validator.List{
+											listvalidator.SizeAtLeast(1),
+											listvalidator.SizeAtMost(1),
+										},
+									},
+								},
+
+								Attributes: map[string]schema.Attribute{
+									"name": variableNameAttribute(),
+									"label": schema.StringAttribute{
+										Optional:    true,
+										Description: "The optional display name.",
+									},
+									"description": schema.StringAttribute{
+										Optional:    true,
+										Description: "The description of the variable.",
+									},
+									"hide": variableHideAttribute(),
+									"intervals": schema.ListAttribute{
+										ElementType: types.StringType,
+										Required:    true,
+										Description: "The time range intervals that you want to appear in the variable drop-down list. " +
+											"The following time units are supported: s (seconds), m (minutes), h (hours), d (days), w (weeks), M (months), and y (years). " +
+											"You can also accept or edit the default values: 1m, 10m, 30m, 1h, 6h, 12h, 1d, 7d, 14d, 30d.",
+										MarkdownDescription: "The time range intervals that you want to appear in the variable drop-down list. " +
+											"The following time units are supported: `s (seconds)`, `m (minutes)`, `h (hours)`, `d (days)`, `w (weeks)`, `M (months)`, and `y (years)`. " +
+											"You can also accept or edit the default values: `1m`, `10m`, `30m`, `1h`, `6h`, `12h`, `1d`, `7d`, `14d`, `30d`.",
+									},
+								},
+							},
+
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(20),
 							},
 						},
 					},
@@ -282,7 +737,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 							},
 						},
 						Validators: []validator.List{
-							listvalidator.SizeAtMost(40),
+							listvalidator.SizeAtMost(200),
 						},
 					},
 				},
@@ -335,6 +790,23 @@ func (d *DashboardDataSource) Configure(_ context.Context, req datasource.Config
 	d.Defaults = defaults.Dashboard
 }
 
+func decodeHide(hideValue types.String) uint8 {
+	hide := uint8(0)
+
+	if !hideValue.IsNull() {
+		switch v := hideValue.ValueString(); v {
+		case "label":
+			hide = 1
+		case "variable":
+			hide = 2
+		default:
+			hide = 0
+		}
+	}
+
+	return hide
+}
+
 func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data DashboardDataSourceModel
 
@@ -350,11 +822,12 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		for _, custom := range variable.Custom {
 			opts := make([]grafana.Option, len(custom.Options))
 			query := ""
-			var current grafana.Current
+			var current grafana.Option
 
 			for i, opt := range custom.Options {
+				text := opt.Text.ValueString()
 				opts[i] = grafana.Option{
-					Text:     opt.Text.ValueString(),
+					Text:     &text,
 					Value:    opt.Value.ValueString(),
 					Selected: opt.Selected.ValueBool(),
 				}
@@ -366,60 +839,244 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				query = query + opt.Text.ValueString() + " : " + opt.Value.ValueString()
 
 				if opt.Selected.ValueBool() {
-					current = grafana.Current{
-						Text: &grafana.StringSliceString{
-							Value: []string{opt.Text.ValueString()},
-							Valid: true,
-						},
-						Value: opt.Value.ValueString(),
-					}
-				}
-			}
-
-			hide := uint8(0)
-
-			if !custom.Hide.IsNull() {
-				switch v := custom.Hide.ValueString(); v {
-				case "label":
-					hide = 1
-				case "variable":
-					hide = 2
-				default:
-					hide = 0
+					current = opts[i]
 				}
 			}
 
 			v := grafana.TemplateVar{
-				Type:    "custom",
-				Name:    custom.Name.ValueString(),
-				Options: opts,
-				Query:   query,
-				Current: current,
-				Hide:    hide,
+				Type:        "custom",
+				Name:        custom.Name.ValueString(),
+				Label:       custom.Label.ValueString(),
+				Description: custom.Description.ValueString(),
+				Multi:       custom.Multi.ValueBool(),
+				Options:     opts,
+				Query:       query,
+				Current:     current,
+				Hide:        decodeHide(custom.Hide),
+			}
+
+			for _, all := range custom.IncludeAll {
+				if !all.Enabled.IsNull() {
+					v.IncludeAll = all.Enabled.ValueBool()
+				}
+
+				if !all.CustomValue.IsNull() {
+					v.AllValue = all.CustomValue.ValueString()
+				}
 			}
 
 			vars = append(vars, v)
 		}
 
 		for _, c := range variable.Constant {
-			hide := uint8(0)
+			v := grafana.TemplateVar{
+				Type:        "constant",
+				Options:     make([]grafana.Option, 0),
+				Name:        c.Name.ValueString(),
+				Label:       c.Label.ValueString(),
+				Description: c.Description.ValueString(),
+				Query:       c.Value.ValueString(),
+			}
 
-			if !c.Hide.IsNull() {
-				switch v := c.Hide.ValueString(); v {
-				case "label":
-					hide = 1
-				case "variable":
-					hide = 2
+			vars = append(vars, v)
+		}
+
+		for _, textbox := range variable.TextBox {
+			v := grafana.TemplateVar{
+				Type:        "textbox",
+				Options:     make([]grafana.Option, 0),
+				Name:        textbox.Name.ValueString(),
+				Label:       textbox.Label.ValueString(),
+				Description: textbox.Description.ValueString(),
+				Query:       textbox.DefaultValue.ValueString(),
+				Hide:        decodeHide(textbox.Hide),
+			}
+
+			vars = append(vars, v)
+		}
+
+		for _, adhoc := range variable.AdHoc {
+			v := grafana.TemplateVar{
+				Type:        "adhoc",
+				Options:     make([]grafana.Option, 0),
+				Name:        adhoc.Name.ValueString(),
+				Label:       adhoc.Label.ValueString(),
+				Description: adhoc.Description.ValueString(),
+				Datasource: &grafana.TemplateVarDataSource{
+					UID:  adhoc.DataSource[0].UID.ValueString(),
+					Type: adhoc.DataSource[0].Type.ValueString(),
+				},
+				Hide: decodeHide(adhoc.Hide),
+			}
+
+			vars = append(vars, v)
+		}
+
+		for _, ds := range variable.DataSource {
+			v := grafana.TemplateVar{
+				Type:        "datasource",
+				Options:     make([]grafana.Option, 0),
+				Name:        ds.Name.ValueString(),
+				Label:       ds.Label.ValueString(),
+				Description: ds.Description.ValueString(),
+				Multi:       ds.Multi.ValueBool(),
+				Query:       ds.DataSource[0].Type.ValueString(),
+				Regex:       ds.DataSource[0].Filter.ValueString(),
+				Hide:        decodeHide(ds.Hide),
+			}
+
+			for _, all := range ds.IncludeAll {
+				if !all.Enabled.IsNull() {
+					v.IncludeAll = all.Enabled.ValueBool()
+				}
+
+				if !all.CustomValue.IsNull() {
+					v.AllValue = all.CustomValue.ValueString()
+				}
+			}
+
+			vars = append(vars, v)
+		}
+
+		for _, query := range variable.Query {
+			refresh := int64(1)
+
+			if !query.Refresh.IsNull() {
+				switch v := query.Refresh.ValueString(); v {
+				case "dashboard-load":
+					refresh = 1
+				case "time-range-change":
+					refresh = 2
 				default:
-					hide = 0
+					refresh = 1
+				}
+			}
+
+			sort := 1
+
+			for _, s := range query.Sort {
+				asc := s.Order.ValueString() != "desc"
+
+				if !s.Type.IsNull() {
+					switch v := s.Type.ValueString(); v {
+					case "disabled":
+						sort = 0
+					case "alphabetical":
+						if asc {
+							sort = 1
+						} else {
+							sort = 2
+						}
+					case "numerical":
+						if asc {
+							sort = 3
+						} else {
+							sort = 4
+						}
+					case "alphabetical-case-insensitive":
+						if asc {
+							sort = 5
+						} else {
+							sort = 6
+						}
+					default:
+						sort = 1
+					}
 				}
 			}
 
 			v := grafana.TemplateVar{
-				Type:  "constant",
-				Name:  c.Name.ValueString(),
-				Query: c.Value.ValueString(),
-				Hide:  hide,
+				Type:        "query",
+				Options:     make([]grafana.Option, 0),
+				Name:        query.Name.ValueString(),
+				Label:       query.Label.ValueString(),
+				Description: query.Description.ValueString(),
+				Multi:       query.Multi.ValueBool(),
+				Hide:        decodeHide(query.Hide),
+				Sort:        sort,
+				Refresh:     grafana.BoolInt{Value: &refresh},
+				Regex:       query.Regex.ValueString(),
+			}
+
+			for _, target := range query.Target {
+				for _, prometheus := range target.Prometheus {
+					v.Datasource = &grafana.TemplateVarDataSource{
+						UID:  prometheus.UID.ValueString(),
+						Type: "prometheus",
+					}
+					v.Definition = prometheus.Expr.ValueString()
+					v.Query = grafana.TemplateVarQueryPrometheus{
+						Query: prometheus.Expr.ValueString(),
+						RefID: "StandardVariableQuery",
+					}
+				}
+			}
+
+			for _, all := range query.IncludeAll {
+				if !all.Enabled.IsNull() {
+					v.IncludeAll = all.Enabled.ValueBool()
+				}
+
+				if !all.CustomValue.IsNull() {
+					v.AllValue = all.CustomValue.ValueString()
+				}
+			}
+
+			vars = append(vars, v)
+		}
+
+		for _, interval := range variable.Interval {
+			query := ""
+			totalIntervals := len(interval.Intervals)
+			opts := make([]grafana.Option, totalIntervals)
+
+			for i, intervalValue := range interval.Intervals {
+				text := intervalValue.ValueString()
+				opts[i] = grafana.Option{
+					Text:     &text,
+					Value:    intervalValue.ValueString(),
+					Selected: i == 0,
+				}
+
+				query = query + intervalValue.ValueString()
+
+				if i < (totalIntervals - 1) {
+					query = query + ","
+				}
+			}
+
+			v := grafana.TemplateVar{
+				Type:        "interval",
+				Options:     opts,
+				Current:     opts[0],
+				Name:        interval.Name.ValueString(),
+				Label:       interval.Label.ValueString(),
+				Description: interval.Description.ValueString(),
+				Hide:        decodeHide(interval.Hide),
+				Query:       query,
+			}
+
+			for _, auto := range interval.Auto {
+				v.Auto = auto.Enabled.ValueBool()
+
+				if !auto.StepCount.IsNull() {
+					value := auto.StepCount.ValueInt64()
+					v.AutoCount = &value
+				}
+
+				if !auto.MinInterval.IsNull() {
+					value := auto.MinInterval.ValueString()
+					v.AutoMin = &value
+				}
+
+				if v.Auto {
+					text := "auto"
+					autoOpt := grafana.Option{
+						Text:  &text,
+						Value: "$__auto_interval_" + interval.Name.ValueString(),
+					}
+					v.Options = append([]grafana.Option{autoOpt}, opts...)
+				}
 			}
 
 			vars = append(vars, v)
@@ -539,7 +1196,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 	data.Json = types.StringValue(string(jsonData))
 	data.Id = types.StringValue(strconv.Itoa(hashcode(jsonData)))
 
-	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("%s", string(jsonData)))
+	// resp.Diagnostics.AddError("Client Error", fmt.Sprintf("%s", string(jsonData)))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

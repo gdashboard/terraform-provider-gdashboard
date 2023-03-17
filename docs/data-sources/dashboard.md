@@ -140,8 +140,37 @@ Required:
 
 Optional:
 
-- `const` (Block List) The constant variable. (see [below for nested schema](#nestedblock--variables--const))
+- `adhoc` (Block List) The adhoc variable. Allows adding key/value filters that are automatically added to all metric queries that use the specified data source. Unlike other variables, you do not use ad hoc filters in queries. Instead, you use ad hoc filters to write filters for existing queries. (see [below for nested schema](#nestedblock--variables--adhoc))
+- `const` (Block List) The constant variable. Defines a hidden constant. (see [below for nested schema](#nestedblock--variables--const))
 - `custom` (Block List) The variable options defined as a comma-separated list. (see [below for nested schema](#nestedblock--variables--custom))
+- `datasource` (Block List) The datasource variable. Quickly change the data source for an entire dashboard. (see [below for nested schema](#nestedblock--variables--datasource))
+- `interval` (Block List) The interval variable. Represents time spans such as `1m`, `1h`, `1d`. You can think of them as a dashboard-wide 'group by time' command. Interval variables change how the data is grouped in the visualization. (see [below for nested schema](#nestedblock--variables--interval))
+- `query` (Block List) The query variable. Allows adding a query that can return a list of metric names, tag values, or keys. (see [below for nested schema](#nestedblock--variables--query))
+- `textbox` (Block List) The textbox variable. Displays a free text input field with an optional default value. (see [below for nested schema](#nestedblock--variables--textbox))
+
+<a id="nestedblock--variables--adhoc"></a>
+### Nested Schema for `variables.adhoc`
+
+Required:
+
+- `name` (String) The name of the variable.
+
+Optional:
+
+- `datasource` (Block List) The datasource to use. (see [below for nested schema](#nestedblock--variables--adhoc--datasource))
+- `description` (String) The description of the variable.
+- `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
+- `label` (String) The optional display name.
+
+<a id="nestedblock--variables--adhoc--datasource"></a>
+### Nested Schema for `variables.adhoc.datasource`
+
+Required:
+
+- `type` (String) The type of the datasource. The choices are: `prometheus`, `loki`, `influxdb`, `elasticsearch`.
+- `uid` (String) The uid of the datasource.
+
+
 
 <a id="nestedblock--variables--const"></a>
 ### Nested Schema for `variables.const`
@@ -153,7 +182,8 @@ Required:
 
 Optional:
 
-- `hide` (String) Which variable information to hide. The choices are: `label`, `variable`.
+- `description` (String) The description of the variable.
+- `label` (String) The optional display name.
 
 
 <a id="nestedblock--variables--custom"></a>
@@ -165,8 +195,24 @@ Required:
 
 Optional:
 
-- `hide` (String) Which variable information to hide. The choices are: `label`, `variable`.
+- `description` (String) The description of the variable.
+- `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
+- `include_all` (Block List) An option to include all variables. If `custom_value` is blank, then the Grafana concatenates (adds together) all the values in the query. (see [below for nested schema](#nestedblock--variables--custom--include_all))
+- `label` (String) The optional display name.
+- `multi` (Boolean) Whether to allow selecting multiple values at the same time or not.
 - `option` (Block List) The option entry. (see [below for nested schema](#nestedblock--variables--custom--option))
+
+<a id="nestedblock--variables--custom--include_all"></a>
+### Nested Schema for `variables.custom.include_all`
+
+Required:
+
+- `enabled` (Boolean) Whether to enable the option to include all variables or not.
+
+Optional:
+
+- `custom_value` (String) The value to use when `include_all` is enabled. Example: `*`, `all`, etc.
+
 
 <a id="nestedblock--variables--custom--option"></a>
 ### Nested Schema for `variables.custom.option`
@@ -179,5 +225,149 @@ Required:
 Optional:
 
 - `selected` (Boolean) Whether to mark the option as selected or not.
+
+
+
+<a id="nestedblock--variables--datasource"></a>
+### Nested Schema for `variables.datasource`
+
+Required:
+
+- `name` (String) The name of the variable.
+
+Optional:
+
+- `description` (String) The description of the variable.
+- `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
+- `include_all` (Block List) An option to include all variables. If `custom_value` is blank, then the Grafana concatenates (adds together) all the values in the query. (see [below for nested schema](#nestedblock--variables--datasource--include_all))
+- `label` (String) The optional display name.
+- `multi` (Boolean) Whether to allow selecting multiple values at the same time or not.
+- `source` (Block List) The datasource selector. (see [below for nested schema](#nestedblock--variables--datasource--source))
+
+<a id="nestedblock--variables--datasource--include_all"></a>
+### Nested Schema for `variables.datasource.include_all`
+
+Required:
+
+- `enabled` (Boolean) Whether to enable the option to include all variables or not.
+
+Optional:
+
+- `custom_value` (String) The value to use when `include_all` is enabled. Example: `*`, `all`, etc.
+
+
+<a id="nestedblock--variables--datasource--source"></a>
+### Nested Schema for `variables.datasource.source`
+
+Required:
+
+- `type` (String) The type of the datasource. Example: `prometheus`, `loki`, `influxdb`, `elasticsearch`, `cloudwatch`, etc.
+
+Optional:
+
+- `filter` (String) Regex filter for which data source instances to choose from in the variable value list. Leave empty for all. Example: `/^prod/`.
+
+
+
+<a id="nestedblock--variables--interval"></a>
+### Nested Schema for `variables.interval`
+
+Required:
+
+- `intervals` (List of String) The time range intervals that you want to appear in the variable drop-down list. The following time units are supported: `s (seconds)`, `m (minutes)`, `h (hours)`, `d (days)`, `w (weeks)`, `M (months)`, and `y (years)`. You can also accept or edit the default values: `1m`, `10m`, `30m`, `1h`, `6h`, `12h`, `1d`, `7d`, `14d`, `30d`.
+- `name` (String) The name of the variable.
+
+Optional:
+
+- `auto` (Block List) Defines how many times the current time range should be divided to calculate the current auto time span. (see [below for nested schema](#nestedblock--variables--interval--auto))
+- `description` (String) The description of the variable.
+- `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
+- `label` (String) The optional display name.
+
+<a id="nestedblock--variables--interval--auto"></a>
+### Nested Schema for `variables.interval.auto`
+
+Required:
+
+- `enabled` (Boolean) Whether to enable calculation of auto time spans or not.
+- `min_interval` (String) The calculated value will not go below this threshold.
+- `step_count` (Number) How many times the current time range should be divided to calculate the value. The choices are: `1`, `2`, `3`, `4`, `5`, `10`, `20`, `30`, `40`, `50`, `100`, `200`, `300`, `400`, `500`.
+
+
+
+<a id="nestedblock--variables--query"></a>
+### Nested Schema for `variables.query`
+
+Required:
+
+- `name` (String) The name of the variable.
+
+Optional:
+
+- `description` (String) The description of the variable.
+- `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
+- `include_all` (Block List) An option to include all variables. If `custom_value` is blank, then the Grafana concatenates (adds together) all the values in the query. (see [below for nested schema](#nestedblock--variables--query--include_all))
+- `label` (String) The optional display name.
+- `multi` (Boolean) Whether to allow selecting multiple values at the same time or not.
+- `refresh` (String) When to update the values of this variable. The choices are: `dashboard-load`, `time-range-change`.
+- `regex` (String) The regex expression to filter or capture specific parts of the names returned by your data source query. Example: `/.*instance="([^"]*).*/`.
+- `sort` (Block List) The sort order for values to be displayed in the dropdown list. (see [below for nested schema](#nestedblock--variables--query--sort))
+- `target` (Block List) The datasource-specific query. (see [below for nested schema](#nestedblock--variables--query--target))
+
+<a id="nestedblock--variables--query--include_all"></a>
+### Nested Schema for `variables.query.include_all`
+
+Required:
+
+- `enabled` (Boolean) Whether to enable the option to include all variables or not.
+
+Optional:
+
+- `custom_value` (String) The value to use when `include_all` is enabled. Example: `*`, `all`, etc.
+
+
+<a id="nestedblock--variables--query--sort"></a>
+### Nested Schema for `variables.query.sort`
+
+Required:
+
+- `type` (String) The type of sorting. The choices are: `disabled`, `alphabetical`, `numerical`, `alphabetical-case-insensitive`.
+
+Optional:
+
+- `order` (String) The order of the sorting. The choices are: `asc`, `desc`.
+
+
+<a id="nestedblock--variables--query--target"></a>
+### Nested Schema for `variables.query.target`
+
+Optional:
+
+- `prometheus` (Block List) (see [below for nested schema](#nestedblock--variables--query--target--prometheus))
+
+<a id="nestedblock--variables--query--target--prometheus"></a>
+### Nested Schema for `variables.query.target.prometheus`
+
+Required:
+
+- `expr` (String) The query expression.
+- `uid` (String) The uid of the datasource.
+
+
+
+
+<a id="nestedblock--variables--textbox"></a>
+### Nested Schema for `variables.textbox`
+
+Required:
+
+- `name` (String) The name of the variable.
+
+Optional:
+
+- `default_value` (String) The default value of the variable to use when the textbox is empty.
+- `description` (String) The description of the variable.
+- `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
+- `label` (String) The optional display name.
 
 

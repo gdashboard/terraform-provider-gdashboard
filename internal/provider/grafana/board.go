@@ -13,7 +13,7 @@ type (
 		Slug          string   `json:"slug"`
 		Title         string   `json:"title"`
 		OriginalTitle string   `json:"originalTitle"`
-		Tags          []string `json:"tags"`
+		Tags          []string `json:"tags,omitempty"`
 		Style         string   `json:"style"`
 		Timezone      string   `json:"timezone"`
 		Editable      bool     `json:"editable"`
@@ -44,37 +44,40 @@ type (
 	Templating struct {
 		List []TemplateVar `json:"list"`
 	}
+	TemplateVarDataSource struct {
+		UID  string `json:"uid"`
+		Type string `json:"type"`
+	}
+	TemplateVarQueryPrometheus struct {
+		Query string `json:"query"`
+		RefID string `json:"refId"`
+	}
 	TemplateVar struct {
-		Name        string      `json:"name"`
-		Type        string      `json:"type"`
-		Auto        bool        `json:"auto,omitempty"`
-		AutoCount   *int        `json:"auto_count,omitempty"`
-		Datasource  interface{} `json:"datasource"`
-		Refresh     BoolInt     `json:"refresh"`
-		Options     []Option    `json:"options"`
-		IncludeAll  bool        `json:"includeAll"`
-		AllFormat   string      `json:"allFormat"`
-		AllValue    string      `json:"allValue"`
-		Multi       bool        `json:"multi"`
-		MultiFormat string      `json:"multiFormat"`
-		Query       interface{} `json:"query"`
-		Regex       string      `json:"regex"`
-		Current     Current     `json:"current"`
-		Label       string      `json:"label"`
-		Hide        uint8       `json:"hide"`
-		Sort        int         `json:"sort"`
+		Type        string                 `json:"type"`                  // constant, custom, textbox, adhoc, datasource, query, interval
+		Name        string                 `json:"name"`                  // constant, custom, textbox, adhoc, datasource, query, interval
+		Description string                 `json:"description,omitempty"` // constant, custom, textbox, adhoc, datasource, query, interval
+		Label       string                 `json:"label"`                 // constant, custom, textbox, adhoc, datasource, query, interval
+		Hide        uint8                  `json:"hide"`                  // ________, custom, textbox, adhoc, datasource, query, interval
+		Auto        bool                   `json:"auto,omitempty"`        // ________, ______, _______, _____, __________, _____, interval
+		AutoCount   *int64                 `json:"auto_count,omitempty"`  // ________, ______, _______, _____, __________, _____, interval
+		AutoMin     *string                `json:"auto_min,omitempty"`    // ________, ______, _______, _____, __________, _____, interval
+		Datasource  *TemplateVarDataSource `json:"datasource,omitempty"`  // ________, ______, _______, adhoc, __________, _____, ________
+		Refresh     BoolInt                `json:"refresh"`               // ________, ______, _______, _____, __________, query, ________
+		Options     []Option               `json:"options"`               // ________, custom, _______, _____, __________, _____, interval
+		IncludeAll  bool                   `json:"includeAll"`            // ________, custom, _______, _____, datasource, query, ________
+		AllValue    string                 `json:"allValue"`              // ________, custom, _______, _____, datasource, query, ________
+		Multi       bool                   `json:"multi"`                 // ________, custom, _______, _____, datasource, query, ________
+		Query       interface{}            `json:"query"`                 // constant, custom, textbox, _____, datasource, query, ________
+		Regex       string                 `json:"regex"`                 // ________, ______, _______, _____, datasource, query, interval
+		Current     Option                 `json:"current"`               // ________, custom, _______, _____, __________, _____, interval
+		Sort        int                    `json:"sort"`                  // ________, ______, _______, _____, __________, query, ________
+		Definition  string                 `json:"definition,omitempty"`  // ________, ______, _______, _____, __________, query, ________
 	}
 	// Option for templateVar
 	Option struct {
-		Text     string `json:"text"`
-		Value    string `json:"value"`
-		Selected bool   `json:"selected"`
-	}
-	// Current for templateVar
-	Current struct {
-		Tags  []*string          `json:"tags,omitempty"`
-		Text  *StringSliceString `json:"text"`
-		Value interface{}        `json:"value"` // TODO select more precise type
+		Text     *string `json:"text"`
+		Value    string  `json:"value"`
+		Selected bool    `json:"selected"`
 	}
 	Annotation struct {
 		Name        string      `json:"name"`
