@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -32,6 +33,42 @@ func TestAccDashboardDataSource(t *testing.T) {
 					resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "title", "Test"),
 					resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProviderCustomDefaultsConfigExpectedJson),
 				),
+			},
+			{
+				Config: testAccDashboardDataSourceProvider_Variable_Custom_Valid,
+				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Variable_Custom_Valid_ExpectedJson),
+			},
+			{
+				Config:      testAccDashboardDataSourceProvider_Variable_TextBox_MissingFields,
+				ExpectError: regexp.MustCompile("The argument \"name\" is required, but no definition was found"),
+			},
+			{
+				Config: testAccDashboardDataSourceProvider_Variable_TextBox_Valid,
+				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Variable_TextBox_Valid_ExpectedJson),
+			},
+			{
+				Config:      testAccDashboardDataSourceProvider_Variable_Adhoc_MissingFields,
+				ExpectError: regexp.MustCompile("Attribute \"variables\\[0]\\.adhoc\\[0]\\.datasource\" must be specified when"),
+			},
+			{
+				Config: testAccDashboardDataSourceProvider_Variable_Adhoc_Valid,
+				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Variable_Adhoc_Valid_ExpectedJson),
+			},
+			{
+				Config:      testAccDashboardDataSourceProvider_Variable_Datasource_MissingFields,
+				ExpectError: regexp.MustCompile("Attribute \"variables\\[0]\\.datasource\\[0]\\.source\" must be specified when"),
+			},
+			{
+				Config: testAccDashboardDataSourceProvider_Variable_Datasource_Valid,
+				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Variable_Datasource_Valid_ExpectedJson),
+			},
+			{
+				Config:      testAccDashboardDataSourceProvider_Variable_Query_MissingFields,
+				ExpectError: regexp.MustCompile("Attribute \"variables\\[0]\\.query\\[0]\\.target\" must be specified when"),
+			},
+			{
+				Config: testAccDashboardDataSourceProvider_Variable_Query_Valid,
+				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Variable_Query_Valid_ExpectedJson),
 			},
 		},
 	})
@@ -118,7 +155,6 @@ const testAccDashboardDataSourceConfigExpectedJson = `{
   "slug": "",
   "title": "Test",
   "originalTitle": "",
-  "tags": null,
   "style": "light",
   "timezone": "",
   "editable": false,
@@ -196,9 +232,10 @@ const testAccDashboardDataSourceConfigExpectedJson = `{
   "templating": {
     "list": [
       {
-        "name": "custom",
         "type": "custom",
-        "datasource": null,
+        "name": "custom",
+        "label": "",
+        "hide": 1,
         "refresh": false,
         "options": [
           {
@@ -213,10 +250,8 @@ const testAccDashboardDataSourceConfigExpectedJson = `{
           }
         ],
         "includeAll": false,
-        "allFormat": "",
         "allValue": "",
         "multi": false,
-        "multiFormat": "",
         "query": "entry-1 : value, entry-2 : value",
         "regex": "",
         "current": {
@@ -225,29 +260,24 @@ const testAccDashboardDataSourceConfigExpectedJson = `{
           ],
           "value": "value"
         },
-        "label": "",
-        "hide": 1,
         "sort": 0
       },
       {
-        "name": "var",
         "type": "constant",
-        "datasource": null,
+        "name": "var",
+        "label": "",
+        "hide": 0,
         "refresh": false,
-        "options": null,
+        "options": [],
         "includeAll": false,
-        "allFormat": "",
         "allValue": "",
         "multi": false,
-        "multiFormat": "",
         "query": "const-value",
         "regex": "",
         "current": {
           "text": null,
-          "value": null
+          "value": ""
         },
-        "label": "",
-        "hide": 0,
         "sort": 0
       }
     ]
@@ -297,7 +327,6 @@ const testAccDashboardDataSourceProviderCustomDefaultsConfigExpectedJson = `{
   "slug": "",
   "title": "Test",
   "originalTitle": "",
-  "tags": null,
   "style": "light",
   "timezone": "",
   "editable": false,
@@ -337,7 +366,6 @@ const testAccDashboardDataSourceProviderDefaultsConfigExpectedJson = `{
   "slug": "",
   "title": "Test",
   "originalTitle": "",
-  "tags": null,
   "style": "dark",
   "timezone": "",
   "editable": true,
@@ -361,3 +389,487 @@ const testAccDashboardDataSourceProviderDefaultsConfigExpectedJson = `{
     "time_options": null
   }
 }`
+
+//// Custom start
+
+const testAccDashboardDataSourceProvider_Variable_Custom_Valid = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+
+  variables {
+    custom {
+	  name          = "custom"
+	  label         = "Label"
+      description   = "Description"
+	  hide          = "label"
+	  multi_value   = true
+      
+ 	  include_all {
+        enabled      = true
+		custom_value = "*"
+	  }
+
+      option {
+		text  = "entry-1"
+		value = "value"
+	  }
+
+	  option {
+		text  	 = "entry-2"
+		value 	 = "value"
+		selected = true
+	  }
+    }
+  }
+
+  layout {
+
+  }
+}
+`
+
+const testAccDashboardDataSourceProvider_Variable_Custom_Valid_ExpectedJson = `{
+  "slug": "",
+  "title": "Test",
+  "originalTitle": "",
+  "style": "dark",
+  "timezone": "",
+  "editable": true,
+  "hideControls": false,
+  "panels": [],
+  "templating": {
+    "list": [
+      {
+        "type": "custom",
+        "name": "custom",
+        "description": "Description",
+        "label": "Label",
+        "hide": 1,
+        "refresh": false,
+        "options": [
+          {
+            "text": "entry-1",
+            "value": "value",
+            "selected": false
+          },
+          {
+            "text": "entry-2",
+            "value": "value",
+            "selected": true
+          }
+        ],
+        "includeAll": true,
+        "allValue": "*",
+        "multi": true,
+        "query": "entry-1 : value, entry-2 : value",
+        "regex": "",
+        "current": {
+          "text": [
+            "entry-2"
+          ],
+          "value": "value"
+        },
+        "sort": 0
+      }
+    ]
+  },
+  "annotations": {
+    "list": null
+  },
+  "schemaVersion": 0,
+  "version": 1,
+  "links": null,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": null,
+    "time_options": null
+  }
+}`
+
+//// Custom end
+
+//// Textbox start
+
+const testAccDashboardDataSourceProvider_Variable_TextBox_Valid = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+
+  variables {
+    textbox {
+	  name          = "custom"
+	  label         = "Label"
+      description   = "Description"
+	  default_value = "*"
+	  hide          = "label"
+    }
+  }
+
+  layout {
+
+  }
+}
+`
+
+const testAccDashboardDataSourceProvider_Variable_TextBox_Valid_ExpectedJson = `{
+  "slug": "",
+  "title": "Test",
+  "originalTitle": "",
+  "style": "dark",
+  "timezone": "",
+  "editable": true,
+  "hideControls": false,
+  "panels": [],
+  "templating": {
+    "list": [
+      {
+        "type": "textbox",
+        "name": "custom",
+        "description": "Description",
+        "label": "Label",
+        "hide": 1,
+        "refresh": false,
+        "options": [],
+        "includeAll": false,
+        "allValue": "",
+        "multi": false,
+        "query": "*",
+        "regex": "",
+        "current": {
+          "text": null,
+          "value": ""
+        },
+        "sort": 0
+      }
+    ]
+  },
+  "annotations": {
+    "list": null
+  },
+  "schemaVersion": 0,
+  "version": 1,
+  "links": null,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": null,
+    "time_options": null
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Variable_TextBox_MissingFields = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+
+  variables {
+    textbox {
+
+    }
+  }
+
+  layout { }
+}
+`
+
+//// Textbox end
+
+//// Adhoc start
+
+const testAccDashboardDataSourceProvider_Variable_Adhoc_Valid = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+
+  variables {
+    adhoc {
+	  name          = "custom"
+	  label         = "Label"
+      description   = "Description"
+	  hide          = "label"
+
+	  datasource {
+		type = "prometheus"
+		uid  = "uid"
+	  }
+    }
+  }
+
+  layout { }
+}
+`
+
+const testAccDashboardDataSourceProvider_Variable_Adhoc_Valid_ExpectedJson = `{
+  "slug": "",
+  "title": "Test",
+  "originalTitle": "",
+  "style": "dark",
+  "timezone": "",
+  "editable": true,
+  "hideControls": false,
+  "panels": [],
+  "templating": {
+    "list": [
+      {
+        "type": "adhoc",
+        "name": "custom",
+        "description": "Description",
+        "label": "Label",
+        "hide": 1,
+        "datasource": {
+          "uid": "uid",
+          "type": "prometheus"
+        },
+        "refresh": false,
+        "options": [],
+        "includeAll": false,
+        "allValue": "",
+        "multi": false,
+        "query": null,
+        "regex": "",
+        "current": {
+          "text": null,
+          "value": ""
+        },
+        "sort": 0
+      }
+    ]
+  },
+  "annotations": {
+    "list": null
+  },
+  "schemaVersion": 0,
+  "version": 1,
+  "links": null,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": null,
+    "time_options": null
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Variable_Adhoc_MissingFields = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+
+  variables {
+    adhoc {
+	  name = "test"
+    }
+  }
+ 
+  layout { }
+}
+`
+
+//// Adhoc end
+
+//// Datasource start
+
+const testAccDashboardDataSourceProvider_Variable_Datasource_Valid = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+
+  variables {
+    datasource {
+	  name          = "custom"
+	  label         = "Label"
+      description   = "Description"
+	  hide          = "label"
+	  multi_value   = true
+      
+ 	  include_all {
+        enabled      = true
+		custom_value = "*"
+	  }
+
+	  source {
+		type   = "prometheus"
+		filter = "^prod$"
+	  }
+    }
+  }
+
+  layout { }
+}
+`
+
+const testAccDashboardDataSourceProvider_Variable_Datasource_Valid_ExpectedJson = `{
+  "slug": "",
+  "title": "Test",
+  "originalTitle": "",
+  "style": "dark",
+  "timezone": "",
+  "editable": true,
+  "hideControls": false,
+  "panels": [],
+  "templating": {
+    "list": [
+      {
+        "type": "datasource",
+        "name": "custom",
+        "description": "Description",
+        "label": "Label",
+        "hide": 1,
+        "refresh": false,
+        "options": [],
+        "includeAll": true,
+        "allValue": "*",
+        "multi": true,
+        "query": "prometheus",
+        "regex": "^prod$",
+        "current": {
+          "text": null,
+          "value": ""
+        },
+        "sort": 0
+      }
+    ]
+  },
+  "annotations": {
+    "list": null
+  },
+  "schemaVersion": 0,
+  "version": 1,
+  "links": null,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": null,
+    "time_options": null
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Variable_Datasource_MissingFields = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+
+  variables {
+    datasource {
+	  name = "test"
+    }
+  }
+ 
+  layout { }
+}
+`
+
+//// Datasource end
+
+//// Query start
+
+const testAccDashboardDataSourceProvider_Variable_Query_Valid = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+
+  variables {
+    query {
+	  name          = "custom"
+	  label         = "Label"
+      description   = "Description"
+	  hide          = "label"
+	  multi_value   = true
+      refresh 		= "time-range-change"
+ 	  regex  		= "$prod^"
+
+ 	  include_all {
+        enabled      = true
+		custom_value = "*"
+	  }
+
+	  sort {
+		type  = "alphabetical-case-insensitive"
+		order = "desc"
+	  }
+
+	  target {
+		prometheus {
+		  uid  = "uid"
+		  expr = "up{service='test'}"
+		}
+	  }
+    }
+  }
+
+  layout { }
+}
+`
+
+const testAccDashboardDataSourceProvider_Variable_Query_Valid_ExpectedJson = `{
+  "slug": "",
+  "title": "Test",
+  "originalTitle": "",
+  "style": "dark",
+  "timezone": "",
+  "editable": true,
+  "hideControls": false,
+  "panels": [],
+  "templating": {
+    "list": [
+      {
+        "type": "query",
+        "name": "custom",
+        "description": "Description",
+        "label": "Label",
+        "hide": 1,
+        "datasource": {
+          "uid": "uid",
+          "type": "prometheus"
+        },
+        "refresh": 2,
+        "options": [],
+        "includeAll": true,
+        "allValue": "*",
+        "multi": true,
+        "query": {
+          "query": "up{service='test'}",
+          "refId": "StandardVariableQuery"
+        },
+        "regex": "$prod^",
+        "current": {
+          "text": null,
+          "value": ""
+        },
+        "sort": 6,
+        "definition": "up{service='test'}"
+      }
+    ]
+  },
+  "annotations": {
+    "list": null
+  },
+  "schemaVersion": 0,
+  "version": 1,
+  "links": null,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": null,
+    "time_options": null
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Variable_Query_MissingFields = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+
+  variables {
+    query {
+	  name = "test"
+    }
+  }
+ 
+  layout { }
+}
+`
+
+//// Query end

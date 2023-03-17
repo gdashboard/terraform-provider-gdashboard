@@ -263,7 +263,7 @@ type Query struct {
 }
 
 type PrometheusTarget struct {
-	Uid     types.String `tfsdk:"uid"`
+	UID     types.String `tfsdk:"uid"`
 	Expr    types.String `tfsdk:"expr"`
 	Instant types.Bool   `tfsdk:"instant"`
 	Format  types.String `tfsdk:"format"`
@@ -274,7 +274,7 @@ type PrometheusTarget struct {
 }
 
 type CloudWatchTarget struct {
-	Uid        types.String          `tfsdk:"uid"`
+	UID        types.String          `tfsdk:"uid"`
 	Namespace  types.String          `tfsdk:"namespace"`
 	MetricName types.String          `tfsdk:"metric_name"`
 	Statistic  types.String          `tfsdk:"statistic"`
@@ -915,7 +915,7 @@ func createTargets(queries []Query) []grafana.Target {
 		for _, target := range group.Prometheus {
 			t := grafana.Target{
 				Datasource: grafana.Datasource{
-					UID:  target.Uid.ValueString(),
+					UID:  target.UID.ValueString(),
 					Type: "prometheus",
 				},
 				RefID:        target.RefId.ValueString(),
@@ -938,7 +938,7 @@ func createTargets(queries []Query) []grafana.Target {
 
 			t := grafana.Target{
 				Datasource: grafana.Datasource{
-					UID:  target.Uid.ValueString(),
+					UID:  target.UID.ValueString(),
 					Type: "cloudwatch",
 				},
 				RefID:      target.RefId.ValueString(),
