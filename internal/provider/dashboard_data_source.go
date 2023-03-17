@@ -250,6 +250,27 @@ func variableIncludeAllBlock() schema.ListNestedBlock {
 	}
 }
 
+func variableNameAttribute() schema.Attribute {
+	return schema.StringAttribute{
+		Description: "The name of the variable.",
+		Required:    true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtMost(50),
+		},
+	}
+}
+
+func variableHideAttribute() schema.Attribute {
+	return schema.StringAttribute{
+		Optional:            true,
+		Description:         "Which variable information to hide from the dashboard. The choices are: label, variable.",
+		MarkdownDescription: "Which variable information to hide from the dashboard. The choices are: `label`, `variable`.",
+		Validators: []validator.String{
+			stringvalidator.OneOf("label", "variable"),
+		},
+	}
+}
+
 func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
@@ -293,13 +314,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 									"include_all": variableIncludeAllBlock(),
 								},
 								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										Required:    true,
-										Description: "The name of the variable.",
-										Validators: []validator.String{
-											stringvalidator.LengthAtMost(50),
-										},
-									},
+									"name": variableNameAttribute(),
 									"label": schema.StringAttribute{
 										Optional:    true,
 										Description: "The optional display name.",
@@ -312,14 +327,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 										Optional:    true,
 										Description: "Whether to allow selecting multiple values at the same time or not.",
 									},
-									"hide": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Which variable information to hide. The choices are: label, variable.",
-										MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
-										Validators: []validator.String{
-											stringvalidator.OneOf("label", "variable"),
-										},
-									},
+									"hide": variableHideAttribute(),
 								},
 							},
 
@@ -333,13 +341,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 							Description: "The constant variable. Defines a hidden constant.",
 							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										Description: "The name of the variable.",
-										Required:    true,
-										Validators: []validator.String{
-											stringvalidator.LengthAtMost(50),
-										},
-									},
+									"name": variableNameAttribute(),
 									"label": schema.StringAttribute{
 										Optional:    true,
 										Description: "The optional display name.",
@@ -363,13 +365,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 							Description: "The textbox variable. Displays a free text input field with an optional default value.",
 							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										Description: "The name of the variable.",
-										Required:    true,
-										Validators: []validator.String{
-											stringvalidator.LengthAtMost(50),
-										},
-									},
+									"name": variableNameAttribute(),
 									"label": schema.StringAttribute{
 										Optional:    true,
 										Description: "The optional display name.",
@@ -382,14 +378,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 										Description: "The default value of the variable to use when the textbox is empty.",
 										Optional:    true,
 									},
-									"hide": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Which variable information to hide. The choices are: label, variable.",
-										MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
-										Validators: []validator.String{
-											stringvalidator.OneOf("label", "variable"),
-										},
-									},
+									"hide": variableHideAttribute(),
 								},
 							},
 							Validators: []validator.List{
@@ -430,13 +419,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 								},
 
 								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										Description: "The name of the variable.",
-										Required:    true,
-										Validators: []validator.String{
-											stringvalidator.LengthAtMost(50),
-										},
-									},
+									"name": variableNameAttribute(),
 									"label": schema.StringAttribute{
 										Optional:    true,
 										Description: "The optional display name.",
@@ -445,14 +428,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 										Optional:    true,
 										Description: "The description of the variable.",
 									},
-									"hide": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Which variable information to hide. The choices are: label, variable.",
-										MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
-										Validators: []validator.String{
-											stringvalidator.OneOf("label", "variable"),
-										},
-									},
+									"hide": variableHideAttribute(),
 								},
 
 								Validators: []validator.Object{
@@ -495,13 +471,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 								},
 
 								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										Description: "The name of the variable.",
-										Required:    true,
-										Validators: []validator.String{
-											stringvalidator.LengthAtMost(50),
-										},
-									},
+									"name": variableNameAttribute(),
 									"label": schema.StringAttribute{
 										Optional:    true,
 										Description: "The optional display name.",
@@ -514,14 +484,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 										Optional:    true,
 										Description: "Whether to allow selecting multiple values at the same time or not.",
 									},
-									"hide": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Which variable information to hide. The choices are: label, variable.",
-										MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
-										Validators: []validator.String{
-											stringvalidator.OneOf("label", "variable"),
-										},
-									},
+									"hide": variableHideAttribute(),
 								},
 
 								Validators: []validator.Object{
@@ -603,13 +566,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 								},
 
 								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										Description: "The name of the variable.",
-										Required:    true,
-										Validators: []validator.String{
-											stringvalidator.LengthAtMost(50),
-										},
-									},
+									"name": variableNameAttribute(),
 									"label": schema.StringAttribute{
 										Optional:    true,
 										Description: "The optional display name.",
@@ -635,14 +592,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 										Description:         "The regex expression to filter or capture specific parts of the names returned by your data source query. Example: /.*instance=\"([^\"]*).*/.",
 										MarkdownDescription: "The regex expression to filter or capture specific parts of the names returned by your data source query. Example: `/.*instance=\"([^\"]*).*/`.",
 									},
-									"hide": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Which variable information to hide. The choices are: label, variable.",
-										MarkdownDescription: "Which variable information to hide. The choices are: `label`, `variable`.",
-										Validators: []validator.String{
-											stringvalidator.OneOf("label", "variable"),
-										},
-									},
+									"hide": variableHideAttribute(),
 								},
 
 								Validators: []validator.Object{
@@ -751,6 +701,23 @@ func (d *DashboardDataSource) Configure(_ context.Context, req datasource.Config
 	d.Defaults = defaults.Dashboard
 }
 
+func decodeHide(hideValue types.String) uint8 {
+	hide := uint8(0)
+
+	if !hideValue.IsNull() {
+		switch v := hideValue.ValueString(); v {
+		case "label":
+			hide = 1
+		case "variable":
+			hide = 2
+		default:
+			hide = 0
+		}
+	}
+
+	return hide
+}
+
 func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data DashboardDataSourceModel
 
@@ -792,19 +759,6 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				}
 			}
 
-			hide := uint8(0)
-
-			if !custom.Hide.IsNull() {
-				switch v := custom.Hide.ValueString(); v {
-				case "label":
-					hide = 1
-				case "variable":
-					hide = 2
-				default:
-					hide = 0
-				}
-			}
-
 			v := grafana.TemplateVar{
 				Type:        "custom",
 				Name:        custom.Name.ValueString(),
@@ -814,7 +768,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				Options:     opts,
 				Query:       query,
 				Current:     current,
-				Hide:        hide,
+				Hide:        decodeHide(custom.Hide),
 			}
 
 			for _, all := range custom.IncludeAll {
@@ -844,19 +798,6 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		}
 
 		for _, textbox := range variable.TextBox {
-			hide := uint8(0)
-
-			if !textbox.Hide.IsNull() {
-				switch v := textbox.Hide.ValueString(); v {
-				case "label":
-					hide = 1
-				case "variable":
-					hide = 2
-				default:
-					hide = 0
-				}
-			}
-
 			v := grafana.TemplateVar{
 				Type:        "textbox",
 				Options:     make([]grafana.Option, 0),
@@ -864,26 +805,13 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				Label:       textbox.Label.ValueString(),
 				Description: textbox.Description.ValueString(),
 				Query:       textbox.DefaultValue.ValueString(),
-				Hide:        hide,
+				Hide:        decodeHide(textbox.Hide),
 			}
 
 			vars = append(vars, v)
 		}
 
 		for _, adhoc := range variable.AdHoc {
-			hide := uint8(0)
-
-			if !adhoc.Hide.IsNull() {
-				switch v := adhoc.Hide.ValueString(); v {
-				case "label":
-					hide = 1
-				case "variable":
-					hide = 2
-				default:
-					hide = 0
-				}
-			}
-
 			v := grafana.TemplateVar{
 				Type:        "adhoc",
 				Options:     make([]grafana.Option, 0),
@@ -894,26 +822,13 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 					UID:  adhoc.DataSource[0].UID.ValueString(),
 					Type: adhoc.DataSource[0].Type.ValueString(),
 				},
-				Hide: hide,
+				Hide: decodeHide(adhoc.Hide),
 			}
 
 			vars = append(vars, v)
 		}
 
 		for _, ds := range variable.DataSource {
-			hide := uint8(0)
-
-			if !ds.Hide.IsNull() {
-				switch v := ds.Hide.ValueString(); v {
-				case "label":
-					hide = 1
-				case "variable":
-					hide = 2
-				default:
-					hide = 0
-				}
-			}
-
 			v := grafana.TemplateVar{
 				Type:        "datasource",
 				Options:     make([]grafana.Option, 0),
@@ -923,7 +838,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				Multi:       ds.MultiValue.ValueBool(),
 				Query:       ds.DataSource[0].Type.ValueString(),
 				Regex:       ds.DataSource[0].Filter.ValueString(),
-				Hide:        hide,
+				Hide:        decodeHide(ds.Hide),
 			}
 
 			for _, all := range ds.IncludeAll {
@@ -940,19 +855,6 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		}
 
 		for _, query := range variable.Query {
-			hide := uint8(0)
-
-			if !query.Hide.IsNull() {
-				switch v := query.Hide.ValueString(); v {
-				case "label":
-					hide = 1
-				case "variable":
-					hide = 2
-				default:
-					hide = 0
-				}
-			}
-
 			refresh := int64(1)
 
 			if !query.Refresh.IsNull() {
@@ -1006,7 +908,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				Label:       query.Label.ValueString(),
 				Description: query.Description.ValueString(),
 				Multi:       query.MultiValue.ValueBool(),
-				Hide:        hide,
+				Hide:        decodeHide(query.Hide),
 				Sort:        sort,
 				Refresh:     grafana.BoolInt{Value: &refresh},
 				Regex:       query.Regex.ValueString(),
