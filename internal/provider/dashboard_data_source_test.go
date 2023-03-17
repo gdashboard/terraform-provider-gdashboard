@@ -263,10 +263,9 @@ const testAccDashboardDataSourceConfigExpectedJson = `{
         "query": "entry-1 : value, entry-2 : value",
         "regex": "",
         "current": {
-          "text": [
-            "entry-2"
-          ],
-          "value": "value"
+          "text": "entry-2",
+          "value": "value",
+          "selected": true
         },
         "sort": 0
       },
@@ -284,7 +283,8 @@ const testAccDashboardDataSourceConfigExpectedJson = `{
         "regex": "",
         "current": {
           "text": null,
-          "value": ""
+          "value": "",
+          "selected": false
         },
         "sort": 0
       }
@@ -472,10 +472,9 @@ const testAccDashboardDataSourceProvider_Variable_Custom_Valid_ExpectedJson = `{
         "query": "entry-1 : value, entry-2 : value",
         "regex": "",
         "current": {
-          "text": [
-            "entry-2"
-          ],
-          "value": "value"
+          "text": "entry-2",
+          "value": "value",
+          "selected": true
         },
         "sort": 0
       }
@@ -546,7 +545,8 @@ const testAccDashboardDataSourceProvider_Variable_TextBox_Valid_ExpectedJson = `
         "regex": "",
         "current": {
           "text": null,
-          "value": ""
+          "value": "",
+          "selected": false
         },
         "sort": 0
       }
@@ -636,7 +636,8 @@ const testAccDashboardDataSourceProvider_Variable_Adhoc_Valid_ExpectedJson = `{
         "regex": "",
         "current": {
           "text": null,
-          "value": ""
+          "value": "",
+          "selected": false
         },
         "sort": 0
       }
@@ -728,7 +729,8 @@ const testAccDashboardDataSourceProvider_Variable_Datasource_Valid_ExpectedJson 
         "regex": "^prod$",
         "current": {
           "text": null,
-          "value": ""
+          "value": "",
+          "selected": false
         },
         "sort": 0
       }
@@ -836,7 +838,8 @@ const testAccDashboardDataSourceProvider_Variable_Query_Valid_ExpectedJson = `{
         "regex": "^prod$",
         "current": {
           "text": null,
-          "value": ""
+          "value": "",
+          "selected": false
         },
         "sort": 6,
         "definition": "up{service='test'}"
@@ -983,8 +986,9 @@ const testAccDashboardDataSourceProvider_Variable_Interval_Valid_ExpectedJson = 
         "query": "1m,10m,30m,1h,6h,12h,1d,7d,14d,30d",
         "regex": "",
         "current": {
-          "text": null,
-          "value": ""
+          "text": "1m",
+          "value": "1m",
+          "selected": true
         },
         "sort": 0
       }

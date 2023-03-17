@@ -63,27 +63,21 @@ type (
 		AutoMin     *string                `json:"auto_min,omitempty"`    // ________, ______, _______, _____, __________, _____, interval
 		Datasource  *TemplateVarDataSource `json:"datasource,omitempty"`  // ________, ______, _______, adhoc, __________, _____, ________
 		Refresh     BoolInt                `json:"refresh"`               // ________, ______, _______, _____, __________, query, ________
-		Options     []Option               `json:"options"`               // ________, custom, _______, _____, __________, _____, ________
+		Options     []Option               `json:"options"`               // ________, custom, _______, _____, __________, _____, interval
 		IncludeAll  bool                   `json:"includeAll"`            // ________, custom, _______, _____, datasource, query, ________
 		AllValue    string                 `json:"allValue"`              // ________, custom, _______, _____, datasource, query, ________
 		Multi       bool                   `json:"multi"`                 // ________, custom, _______, _____, datasource, query, ________
 		Query       interface{}            `json:"query"`                 // constant, custom, textbox, _____, datasource, query, ________
-		Regex       string                 `json:"regex"`                 // ________, ______, _______, _____, datasource, query, ________
-		Current     Current                `json:"current"`               // ________, custom, _______, _____, __________, _____, ________
+		Regex       string                 `json:"regex"`                 // ________, ______, _______, _____, datasource, query, interval
+		Current     Option                 `json:"current"`               // ________, custom, _______, _____, __________, _____, interval
 		Sort        int                    `json:"sort"`                  // ________, ______, _______, _____, __________, query, ________
 		Definition  string                 `json:"definition,omitempty"`  // ________, ______, _______, _____, __________, query, ________
 	}
 	// Option for templateVar
 	Option struct {
-		Text     string `json:"text"`
-		Value    string `json:"value"`
-		Selected bool   `json:"selected"`
-	}
-	// Current for templateVar
-	Current struct {
-		Tags  []*string          `json:"tags,omitempty"`
-		Text  *StringSliceString `json:"text"`
-		Value string             `json:"value"`
+		Text     *string `json:"text"`
+		Value    string  `json:"value"`
+		Selected bool    `json:"selected"`
 	}
 	Annotation struct {
 		Name        string      `json:"name"`

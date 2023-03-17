@@ -822,11 +822,12 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		for _, custom := range variable.Custom {
 			opts := make([]grafana.Option, len(custom.Options))
 			query := ""
-			var current grafana.Current
+			var current grafana.Option
 
 			for i, opt := range custom.Options {
+				text := opt.Text.ValueString()
 				opts[i] = grafana.Option{
-					Text:     opt.Text.ValueString(),
+					Text:     &text,
 					Value:    opt.Value.ValueString(),
 					Selected: opt.Selected.ValueBool(),
 				}
@@ -838,13 +839,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				query = query + opt.Text.ValueString() + " : " + opt.Value.ValueString()
 
 				if opt.Selected.ValueBool() {
-					current = grafana.Current{
-						Text: &grafana.StringSliceString{
-							Value: []string{opt.Text.ValueString()},
-							Valid: true,
-						},
-						Value: opt.Value.ValueString(),
-					}
+					current = opts[i]
 				}
 			}
 
@@ -1036,8 +1031,9 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 			opts := make([]grafana.Option, totalIntervals)
 
 			for i, intervalValue := range interval.Intervals {
+				text := intervalValue.ValueString()
 				opts[i] = grafana.Option{
-					Text:     intervalValue.ValueString(),
+					Text:     &text,
 					Value:    intervalValue.ValueString(),
 					Selected: i == 0,
 				}
@@ -1052,6 +1048,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 			v := grafana.TemplateVar{
 				Type:        "interval",
 				Options:     opts,
+				Current:     opts[0],
 				Name:        interval.Name.ValueString(),
 				Label:       interval.Label.ValueString(),
 				Description: interval.Description.ValueString(),
@@ -1073,8 +1070,9 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				}
 
 				if v.Auto {
+					text := "auto"
 					autoOpt := grafana.Option{
-						Text:  "auto",
+						Text:  &text,
 						Value: "$__auto_interval_" + interval.Name.ValueString(),
 					}
 					v.Options = append([]grafana.Option{autoOpt}, opts...)
