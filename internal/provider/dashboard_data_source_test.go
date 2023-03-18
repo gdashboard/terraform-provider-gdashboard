@@ -85,7 +85,7 @@ func TestAccDashboardDataSource(t *testing.T) {
 const testAccDashboardDataSourceConfig = `
 data "gdashboard_dashboard" "test" {
   title         = "Test"
-  uid 	        = "test-uid"
+  uid             = "test-uid"
   editable      = false
   style         = "light"
   graph_tooltip = "shared-crosshair"
@@ -97,62 +97,62 @@ data "gdashboard_dashboard" "test" {
 
   variables {
 	const {
-	  name  = "var"
-	  value = "const-value"
+      name  = "var"
+      value = "const-value"
 	}
 
     custom {
-	  name = "custom"
-	  hide = "label" 
+      name = "custom"
+      hide = "label" 
 
       option {
-		text  = "entry-1"
-		value = "value"
-	  }
+        text  = "entry-1"
+        value = "value"
+      }
 
-	  option {
-		text  	 = "entry-2"
-		value 	 = "value"
-		selected = true
-	  }
+      option {
+        text  	 = "entry-2"
+        value 	 = "value"
+        selected = true
+      }
     }
   }
 
   layout {
 	row {
-	  panel {
-	  	size = {
-		  height = 8
-		  width  = 10
-		}
-	  	source = "{\"title\": \"Panel 1\"}"
-	  }
+      panel {
+      	size = {
+          height = 8
+          width  = 10
+        }
+      	source = "{\"title\": \"Panel 1\"}"
+      }
 
-	  panel {
-	  	size = {
-		  height = 3
-		  width  = 24
-		}
-	  	source = "{\"title\": \"Panel 2\"}"
-	  } 
+      panel {
+      	size = {
+          height = 3
+          width  = 24
+        }
+      	source = "{\"title\": \"Panel 2\"}"
+      } 
 	}
 
 	row {
-	  panel {
-	  	size = {
-		  height = 4
-		  width  = 24
-		}
-	  	source = "{\"title\": \"Panel 3\"}"
-	  }
+      panel {
+      	size = {
+          height = 4
+          width  = 24
+        }
+      	source = "{\"title\": \"Panel 3\"}"
+      }
 
-	  panel {
-	  	size = {
-		  height = 3
-		  width  = 3
-		}
-	  	source = "{\"title\": \"Panel 4\"}"
-	  } 
+      panel {
+      	size = {
+          height = 3
+          width  = 3
+        }
+      	source = "{\"title\": \"Panel 4\"}"
+      } 
 	}
   }
 }
@@ -311,12 +311,12 @@ const testAccDashboardDataSourceProviderCustomDefaultsConfig = `
 provider "gdashboard" {
   defaults {
     dashboard {
-	  editable		= false
-	  graph_tooltip = "shared-tooltip"
- 	  style 		= "light"
+      editable        = false
+      graph_tooltip = "shared-tooltip"
+       style         = "light"
       time {
         from = "now-12h"
-		to   = "now-3h"
+        to   = "now-3h"
       }
     }
   }
@@ -406,27 +406,27 @@ data "gdashboard_dashboard" "test" {
 
   variables {
     custom {
-	  name          = "custom"
-	  label         = "Label"
+      name          = "custom"
+      label         = "Label"
       description   = "Description"
-	  hide          = "label"
-	  multi   = true
+      hide          = "label"
+      multi   = true
       
- 	  include_all {
+       include_all {
         enabled      = true
-		custom_value = "*"
-	  }
+        custom_value = "*"
+      }
 
       option {
-		text  = "entry-1"
-		value = "value"
-	  }
+        text  = "entry-1"
+        value = "value"
+      }
 
-	  option {
-		text  	 = "entry-2"
-		value 	 = "value"
-		selected = true
-	  }
+      option {
+        text  	 = "entry-2"
+        value 	 = "value"
+        selected = true
+      }
     }
   }
 
@@ -506,11 +506,11 @@ data "gdashboard_dashboard" "test" {
 
   variables {
     textbox {
-	  name          = "custom"
-	  label         = "Label"
+      name          = "custom"
+      label         = "Label"
       description   = "Description"
-	  default_value = "*"
-	  hide          = "label"
+      default_value = "*"
+      hide          = "label"
     }
   }
 
@@ -591,27 +591,27 @@ data "gdashboard_dashboard" "test" {
 
   variables {
     adhoc {
-	  name          = "custom"
-	  label         = "Label"
+      name          = "custom"
+      label         = "Label"
       description   = "Description"
-	  hide          = "label"
+      hide          = "label"
 
-	  datasource {
-		type = "prometheus"
-		uid  = "uid"
-	  }
+      datasource {
+        type = "prometheus"
+        uid  = "uid"
+      }
 
-	  filter {
-		key      = "__name__"
-		operator = "!="
-		value    = "any"
-	  }
+      filter {
+        key      = "__name__"
+        operator = "!="
+        value    = "any"
+      }
 
-	  filter {
-		key 	 = "host"
-		operator = "=~"
-		value 	 = "^prod$"
-	  }
+      filter {
+        key 	 = "host"
+        operator = "=~"
+        value 	 = "^prod$"
+      }
     }
   }
 
@@ -691,7 +691,7 @@ data "gdashboard_dashboard" "test" {
 
   variables {
     adhoc {
-	  name = "test"
+      name = "test"
     }
   }
  
@@ -708,21 +708,21 @@ data "gdashboard_dashboard" "test" {
 
   variables {
     datasource {
-	  name          = "custom"
-	  label         = "Label"
+      name          = "custom"
+      label         = "Label"
       description   = "Description"
-	  hide          = "label"
-	  multi   = true
+      hide          = "label"
+      multi   = true
       
- 	  include_all {
+       include_all {
         enabled      = true
-		custom_value = "*"
-	  }
+        custom_value = "*"
+      }
 
-	  source {
-		type   = "prometheus"
-		filter = "^prod$"
-	  }
+      source {
+        type   = "prometheus"
+        filter = "^prod$"
+      }
     }
   }
 
@@ -784,7 +784,7 @@ data "gdashboard_dashboard" "test" {
 
   variables {
     datasource {
-	  name = "test"
+      name = "test"
     }
   }
  
@@ -801,30 +801,30 @@ data "gdashboard_dashboard" "test" {
 
   variables {
     query {
-	  name          = "custom"
-	  label         = "Label"
+      name          = "custom"
+      label         = "Label"
       description   = "Description"
-	  hide          = "label"
-	  multi   = true
-      refresh 		= "time-range-change"
- 	  regex  		= "^prod$"
+      hide          = "label"
+      multi   = true
+      refresh         = "time-range-change"
+       regex          = "^prod$"
 
- 	  include_all {
+       include_all {
         enabled      = true
-		custom_value = "*"
-	  }
+        custom_value = "*"
+      }
 
-	  sort {
-		type  = "alphabetical-case-insensitive"
-		order = "desc"
-	  }
+      sort {
+        type  = "alphabetical-case-insensitive"
+        order = "desc"
+      }
 
-	  target {
-		prometheus {
-		  uid  = "uid"
-		  expr = "up{service='test'}"
-		}
-	  }
+      target {
+        prometheus {
+          uid  = "uid"
+          expr = "up{service='test'}"
+        }
+      }
     }
   }
 
@@ -894,7 +894,7 @@ data "gdashboard_dashboard" "test" {
 
   variables {
     query {
-	  name = "test"
+      name = "test"
     }
   }
  
@@ -911,17 +911,17 @@ data "gdashboard_dashboard" "test" {
 
   variables {
     interval {
-	  name          = "custom"
-	  label         = "Label"
+      name          = "custom"
+      label         = "Label"
       description   = "Description"
-	  hide          = "label"
-	  intervals 	= ["1m", "10m", "30m", "1h", "6h", "12h", "1d", "7d", "14d", "30d"]
+      hide          = "label"
+      intervals 	= ["1m", "10m", "30m", "1h", "6h", "12h", "1d", "7d", "14d", "30d"]
 
-	  auto {
-		enabled 	 = true
-		step_count 	 = 30
-		min_interval = "10s"
-	  }
+      auto {
+        enabled 	 = true
+        step_count 	 = 30
+        min_interval = "10s"
+      }
     }
   }
 
