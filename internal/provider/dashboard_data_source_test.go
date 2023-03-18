@@ -600,6 +600,18 @@ data "gdashboard_dashboard" "test" {
 		type = "prometheus"
 		uid  = "uid"
 	  }
+
+	  filter {
+		key      = "__name__"
+		operator = "!="
+		value    = "any"
+	  }
+
+	  filter {
+		key 	 = "host"
+		operator = "=~"
+		value 	 = "^prod$"
+	  }
     }
   }
 
@@ -627,6 +639,20 @@ const testAccDashboardDataSourceProvider_Variable_Adhoc_Valid_ExpectedJson = `{
           "uid": "uid",
           "type": "prometheus"
         },
+        "filters": [
+          {
+            "condition": "",
+            "key": "__name__",
+            "operator": "!=",
+            "value": "any"
+          },
+          {
+            "condition": "",
+            "key": "host",
+            "operator": "=~",
+            "value": "^prod$"
+          }
+        ],
         "refresh": false,
         "options": [],
         "includeAll": false,
