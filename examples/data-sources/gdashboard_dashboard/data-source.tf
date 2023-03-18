@@ -11,12 +11,15 @@ data "gdashboard_timeseries" "jvm_memory" {
 
 data "gdashboard_dashboard" "jvm_dashboard" {
   title         = "JVM Dashboard"
+  description   = "JVM details"
   style         = "light"
   graph_tooltip = "shared-crosshair"
 
   time {
-    from = "now-1h"
-    to   = "now+1h"
+    default_range {
+      from = "now-1h"
+      to   = "now+1h"
+    }
   }
 
   variables {

@@ -5,7 +5,7 @@ provider "gdashboard" {
       editable      = false
       graph_tooltip = "shared-tooltip"
       style         = "light"
-      time {
+      default_time_range {
         from = "now-12h"
         to   = "now-3h"
       }

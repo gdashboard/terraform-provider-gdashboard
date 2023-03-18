@@ -45,16 +45,34 @@ type Time struct {
 
 // DashboardDataSourceModel describes the data source data model.
 type DashboardDataSourceModel struct {
-	Id           types.String `tfsdk:"id"`
-	Json         types.String `tfsdk:"json"`
-	Title        types.String `tfsdk:"title"`
-	UID          types.String `tfsdk:"uid"`
-	Editable     types.Bool   `tfsdk:"editable"`
-	Style        types.String `tfsdk:"style"`
-	GraphTooltip types.String `tfsdk:"graph_tooltip"`
-	Time         []TimeModel  `tfsdk:"time"`
-	Layout       Layout       `tfsdk:"layout"`
-	Variables    []Variable   `tfsdk:"variables"`
+	Id           types.String           `tfsdk:"id"`
+	Json         types.String           `tfsdk:"json"`
+	Title        types.String           `tfsdk:"title"`
+	Description  types.String           `tfsdk:"description"`
+	Version      types.Int64            `tfsdk:"version"`
+	UID          types.String           `tfsdk:"uid"`
+	Editable     types.Bool             `tfsdk:"editable"`
+	Style        types.String           `tfsdk:"style"`
+	GraphTooltip types.String           `tfsdk:"graph_tooltip"`
+	Tags         []types.String         `tfsdk:"tags"`
+	TimeOptions  []DashboardTimeOptions `tfsdk:"time"`
+	Layout       Layout                 `tfsdk:"layout"`
+	Variables    []Variable             `tfsdk:"variables"`
+}
+
+type DashboardTimeOptions struct {
+	Timezone              types.String                 `tfsdk:"timezone"`
+	WeekStart             types.String                 `tfsdk:"week_start"`
+	RefreshLiveDashboards types.Bool                   `tfsdk:"refresh_live_dashboards"`
+	Range                 []TimeModel                  `tfsdk:"default_range"`
+	TimePicker            []DashboardTimePickerOptions `tfsdk:"picker"`
+}
+
+type DashboardTimePickerOptions struct {
+	Hide             types.Bool     `tfsdk:"hide"`
+	NowDelay         types.String   `tfsdk:"now_delay"`
+	RefreshIntervals []types.String `tfsdk:"refresh_intervals"`
+	TimeOptions      []types.String `tfsdk:"time_options"`
 }
 
 type Layout struct {
@@ -305,7 +323,77 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 		MarkdownDescription: "Dashboard data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/dashboards/use-dashboards/) for more details.",
 
 		Blocks: map[string]schema.Block{
-			"time": dashboardTimeBlock(),
+			"time": schema.ListNestedBlock{
+				Description: "The time-specific options.",
+				NestedObject: schema.NestedBlockObject{
+					Blocks: map[string]schema.Block{
+						"default_range": dashboardTimeBlock(),
+						"picker": schema.ListNestedBlock{
+							Description: "The time picker options.",
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									"refresh_intervals": schema.ListAttribute{
+										ElementType: types.StringType,
+										Optional:    true,
+										Description: "The auto refresh intervals that should be available in the auto refresh list. " +
+											"The following time units are supported: s (seconds), m (minutes), h (hours), d (days), w (weeks), M (months), and y (years). " +
+											"Example: 5s, 10s, 30s, 1m, 5m, 15m, 30m, 1h, 2h, 1d.",
+										MarkdownDescription: "The auto refresh intervals that should be available in the auto refresh list. " +
+											"The following time units are supported: `s (seconds)`, `m (minutes)`, `h (hours)`, `d (days)`, `w (weeks)`, `M (months)`, and `y (years)`. " +
+											"Example: `1m`, `10s`, `30s`, `1m`, `5m`, `15m`, `30m`, `1h`, `2h`, `1d`.",
+									},
+									"time_options": schema.ListAttribute{
+										ElementType: types.StringType,
+										Optional:    true,
+										Description: "The time options (Last X) that should be available in the range selection list. " +
+											"The following time units are supported: s (seconds), m (minutes), h (hours), d (days), w (weeks), M (months), and y (years). " +
+											"Example: 5s, 10s, 30s, 1m, 5m, 15m, 30m, 1h, 2h, 1d.",
+										MarkdownDescription: "The time options (Last X) that should be available in the range selection list. " +
+											"The following time units are supported: `s (seconds)`, `m (minutes)`, `h (hours)`, `d (days)`, `w (weeks)`, `M (months)`, and `y (years)`. " +
+											"Example: `1m`, `10s`, `30s`, `1m`, `5m`, `15m`, `30m`, `1h`, `2h`, `1d`.",
+									},
+									"now_delay": schema.StringAttribute{
+										Optional:            true,
+										Description:         "Exclude recent data that may be incomplete. Example: 10s, 1m, 15m.",
+										MarkdownDescription: "Exclude recent data that may be incomplete. Example: `10s`, `1m`, `15m.`",
+									},
+									"hide": schema.BoolAttribute{
+										Optional:    true,
+										Description: "Whether to hide time picker or not.",
+									},
+								},
+							},
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(1),
+							},
+						},
+					},
+
+					Attributes: map[string]schema.Attribute{
+						"timezone": schema.StringAttribute{
+							Optional:            true,
+							Description:         "The timezone to use. Predefined: utc, browser. Custom: Europe/Kyiv.",
+							MarkdownDescription: "The timezone to use. Predefined: `utc`, `browser`. Custom: `Europe/Kyiv`.",
+						},
+						"week_start": schema.StringAttribute{
+							Optional:            true,
+							Description:         "The custom week start. The choices are: `saturday`, `sunday`, `monday`.",
+							MarkdownDescription: "The custom week start. The choices are: `saturday`, `sunday`, `monday`.",
+							Validators: []validator.String{
+								stringvalidator.OneOf("saturday", "sunday", "monday"),
+							},
+						},
+						"refresh_live_dashboards": schema.BoolAttribute{
+							Optional:    true,
+							Description: "Continuously re-draw panels where the time range references 'now'.",
+						},
+					},
+				},
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(1),
+				},
+			},
+
 			"variables": schema.ListNestedBlock{
 				Description: "The variables.",
 				NestedObject: schema.NestedBlockObject{
@@ -714,10 +802,10 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 										Required:    true,
 										Description: "The time range intervals that you want to appear in the variable drop-down list. " +
 											"The following time units are supported: s (seconds), m (minutes), h (hours), d (days), w (weeks), M (months), and y (years). " +
-											"You can also accept or edit the default values: 1m, 10m, 30m, 1h, 6h, 12h, 1d, 7d, 14d, 30d.",
+											"Example: 1m, 10m, 30m, 1h, 6h, 12h, 1d, 7d, 14d, 30d.",
 										MarkdownDescription: "The time range intervals that you want to appear in the variable drop-down list. " +
 											"The following time units are supported: `s (seconds)`, `m (minutes)`, `h (hours)`, `d (days)`, `w (weeks)`, `M (months)`, and `y (years)`. " +
-											"You can also accept or edit the default values: `1m`, `10m`, `30m`, `1h`, `6h`, `12h`, `1d`, `7d`, `14d`, `30d`.",
+											"Example: `1m`, `10m`, `30m`, `1h`, `6h`, `12h`, `1d`, `7d`, `14d`, `30d`.",
 									},
 								},
 							},
@@ -794,9 +882,25 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 				Required:    true,
 				Description: "The title of the dashboard.",
 			},
+			"description": schema.StringAttribute{
+				Optional:    true,
+				Description: "The description of the dashboard.",
+			},
 			"uid": schema.StringAttribute{
 				Optional:    true,
 				Description: "The UID of the dashboard.",
+			},
+			"tags": schema.ListAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Description: "The set of tags to associate with the dashboard.",
+			},
+			"version": schema.Int64Attribute{
+				Optional:    true,
+				Description: "The version of the dashboard.",
+				Validators: []validator.Int64{
+					int64validator.AtLeast(1),
+				},
 			},
 			"editable":      dashboardEditableAttribute(),
 			"style":         dashboardStyleAttribute(),
@@ -1204,6 +1308,10 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		},
 	}
 
+	if !data.Description.IsNull() {
+		dashboard.Description = data.Description.ValueString()
+	}
+
 	if !data.UID.IsNull() {
 		dashboard.UID = data.UID.ValueString()
 	}
@@ -1216,9 +1324,63 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		dashboard.Style = data.Style.ValueString()
 	}
 
-	for _, time := range data.Time {
-		dashboard.Time.From = time.From.ValueString()
-		dashboard.Time.To = time.To.ValueString()
+	if !data.Version.IsNull() {
+		dashboard.Version = data.Version.ValueInt64()
+	}
+
+	if len(data.Tags) > 0 {
+		tags := make([]string, len(data.Tags))
+		for i, tag := range data.Tags {
+			tags[i] = tag.ValueString()
+		}
+
+		dashboard.Tags = tags
+	}
+
+	for _, timeOptions := range data.TimeOptions {
+		if !timeOptions.Timezone.IsNull() {
+			dashboard.Timezone = timeOptions.Timezone.ValueString()
+		}
+
+		if !timeOptions.WeekStart.IsNull() {
+			dashboard.WeekStart = timeOptions.WeekStart.ValueString()
+		}
+
+		if !timeOptions.RefreshLiveDashboards.IsNull() {
+			dashboard.LiveNow = timeOptions.RefreshLiveDashboards.ValueBool()
+		}
+
+		for _, time := range timeOptions.Range {
+			dashboard.Time.From = time.From.ValueString()
+			dashboard.Time.To = time.To.ValueString()
+		}
+
+		for _, picker := range timeOptions.TimePicker {
+			if !picker.Hide.IsNull() {
+				value := picker.Hide.ValueBool()
+				dashboard.Timepicker.Hidden = &value
+			}
+
+			if !picker.NowDelay.IsNull() {
+				dashboard.Timepicker.NowDelay = picker.NowDelay.ValueString()
+			}
+
+			if len(picker.RefreshIntervals) > 0 {
+				intervals := make([]string, len(picker.RefreshIntervals))
+				for i, interval := range picker.RefreshIntervals {
+					intervals[i] = interval.ValueString()
+				}
+				dashboard.Timepicker.RefreshIntervals = intervals
+			}
+
+			if len(picker.TimeOptions) > 0 {
+				options := make([]string, len(picker.TimeOptions))
+				for i, option := range picker.TimeOptions {
+					options[i] = option.ValueString()
+				}
+				dashboard.Timepicker.TimeOptions = options
+			}
+		}
 	}
 
 	tooltip := ""

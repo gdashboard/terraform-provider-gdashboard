@@ -292,13 +292,13 @@ Optional:
 
 Optional:
 
+- `default_time_range` (Block List) The default query time range. (see [below for nested schema](#nestedblock--defaults--dashboard--default_time_range))
 - `editable` (Boolean) Whether to make the dashboard editable or not.
 - `graph_tooltip` (String) Controls tooltip and hover highlight behavior across different panels: `default`, `shared-crosshair`, `shared-tooltip`.
 - `style` (String) The dashboard style. The choices are: `dark`, `light`.
-- `time` (Block List) The default query time range. (see [below for nested schema](#nestedblock--defaults--dashboard--time))
 
-<a id="nestedblock--defaults--dashboard--time"></a>
-### Nested Schema for `defaults.dashboard.time`
+<a id="nestedblock--defaults--dashboard--default_time_range"></a>
+### Nested Schema for `defaults.dashboard.default_time_range`
 
 Required:
 
