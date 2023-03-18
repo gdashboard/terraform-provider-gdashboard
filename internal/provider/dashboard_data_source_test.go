@@ -85,7 +85,7 @@ func TestAccDashboardDataSource(t *testing.T) {
 const testAccDashboardDataSourceConfig = `
 data "gdashboard_dashboard" "test" {
   title         = "Test"
-  uid             = "test-uid"
+  uid           = "test-uid"
   editable      = false
   style         = "light"
   graph_tooltip = "shared-crosshair"
