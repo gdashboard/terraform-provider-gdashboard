@@ -159,6 +159,7 @@ Optional:
 
 - `datasource` (Block List) The datasource to use. (see [below for nested schema](#nestedblock--variables--adhoc--datasource))
 - `description` (String) The description of the variable.
+- `filter` (Block List) The predefined filters. (see [below for nested schema](#nestedblock--variables--adhoc--filter))
 - `hide` (String) Which variable information to hide from the dashboard. The choices are: `label`, `variable`.
 - `label` (String) The optional display name.
 
@@ -169,6 +170,16 @@ Required:
 
 - `type` (String) The type of the datasource. The choices are: `prometheus`, `loki`, `influxdb`, `elasticsearch`.
 - `uid` (String) The uid of the datasource.
+
+
+<a id="nestedblock--variables--adhoc--filter"></a>
+### Nested Schema for `variables.adhoc.filter`
+
+Required:
+
+- `key` (String) The name of the dimensional label to filter by.
+- `operator` (String) The operator to use for comparison. The choices are: `=`, `!=`, `>`, `<`, `=~`, `!~`.
+- `value` (String) The expected value of the dimensional label.
 
 
 

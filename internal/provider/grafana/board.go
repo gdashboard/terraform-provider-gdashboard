@@ -52,26 +52,33 @@ type (
 		Query string `json:"query"`
 		RefID string `json:"refId"`
 	}
+	TemplateVarAdHocFilter struct {
+		Condition string `json:"condition"`
+		Key       string `json:"key"`
+		Operator  string `json:"operator"`
+		Value     string `json:"value"`
+	}
 	TemplateVar struct {
-		Type        string                 `json:"type"`                  // constant, custom, textbox, adhoc, datasource, query, interval
-		Name        string                 `json:"name"`                  // constant, custom, textbox, adhoc, datasource, query, interval
-		Description string                 `json:"description,omitempty"` // constant, custom, textbox, adhoc, datasource, query, interval
-		Label       string                 `json:"label"`                 // constant, custom, textbox, adhoc, datasource, query, interval
-		Hide        uint8                  `json:"hide"`                  // ________, custom, textbox, adhoc, datasource, query, interval
-		Auto        bool                   `json:"auto,omitempty"`        // ________, ______, _______, _____, __________, _____, interval
-		AutoCount   *int64                 `json:"auto_count,omitempty"`  // ________, ______, _______, _____, __________, _____, interval
-		AutoMin     *string                `json:"auto_min,omitempty"`    // ________, ______, _______, _____, __________, _____, interval
-		Datasource  *TemplateVarDataSource `json:"datasource,omitempty"`  // ________, ______, _______, adhoc, __________, _____, ________
-		Refresh     BoolInt                `json:"refresh"`               // ________, ______, _______, _____, datasource, query, ________
-		Options     []Option               `json:"options"`               // ________, custom, _______, _____, __________, _____, interval
-		IncludeAll  bool                   `json:"includeAll"`            // ________, custom, _______, _____, datasource, query, ________
-		AllValue    string                 `json:"allValue"`              // ________, custom, _______, _____, datasource, query, ________
-		Multi       bool                   `json:"multi"`                 // ________, custom, _______, _____, datasource, query, ________
-		Query       interface{}            `json:"query"`                 // constant, custom, textbox, _____, datasource, query, ________
-		Regex       string                 `json:"regex"`                 // ________, ______, _______, _____, datasource, query, interval
-		Current     Option                 `json:"current"`               // ________, custom, _______, _____, __________, _____, interval
-		Sort        int                    `json:"sort"`                  // ________, ______, _______, _____, __________, query, ________
-		Definition  string                 `json:"definition,omitempty"`  // ________, ______, _______, _____, __________, query, ________
+		Type        string                   `json:"type"`                  // constant, custom, textbox, adhoc, datasource, query, interval
+		Name        string                   `json:"name"`                  // constant, custom, textbox, adhoc, datasource, query, interval
+		Description string                   `json:"description,omitempty"` // constant, custom, textbox, adhoc, datasource, query, interval
+		Label       string                   `json:"label"`                 // constant, custom, textbox, adhoc, datasource, query, interval
+		Hide        uint8                    `json:"hide"`                  // ________, custom, textbox, adhoc, datasource, query, interval
+		Auto        bool                     `json:"auto,omitempty"`        // ________, ______, _______, _____, __________, _____, interval
+		AutoCount   *int64                   `json:"auto_count,omitempty"`  // ________, ______, _______, _____, __________, _____, interval
+		AutoMin     *string                  `json:"auto_min,omitempty"`    // ________, ______, _______, _____, __________, _____, interval
+		Datasource  *TemplateVarDataSource   `json:"datasource,omitempty"`  // ________, ______, _______, adhoc, __________, _____, ________
+		Filters     []TemplateVarAdHocFilter `json:"filters,omitempty"`     // ________, ______, _______, adhoc, __________, _____, ________
+		Refresh     BoolInt                  `json:"refresh"`               // ________, ______, _______, _____, datasource, query, ________
+		Options     []Option                 `json:"options"`               // ________, custom, _______, _____, __________, _____, interval
+		IncludeAll  bool                     `json:"includeAll"`            // ________, custom, _______, _____, datasource, query, ________
+		AllValue    string                   `json:"allValue"`              // ________, custom, _______, _____, datasource, query, ________
+		Multi       bool                     `json:"multi"`                 // ________, custom, _______, _____, datasource, query, ________
+		Query       interface{}              `json:"query"`                 // constant, custom, textbox, _____, datasource, query, ________
+		Regex       string                   `json:"regex"`                 // ________, ______, _______, _____, datasource, query, interval
+		Current     Option                   `json:"current"`               // ________, custom, _______, _____, __________, _____, interval
+		Sort        int                      `json:"sort"`                  // ________, ______, _______, _____, __________, query, ________
+		Definition  string                   `json:"definition,omitempty"`  // ________, ______, _______, _____, __________, query, ________
 	}
 	// Option for templateVar
 	Option struct {
