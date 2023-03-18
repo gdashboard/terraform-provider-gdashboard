@@ -69,7 +69,7 @@ type (
 		AutoMin     *string                  `json:"auto_min,omitempty"`    // ________, ______, _______, _____, __________, _____, interval
 		Datasource  *TemplateVarDataSource   `json:"datasource,omitempty"`  // ________, ______, _______, adhoc, __________, _____, ________
 		Filters     []TemplateVarAdHocFilter `json:"filters,omitempty"`     // ________, ______, _______, adhoc, __________, _____, ________
-		Refresh     BoolInt                  `json:"refresh"`               // ________, ______, _______, _____, __________, query, ________
+		Refresh     BoolInt                  `json:"refresh"`               // ________, ______, _______, _____, datasource, query, ________
 		Options     []Option                 `json:"options"`               // ________, custom, _______, _____, __________, _____, interval
 		IncludeAll  bool                     `json:"includeAll"`            // ________, custom, _______, _____, datasource, query, ________
 		AllValue    string                   `json:"allValue"`              // ________, custom, _______, _____, datasource, query, ________
