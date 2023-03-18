@@ -145,11 +145,18 @@ type VariableAdHoc struct {
 	Description types.String              `tfsdk:"description"`
 	Hide        types.String              `tfsdk:"hide"`
 	DataSource  []VariableAdHocDataSource `tfsdk:"datasource"`
+	Filters     []VariableAdHocFilter     `tfsdk:"filter"`
 }
 
 type VariableAdHocDataSource struct {
 	Type types.String `tfsdk:"type"`
 	UID  types.String `tfsdk:"uid"`
+}
+
+type VariableAdHocFilter struct {
+	Key      types.String `tfsdk:"key"`
+	Operator types.String `tfsdk:"operator"`
+	Value    types.String `tfsdk:"value"`
 }
 
 type VariableDataSource struct {
@@ -522,6 +529,32 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 										Validators: []validator.List{
 											listvalidator.SizeAtLeast(1),
 											listvalidator.SizeAtMost(1),
+										},
+									},
+									"filter": schema.ListNestedBlock{
+										Description: "The predefined filters.",
+										NestedObject: schema.NestedBlockObject{
+											Attributes: map[string]schema.Attribute{
+												"key": schema.StringAttribute{
+													Required:    true,
+													Description: "The name of the dimensional label to filter by.",
+												},
+												"operator": schema.StringAttribute{
+													Required:            true,
+													Description:         "The operator to use for comparison. The choices are: =, !=, >, <, =~, !~.",
+													MarkdownDescription: "The operator to use for comparison. The choices are: `=`, `!=`, `>`, `<`, `=~`, `!~`.",
+													Validators: []validator.String{
+														stringvalidator.OneOf("=", "!=", ">", "<", "=~", "!~"),
+													},
+												},
+												"value": schema.StringAttribute{
+													Required:    true,
+													Description: "The expected value of the dimensional label.",
+												},
+											},
+										},
+										Validators: []validator.List{
+											listvalidator.SizeAtMost(30),
 										},
 									},
 								},
@@ -1000,6 +1033,17 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		}
 
 		for _, adhoc := range variable.AdHoc {
+			filters := make([]grafana.TemplateVarAdHocFilter, len(adhoc.Filters))
+
+			for i, filter := range adhoc.Filters {
+				filters[i] = grafana.TemplateVarAdHocFilter{
+					Condition: "",
+					Key:       filter.Key.ValueString(),
+					Operator:  filter.Operator.ValueString(),
+					Value:     filter.Value.ValueString(),
+				}
+			}
+
 			v := grafana.TemplateVar{
 				Type:        "adhoc",
 				Options:     make([]grafana.Option, 0),
@@ -1010,7 +1054,8 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 					UID:  adhoc.DataSource[0].UID.ValueString(),
 					Type: adhoc.DataSource[0].Type.ValueString(),
 				},
-				Hide: decodeHide(adhoc.Hide),
+				Filters: filters,
+				Hide:    decodeHide(adhoc.Hide),
 			}
 
 			vars = append(vars, v)
