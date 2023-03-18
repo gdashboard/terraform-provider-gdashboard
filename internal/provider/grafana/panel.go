@@ -47,17 +47,18 @@ type (
 		*TimeseriesPanel
 		*CustomPanel
 	}
-	panelType   int8
+	panelType int8
+	GridPos   struct {
+		H *int `json:"h,omitempty"`
+		W *int `json:"w,omitempty"`
+		X *int `json:"x,omitempty"`
+		Y *int `json:"y,omitempty"`
+	}
 	CommonPanel struct {
-		Datasource interface{} `json:"datasource,omitempty"` // metrics
-		Editable   bool        `json:"editable"`
-		Error      bool        `json:"error"`
-		GridPos    struct {
-			H *int `json:"h,omitempty"`
-			W *int `json:"w,omitempty"`
-			X *int `json:"x,omitempty"`
-			Y *int `json:"y,omitempty"`
-		} `json:"gridPos,omitempty"`
+		Datasource       interface{} `json:"datasource,omitempty"` // metrics
+		Editable         bool        `json:"editable"`
+		Error            bool        `json:"error"`
+		GridPos          GridPos     `json:"gridPos,omitempty"`
 		Height           interface{} `json:"height,omitempty"` // general
 		HideTimeOverride *bool       `json:"hideTimeOverride,omitempty"`
 		ID               uint        `json:"id"`

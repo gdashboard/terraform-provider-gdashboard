@@ -18,7 +18,7 @@ type (
 		WeekStart   string   `json:"weekStart,omitempty"`
 		LiveNow     bool     `json:"liveNow"`
 		Editable    bool     `json:"editable"`
-		Panels      []*Panel `json:"panels"`
+		Panels      []Panel  `json:"panels"`
 		//		Rows            []*Row     `json:"rows"`
 		Templating  Templating `json:"templating"`
 		Annotations struct {

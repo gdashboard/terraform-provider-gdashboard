@@ -45,7 +45,9 @@ data "gdashboard_dashboard" "jvm_dashboard" {
   }
 
   layout {
-    row {
+    section {
+      title = "JVM"
+
       panel {
         size = {
           height = 8

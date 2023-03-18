@@ -37,7 +37,9 @@ data "gdashboard_dashboard" "dashboard" {
   title = "My dashboard"
 
   layout {
-    row {
+    section {
+      title = "Basic Details"
+
       panel {
         size = {
           height = 8
