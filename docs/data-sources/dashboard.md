@@ -26,12 +26,15 @@ data "gdashboard_timeseries" "jvm_memory" {
 
 data "gdashboard_dashboard" "jvm_dashboard" {
   title         = "JVM Dashboard"
+  description   = "JVM details"
   style         = "light"
   graph_tooltip = "shared-crosshair"
 
   time {
-    from = "now-1h"
-    to   = "now+1h"
+    default_range {
+      from = "now-1h"
+      to   = "now+1h"
+    }
   }
 
   variables {
@@ -79,13 +82,16 @@ data "gdashboard_dashboard" "jvm_dashboard" {
 
 ### Optional
 
+- `description` (String) The description of the dashboard.
 - `editable` (Boolean) Whether to make the dashboard editable or not.
 - `graph_tooltip` (String) Controls tooltip and hover highlight behavior across different panels: `default`, `shared-crosshair`, `shared-tooltip`.
 - `layout` (Block, Optional) The layout of the dashboard. (see [below for nested schema](#nestedblock--layout))
 - `style` (String) The dashboard style. The choices are: `dark`, `light`.
-- `time` (Block List) The default query time range. (see [below for nested schema](#nestedblock--time))
+- `tags` (List of String) The set of tags to associate with the dashboard.
+- `time` (Block List) The time-specific options. (see [below for nested schema](#nestedblock--time))
 - `uid` (String) The UID of the dashboard.
 - `variables` (Block List) The variables. (see [below for nested schema](#nestedblock--variables))
+- `version` (Number) The version of the dashboard.
 
 ### Read-Only
 
@@ -129,10 +135,33 @@ Required:
 <a id="nestedblock--time"></a>
 ### Nested Schema for `time`
 
+Optional:
+
+- `default_range` (Block List) The default query time range. (see [below for nested schema](#nestedblock--time--default_range))
+- `picker` (Block List) The time picker options. (see [below for nested schema](#nestedblock--time--picker))
+- `refresh_live_dashboards` (Boolean) Continuously re-draw panels where the time range references 'now'.
+- `timezone` (String) The timezone to use. Predefined: `utc`, `browser`. Custom: `Europe/Kyiv`.
+- `week_start` (String) The custom week start. The choices are: `saturday`, `sunday`, `monday`.
+
+<a id="nestedblock--time--default_range"></a>
+### Nested Schema for `time.default_range`
+
 Required:
 
 - `from` (String) The start of the range.
 - `to` (String) The end of the range.
+
+
+<a id="nestedblock--time--picker"></a>
+### Nested Schema for `time.picker`
+
+Optional:
+
+- `hide` (Boolean) Whether to hide time picker or not.
+- `now_delay` (String) Exclude recent data that may be incomplete. Example: `10s`, `1m`, `15m.`
+- `refresh_intervals` (List of String) The auto refresh intervals that should be available in the auto refresh list. The following time units are supported: `s (seconds)`, `m (minutes)`, `h (hours)`, `d (days)`, `w (weeks)`, `M (months)`, and `y (years)`. Example: `1m`, `10s`, `30s`, `1m`, `5m`, `15m`, `30m`, `1h`, `2h`, `1d`.
+- `time_options` (List of String) The time options (Last X) that should be available in the range selection list. The following time units are supported: `s (seconds)`, `m (minutes)`, `h (hours)`, `d (days)`, `w (weeks)`, `M (months)`, and `y (years)`. Example: `1m`, `10s`, `30s`, `1m`, `5m`, `15m`, `30m`, `1h`, `2h`, `1d`.
+
 
 
 <a id="nestedblock--variables"></a>
@@ -274,7 +303,7 @@ Optional:
 
 Required:
 
-- `intervals` (List of String) The time range intervals that you want to appear in the variable drop-down list. The following time units are supported: `s (seconds)`, `m (minutes)`, `h (hours)`, `d (days)`, `w (weeks)`, `M (months)`, and `y (years)`. You can also accept or edit the default values: `1m`, `10m`, `30m`, `1h`, `6h`, `12h`, `1d`, `7d`, `14d`, `30d`.
+- `intervals` (List of String) The time range intervals that you want to appear in the variable drop-down list. The following time units are supported: `s (seconds)`, `m (minutes)`, `h (hours)`, `d (days)`, `w (weeks)`, `M (months)`, and `y (years)`. Example: `1m`, `10m`, `30m`, `1h`, `6h`, `12h`, `1d`, `7d`, `14d`, `30d`.
 - `name` (String) The name of the variable.
 
 Optional:

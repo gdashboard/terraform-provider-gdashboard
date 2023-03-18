@@ -85,14 +85,30 @@ func TestAccDashboardDataSource(t *testing.T) {
 const testAccDashboardDataSourceConfig = `
 data "gdashboard_dashboard" "test" {
   title         = "Test"
+  description   = "Terraform-managed dashboard"
   uid 	        = "test-uid"
   editable      = false
   style         = "light"
   graph_tooltip = "shared-crosshair"
+  version       = 2
+  tags          = ["terraform", "test"]
   
   time {
-    from = "now-1h"
-    to   = "now+1h"
+    timezone                = "Europe/Kyiv"
+    week_start              = "monday"
+    refresh_live_dashboards = true
+
+    default_range {
+      from = "now-1h"
+      to   = "now+1h"
+    }
+
+    picker {
+      hide              = true
+      refresh_intervals = ["1s", "1m", "1d"]
+      time_options      = ["10m", "30m", "50m"]
+      now_delay         = "15s"
+    }
   }
 
   variables {
@@ -160,13 +176,17 @@ data "gdashboard_dashboard" "test" {
 
 const testAccDashboardDataSourceConfigExpectedJson = `{
   "uid": "test-uid",
-  "slug": "",
   "title": "Test",
-  "originalTitle": "",
+  "description": "Terraform-managed dashboard",
+  "tags": [
+    "terraform",
+    "test"
+  ],
   "style": "light",
-  "timezone": "",
+  "timezone": "Europe/Kyiv",
+  "weekStart": "monday",
+  "liveNow": true,
   "editable": false,
-  "hideControls": false,
   "panels": [
     {
       "editable": false,
@@ -294,15 +314,25 @@ const testAccDashboardDataSourceConfigExpectedJson = `{
     "list": null
   },
   "schemaVersion": 0,
-  "version": 1,
+  "version": 2,
   "links": null,
   "time": {
     "from": "now-1h",
     "to": "now+1h"
   },
   "timepicker": {
-    "refresh_intervals": null,
-    "time_options": null
+    "hidden": true,
+    "now_delay": "15s",
+    "refresh_intervals": [
+      "1s",
+      "1m",
+      "1d"
+    ],
+    "time_options": [
+      "10m",
+      "30m",
+      "50m"
+    ]
   },
   "graphTooltip": 1
 }`
@@ -314,7 +344,7 @@ provider "gdashboard" {
 	  editable		= false
 	  graph_tooltip = "shared-tooltip"
  	  style 		= "light"
-      time {
+      default_time_range {
         from = "now-12h"
 		to   = "now-3h"
       }
@@ -332,13 +362,11 @@ data "gdashboard_dashboard" "test" {
 `
 
 const testAccDashboardDataSourceProviderCustomDefaultsConfigExpectedJson = `{
-  "slug": "",
   "title": "Test",
-  "originalTitle": "",
   "style": "light",
   "timezone": "",
+  "liveNow": false,
   "editable": false,
-  "hideControls": false,
   "panels": [],
   "templating": {
     "list": []
@@ -371,13 +399,11 @@ data "gdashboard_dashboard" "test" {
 `
 
 const testAccDashboardDataSourceProviderDefaultsConfigExpectedJson = `{
-  "slug": "",
   "title": "Test",
-  "originalTitle": "",
   "style": "dark",
   "timezone": "",
+  "liveNow": false,
   "editable": true,
-  "hideControls": false,
   "panels": [],
   "templating": {
     "list": []
@@ -437,13 +463,11 @@ data "gdashboard_dashboard" "test" {
 `
 
 const testAccDashboardDataSourceProvider_Variable_Custom_Valid_ExpectedJson = `{
-  "slug": "",
   "title": "Test",
-  "originalTitle": "",
   "style": "dark",
   "timezone": "",
+  "liveNow": false,
   "editable": true,
-  "hideControls": false,
   "panels": [],
   "templating": {
     "list": [
@@ -520,13 +544,11 @@ data "gdashboard_dashboard" "test" {
 }`
 
 const testAccDashboardDataSourceProvider_Variable_TextBox_Valid_ExpectedJson = `{
-  "slug": "",
   "title": "Test",
-  "originalTitle": "",
   "style": "dark",
   "timezone": "",
+  "liveNow": false,
   "editable": true,
-  "hideControls": false,
   "panels": [],
   "templating": {
     "list": [
@@ -607,13 +629,11 @@ data "gdashboard_dashboard" "test" {
 }`
 
 const testAccDashboardDataSourceProvider_Variable_Adhoc_Valid_ExpectedJson = `{
-  "slug": "",
   "title": "Test",
-  "originalTitle": "",
   "style": "dark",
   "timezone": "",
+  "liveNow": false,
   "editable": true,
-  "hideControls": false,
   "panels": [],
   "templating": {
     "list": [
@@ -704,13 +724,11 @@ data "gdashboard_dashboard" "test" {
 }`
 
 const testAccDashboardDataSourceProvider_Variable_Datasource_Valid_ExpectedJson = `{
-  "slug": "",
   "title": "Test",
-  "originalTitle": "",
   "style": "dark",
   "timezone": "",
+  "liveNow": false,
   "editable": true,
-  "hideControls": false,
   "panels": [],
   "templating": {
     "list": [
@@ -806,13 +824,11 @@ data "gdashboard_dashboard" "test" {
 }`
 
 const testAccDashboardDataSourceProvider_Variable_Query_Valid_ExpectedJson = `{
-  "slug": "",
   "title": "Test",
-  "originalTitle": "",
   "style": "dark",
   "timezone": "",
+  "liveNow": false,
   "editable": true,
-  "hideControls": false,
   "panels": [],
   "templating": {
     "list": [
@@ -903,13 +919,11 @@ data "gdashboard_dashboard" "test" {
 }`
 
 const testAccDashboardDataSourceProvider_Variable_Interval_Valid_ExpectedJson = `{
-  "slug": "",
   "title": "Test",
-  "originalTitle": "",
   "style": "dark",
   "timezone": "",
+  "liveNow": false,
   "editable": true,
-  "hideControls": false,
   "panels": [],
   "templating": {
     "list": [

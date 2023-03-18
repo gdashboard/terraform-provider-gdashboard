@@ -8,17 +8,17 @@ import (
 type (
 	// Board represents Grafana dashboard.
 	Board struct {
-		ID            uint     `json:"id,omitempty"`
-		UID           string   `json:"uid,omitempty"`
-		Slug          string   `json:"slug"`
-		Title         string   `json:"title"`
-		OriginalTitle string   `json:"originalTitle"`
-		Tags          []string `json:"tags,omitempty"`
-		Style         string   `json:"style"`
-		Timezone      string   `json:"timezone"`
-		Editable      bool     `json:"editable"`
-		HideControls  bool     `json:"hideControls" graf:"hide-controls"`
-		Panels        []*Panel `json:"panels"`
+		ID          uint     `json:"id,omitempty"`
+		UID         string   `json:"uid,omitempty"`
+		Title       string   `json:"title"`
+		Description string   `json:"description,omitempty"`
+		Tags        []string `json:"tags,omitempty"`
+		Style       string   `json:"style"`
+		Timezone    string   `json:"timezone"`
+		WeekStart   string   `json:"weekStart,omitempty"`
+		LiveNow     bool     `json:"liveNow"`
+		Editable    bool     `json:"editable"`
+		Panels      []*Panel `json:"panels"`
 		//		Rows            []*Row     `json:"rows"`
 		Templating  Templating `json:"templating"`
 		Annotations struct {
@@ -26,7 +26,7 @@ type (
 		} `json:"annotations"`
 		Refresh       *BoolString `json:"refresh,omitempty"`
 		SchemaVersion uint        `json:"schemaVersion"`
-		Version       uint        `json:"version"`
+		Version       int64       `json:"version"`
 		Links         []Link      `json:"links"`
 		Time          Time        `json:"time"`
 		Timepicker    Timepicker  `json:"timepicker"`
@@ -37,7 +37,8 @@ type (
 		To   string `json:"to"`
 	}
 	Timepicker struct {
-		Now              *bool    `json:"now,omitempty"`
+		Hidden           *bool    `json:"hidden,omitempty"`
+		NowDelay         string   `json:"now_delay,omitempty"`
 		RefreshIntervals []string `json:"refresh_intervals"`
 		TimeOptions      []string `json:"time_options"`
 	}

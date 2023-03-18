@@ -49,7 +49,7 @@ type DashboardDefaultsModel struct {
 	Editable     types.Bool   `tfsdk:"editable"`
 	Style        types.String `tfsdk:"style"`
 	GraphTooltip types.String `tfsdk:"graph_tooltip"`
-	Time         []TimeModel  `tfsdk:"time"`
+	Time         []TimeModel  `tfsdk:"default_time_range"`
 }
 
 type TimeseriesDefaultsModel struct {
@@ -101,7 +101,7 @@ func (p *GrafanaDashboardBuilderProvider) Schema(ctx context.Context, req provid
 							Description: "Dashboard defaults.",
 							NestedObject: schema.NestedBlockObject{
 								Blocks: map[string]schema.Block{
-									"time": dashboardTimeBlock(),
+									"default_time_range": dashboardTimeBlock(),
 								},
 								Attributes: map[string]schema.Attribute{
 									"editable":      dashboardEditableAttribute(),
