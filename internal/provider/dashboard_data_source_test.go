@@ -96,10 +96,10 @@ data "gdashboard_dashboard" "test" {
   }
 
   variables {
-	const {
+    const {
       name  = "var"
       value = "const-value"
-	}
+    }
 
     custom {
       name = "custom"
@@ -111,49 +111,49 @@ data "gdashboard_dashboard" "test" {
       }
 
       option {
-        text  	 = "entry-2"
-        value 	 = "value"
+        text     = "entry-2"
+        value    = "value"
         selected = true
       }
     }
   }
 
   layout {
-	row {
+    row {
       panel {
-      	size = {
+        size = {
           height = 8
           width  = 10
         }
-      	source = "{\"title\": \"Panel 1\"}"
+        source = "{\"title\": \"Panel 1\"}"
       }
 
       panel {
-      	size = {
+        size = {
           height = 3
           width  = 24
         }
-      	source = "{\"title\": \"Panel 2\"}"
+        source = "{\"title\": \"Panel 2\"}"
       } 
-	}
+    }
 
-	row {
+    row {
       panel {
-      	size = {
+        size = {
           height = 4
           width  = 24
         }
-      	source = "{\"title\": \"Panel 3\"}"
+        source = "{\"title\": \"Panel 3\"}"
       }
 
       panel {
-      	size = {
+        size = {
           height = 3
           width  = 3
         }
-      	source = "{\"title\": \"Panel 4\"}"
+        source = "{\"title\": \"Panel 4\"}"
       } 
-	}
+    }
   }
 }
 `
@@ -410,9 +410,9 @@ data "gdashboard_dashboard" "test" {
       label         = "Label"
       description   = "Description"
       hide          = "label"
-      multi   = true
+      multi         = true
       
-       include_all {
+      include_all {
         enabled      = true
         custom_value = "*"
       }
@@ -423,8 +423,8 @@ data "gdashboard_dashboard" "test" {
       }
 
       option {
-        text  	 = "entry-2"
-        value 	 = "value"
+        text       = "entry-2"
+        value      = "value"
         selected = true
       }
     }
@@ -608,9 +608,9 @@ data "gdashboard_dashboard" "test" {
       }
 
       filter {
-        key 	 = "host"
+        key      = "host"
         operator = "=~"
-        value 	 = "^prod$"
+        value      = "^prod$"
       }
     }
   }
@@ -712,9 +712,9 @@ data "gdashboard_dashboard" "test" {
       label         = "Label"
       description   = "Description"
       hide          = "label"
-      multi   = true
+      multi         = true
       
-       include_all {
+      include_all {
         enabled      = true
         custom_value = "*"
       }
@@ -805,11 +805,11 @@ data "gdashboard_dashboard" "test" {
       label         = "Label"
       description   = "Description"
       hide          = "label"
-      multi   = true
+      multi         = true
       refresh         = "time-range-change"
-       regex          = "^prod$"
+      regex          = "^prod$"
 
-       include_all {
+      include_all {
         enabled      = true
         custom_value = "*"
       }
@@ -915,11 +915,11 @@ data "gdashboard_dashboard" "test" {
       label         = "Label"
       description   = "Description"
       hide          = "label"
-      intervals 	= ["1m", "10m", "30m", "1h", "6h", "12h", "1d", "7d", "14d", "30d"]
+      intervals     = ["1m", "10m", "30m", "1h", "6h", "12h", "1d", "7d", "14d", "30d"]
 
       auto {
-        enabled 	 = true
-        step_count 	 = 30
+        enabled      = true
+        step_count   = 30
         min_interval = "10s"
       }
     }
