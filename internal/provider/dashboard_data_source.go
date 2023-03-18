@@ -913,6 +913,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		}
 
 		for _, ds := range variable.DataSource {
+			refresh := int64(1)
 			v := grafana.TemplateVar{
 				Type:        "datasource",
 				Options:     make([]grafana.Option, 0),
@@ -923,6 +924,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				Query:       ds.DataSource[0].Type.ValueString(),
 				Regex:       ds.DataSource[0].Filter.ValueString(),
 				Hide:        decodeHide(ds.Hide),
+				Refresh:     grafana.BoolInt{Value: &refresh},
 			}
 
 			for _, all := range ds.IncludeAll {
