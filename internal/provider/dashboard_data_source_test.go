@@ -720,7 +720,7 @@ const testAccDashboardDataSourceProvider_Variable_Datasource_Valid_ExpectedJson 
         "description": "Description",
         "label": "Label",
         "hide": 1,
-        "refresh": false,
+        "refresh": 1,
         "options": [],
         "includeAll": true,
         "allValue": "*",
