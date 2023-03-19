@@ -76,10 +76,18 @@ type DashboardTimePickerOptions struct {
 }
 
 type Layout struct {
-	Rows []Row `tfsdk:"row"`
+	Sections []Section `tfsdk:"section"`
 }
 
-type Row struct {
+// Section has two modes: auto layout and explicit rows
+type Section struct {
+	Title     types.String `tfsdk:"title"`
+	Collapsed types.Bool   `tfsdk:"collapsed"`
+	Panels    []Panel      `tfsdk:"panel"`
+	Rows      []SectionRow `tfsdk:"row"`
+}
+
+type SectionRow struct {
 	Panels []Panel `tfsdk:"panel"`
 }
 
@@ -140,12 +148,12 @@ type VariableTextBox struct {
 }
 
 type VariableAdHoc struct {
-	Name        types.String              `tfsdk:"name"`
-	Label       types.String              `tfsdk:"label"`
-	Description types.String              `tfsdk:"description"`
-	Hide        types.String              `tfsdk:"hide"`
-	DataSource  []VariableAdHocDataSource `tfsdk:"datasource"`
-	Filters     []VariableAdHocFilter     `tfsdk:"filter"`
+	Name        types.String            `tfsdk:"name"`
+	Label       types.String            `tfsdk:"label"`
+	Description types.String            `tfsdk:"description"`
+	Hide        types.String            `tfsdk:"hide"`
+	DataSource  VariableAdHocDataSource `tfsdk:"datasource"`
+	Filters     []VariableAdHocFilter   `tfsdk:"filter"`
 }
 
 type VariableAdHocDataSource struct {
@@ -160,13 +168,13 @@ type VariableAdHocFilter struct {
 }
 
 type VariableDataSource struct {
-	Name        types.String                 `tfsdk:"name"`
-	Label       types.String                 `tfsdk:"label"`
-	Description types.String                 `tfsdk:"description"`
-	Hide        types.String                 `tfsdk:"hide"`
-	Multi       types.Bool                   `tfsdk:"multi"`
-	IncludeAll  []VariableIncludeAll         `tfsdk:"include_all"`
-	DataSource  []VariableDataSourceSelector `tfsdk:"source"`
+	Name        types.String               `tfsdk:"name"`
+	Label       types.String               `tfsdk:"label"`
+	Description types.String               `tfsdk:"description"`
+	Hide        types.String               `tfsdk:"hide"`
+	Multi       types.Bool                 `tfsdk:"multi"`
+	IncludeAll  []VariableIncludeAll       `tfsdk:"include_all"`
+	DataSource  VariableDataSourceSelector `tfsdk:"source"`
 }
 
 type VariableDataSourceSelector struct {
@@ -312,6 +320,34 @@ func variableHideAttribute() schema.Attribute {
 		MarkdownDescription: "Which variable information to hide from the dashboard. The choices are: `label`, `variable`.",
 		Validators: []validator.String{
 			stringvalidator.OneOf("label", "variable"),
+		},
+	}
+}
+
+func panelBlock() schema.ListNestedBlock {
+	return schema.ListNestedBlock{
+		Description: "The definition of the panel within the row.",
+		NestedObject: schema.NestedBlockObject{
+			Attributes: map[string]schema.Attribute{
+				"size": schema.SingleNestedAttribute{
+					Description: "The size of the panel.",
+					Required:    true,
+					Attributes: map[string]schema.Attribute{
+						"height": schema.Int64Attribute{
+							Required:    true,
+							Description: "The height of the panel.",
+						},
+						"width": schema.Int64Attribute{
+							Required:    true,
+							Description: "The width of the panel.",
+						},
+					},
+				},
+				"source": schema.StringAttribute{
+					Description: "The JSON source of the panel.",
+					Required:    true,
+				},
+			},
 		},
 	}
 }
@@ -508,27 +544,21 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 
 							NestedObject: schema.NestedBlockObject{
 								Blocks: map[string]schema.Block{
-									"datasource": schema.ListNestedBlock{
+									"datasource": schema.SingleNestedBlock{
 										Description: "The datasource to use.",
-										NestedObject: schema.NestedBlockObject{
-											Attributes: map[string]schema.Attribute{
-												"type": schema.StringAttribute{
-													Required:            true,
-													Description:         "The type of the datasource. The choices are: prometheus, loki, influxdb, elasticsearch.",
-													MarkdownDescription: "The type of the datasource. The choices are: `prometheus`, `loki`, `influxdb`, `elasticsearch`.",
-													Validators: []validator.String{
-														stringvalidator.OneOf("prometheus", "loki", "influxdb", "elasticsearch"),
-													},
-												},
-												"uid": schema.StringAttribute{
-													Required:    true,
-													Description: "The uid of the datasource.",
+										Attributes: map[string]schema.Attribute{
+											"type": schema.StringAttribute{
+												Required:            true,
+												Description:         "The type of the datasource. The choices are: prometheus, loki, influxdb, elasticsearch.",
+												MarkdownDescription: "The type of the datasource. The choices are: `prometheus`, `loki`, `influxdb`, `elasticsearch`.",
+												Validators: []validator.String{
+													stringvalidator.OneOf("prometheus", "loki", "influxdb", "elasticsearch"),
 												},
 											},
-										},
-										Validators: []validator.List{
-											listvalidator.SizeAtLeast(1),
-											listvalidator.SizeAtMost(1),
+											"uid": schema.StringAttribute{
+												Required:    true,
+												Description: "The uid of the datasource.",
+											},
 										},
 									},
 									"filter": schema.ListNestedBlock{
@@ -587,25 +617,19 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 
 							NestedObject: schema.NestedBlockObject{
 								Blocks: map[string]schema.Block{
-									"source": schema.ListNestedBlock{
+									"source": schema.SingleNestedBlock{
 										Description: "The datasource selector.",
-										NestedObject: schema.NestedBlockObject{
-											Attributes: map[string]schema.Attribute{
-												"type": schema.StringAttribute{
-													Required:            true,
-													Description:         "The type of the datasource. Example: prometheus, loki, influxdb, elasticsearch, cloudwatch, etc.",
-													MarkdownDescription: "The type of the datasource. Example: `prometheus`, `loki`, `influxdb`, `elasticsearch`, `cloudwatch`, etc.",
-												},
-												"filter": schema.StringAttribute{
-													Optional:            true,
-													Description:         "Regex filter for which data source instances to choose from in the variable value list. Leave empty for all. Example: /^prod/.",
-													MarkdownDescription: "Regex filter for which data source instances to choose from in the variable value list. Leave empty for all. Example: `/^prod/`.",
-												},
+										Attributes: map[string]schema.Attribute{
+											"type": schema.StringAttribute{
+												Required:            true,
+												Description:         "The type of the datasource. Example: prometheus, loki, influxdb, elasticsearch, cloudwatch, etc.",
+												MarkdownDescription: "The type of the datasource. Example: `prometheus`, `loki`, `influxdb`, `elasticsearch`, `cloudwatch`, etc.",
 											},
-										},
-										Validators: []validator.List{
-											listvalidator.SizeAtLeast(1),
-											listvalidator.SizeAtMost(1),
+											"filter": schema.StringAttribute{
+												Optional:            true,
+												Description:         "Regex filter for which data source instances to choose from in the variable value list. Leave empty for all. Example: /^prod/.",
+												MarkdownDescription: "Regex filter for which data source instances to choose from in the variable value list. Leave empty for all. Example: `/^prod/`.",
+											},
 										},
 									},
 									"include_all": variableIncludeAllBlock(),
@@ -823,42 +847,33 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 			"layout": schema.SingleNestedBlock{
 				Description: "The layout of the dashboard.",
 				Blocks: map[string]schema.Block{
-					"row": schema.ListNestedBlock{
+					"section": schema.ListNestedBlock{
 						Description: "The row within the dashboard.",
 						NestedObject: schema.NestedBlockObject{
 							Blocks: map[string]schema.Block{
-								"panel": schema.ListNestedBlock{
-									Description: "The definition of the panel within the row.",
+								"panel": panelBlock(),
+								"row": schema.ListNestedBlock{
+									Description: "The new row to align the nested panels.",
 									NestedObject: schema.NestedBlockObject{
-										Attributes: map[string]schema.Attribute{
-											"size": schema.SingleNestedAttribute{
-												Description: "The size of the panel.",
-												Required:    true,
-												Attributes: map[string]schema.Attribute{
-													"height": schema.Int64Attribute{
-														Required:    true,
-														Description: "The height of the panel.",
-													},
-													"width": schema.Int64Attribute{
-														Required:    true,
-														Description: "The width of the panel.",
-													},
-												},
-											},
-											"source": schema.StringAttribute{
-												Description: "The JSON source of the panel.",
-												Required:    true,
-											},
+										Blocks: map[string]schema.Block{
+											"panel": panelBlock(),
 										},
 									},
 									Validators: []validator.List{
-										listvalidator.SizeAtMost(20),
+										listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("panel")),
 									},
 								},
 							},
-						},
-						Validators: []validator.List{
-							listvalidator.SizeAtMost(200),
+							Attributes: map[string]schema.Attribute{
+								"title": schema.StringAttribute{
+									Optional:    true,
+									Description: "The title of the row. If the title is defined the row is treated as collapsible.",
+								},
+								"collapsed": schema.BoolAttribute{
+									Optional:    true,
+									Description: "Whether the row is collapsed or not.",
+								},
+							},
 						},
 					},
 				},
@@ -944,6 +959,148 @@ func decodeHide(hideValue types.String) uint8 {
 	return hide
 }
 
+func findFreeBlock(matrix [][]uint8, H int, W int) (int, int) {
+	rows := len(matrix)
+
+	for i := 0; i <= rows-H; i++ {
+		cols := len(matrix[i])
+
+		for j := 0; j <= cols-W; j++ {
+			allZero := true
+			for k := i; k < i+H; k++ {
+				for l := j; l < j+W; l++ {
+					if matrix[k][l] != 0 {
+						allZero = false
+						break
+					}
+				}
+				if !allZero {
+					break
+				}
+			}
+			if allZero {
+				return i, j
+			}
+		}
+	}
+	return -1, -1
+}
+
+// todo add verification of bounds?
+func calculateAutoLayout(panels []Panel, startY int) ([]grafana.Panel, error) {
+	matrix := make([][]uint8, 0)
+	result := make([]grafana.Panel, 0)
+
+	for _, panel := range panels {
+		var grafanaPanel grafana.Panel
+
+		err := json.Unmarshal([]byte(panel.Source.ValueString()), &grafanaPanel)
+		if err != nil {
+			return result, err
+		}
+
+		height := int(panel.Size.Height.ValueInt64())
+		width := int(panel.Size.Width.ValueInt64())
+
+		var y, x = findFreeBlock(matrix, height, width)
+
+		if y == -1 {
+			y = len(matrix)
+			x = 0
+
+			for i := 0; i < height; i++ {
+				matrix = append(matrix, make([]uint8, 24))
+			}
+		}
+
+		for i := 0; i < height; i++ {
+			for j := 0; j < width; j++ {
+				matrix[y+i][x+j] = 1
+			}
+		}
+
+		/*fmt.Println("New matrix:") // Move to the next line after printing each row
+		for i := 0; i < len(matrix); i++ {
+			for j := 0; j < len(matrix[i]); j++ {
+				fmt.Printf("%4d", matrix[i][j]) // Use a fixed width of 4 characters
+			}
+			fmt.Println() // Move to the next line after printing each row
+		}*/
+
+		posX := x
+		posY := startY + y
+		grafanaPanel.GridPos = grafana.GridPos{
+			H: &height,
+			W: &width,
+			X: &posX,
+			Y: &posY,
+		}
+
+		result = append(result, grafanaPanel)
+	}
+
+	return result, nil
+}
+
+func calculateManualLayout(rows []SectionRow, startY int) ([]grafana.Panel, error) {
+	result := make([]grafana.Panel, 0)
+
+	for rowIdx, row := range rows {
+		for columnIdx, panel := range row.Panels {
+			var grafanaPanel grafana.Panel
+
+			err := json.Unmarshal([]byte(panel.Source.ValueString()), &grafanaPanel)
+			if err != nil {
+				return result, err
+			}
+
+			height := int(panel.Size.Height.ValueInt64())
+			width := int(panel.Size.Width.ValueInt64())
+
+			var x int
+			var y int
+
+			if columnIdx == 0 {
+				x = 0
+			} else {
+				total := 0
+				for _, item := range row.Panels[0:columnIdx] {
+					total += int(item.Size.Width.ValueInt64())
+				}
+				x = total
+			}
+
+			if rowIdx == 0 {
+				y = 0
+			} else {
+				total := 0
+				for _, r := range rows[0:rowIdx] {
+					max := 0
+					for _, c := range r.Panels {
+						max = int(math.Max(float64(max), float64(c.Size.Height.ValueInt64())))
+					}
+					total += max
+				}
+				y = total + rowIdx
+			}
+
+			posX := x
+			posY := startY + y
+
+			grafanaPanel.GridPos = grafana.GridPos{
+				H: &height,
+				W: &width,
+				X: &posX,
+				Y: &posY,
+			}
+
+			result = append(result, grafanaPanel)
+		}
+	}
+
+	return result, nil
+}
+
 func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data DashboardDataSourceModel
 
@@ -1013,6 +1170,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				Label:       c.Label.ValueString(),
 				Description: c.Description.ValueString(),
 				Query:       c.Value.ValueString(),
+				Hide:        uint8(2),
 			}
 
 			vars = append(vars, v)
@@ -1051,8 +1209,8 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				Label:       adhoc.Label.ValueString(),
 				Description: adhoc.Description.ValueString(),
 				Datasource: &grafana.TemplateVarDataSource{
-					UID:  adhoc.DataSource[0].UID.ValueString(),
-					Type: adhoc.DataSource[0].Type.ValueString(),
+					UID:  adhoc.DataSource.UID.ValueString(),
+					Type: adhoc.DataSource.Type.ValueString(),
 				},
 				Filters: filters,
 				Hide:    decodeHide(adhoc.Hide),
@@ -1070,8 +1228,8 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				Label:       ds.Label.ValueString(),
 				Description: ds.Description.ValueString(),
 				Multi:       ds.Multi.ValueBool(),
-				Query:       ds.DataSource[0].Type.ValueString(),
-				Regex:       ds.DataSource[0].Filter.ValueString(),
+				Query:       ds.DataSource.Type.ValueString(),
+				Regex:       ds.DataSource.Filter.ValueString(),
 				Hide:        decodeHide(ds.Hide),
 				Refresh:     grafana.BoolInt{Value: &refresh},
 			}
@@ -1234,61 +1392,98 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		}
 	}
 
-	panels := make([]*grafana.Panel, 0)
+	panels := make([]grafana.Panel, 0)
 
-	for rowIdx, row := range data.Layout.Rows {
-		for columnIdx, column := range row.Panels {
-			var panel grafana.Panel
+	for _, section := range data.Layout.Sections {
+		isCollapsibleRow := !section.Title.IsNull() || section.Collapsed.ValueBool()
+		sectionPanels := make([]grafana.Panel, 0)
 
-			err := json.Unmarshal([]byte(column.Source.ValueString()), &panel)
+		startY := 0
+
+		if len(panels) == 0 {
+			startY = 0
+		} else {
+			maxY := 0
+			maxHeight := 0
+
+			for _, panel := range panels {
+				if *panel.GridPos.Y > maxY {
+					maxY = *panel.GridPos.Y
+					maxHeight = *panel.GridPos.H
+				} else if *panel.GridPos.Y == maxY && *panel.GridPos.H > maxHeight {
+					maxHeight = *panel.GridPos.H
+				}
+
+				if panel.Type == "row" {
+					for _, collapsedPanel := range panel.Panels {
+						if *collapsedPanel.GridPos.Y > maxY {
+							maxY = *collapsedPanel.GridPos.Y
+							maxHeight = *collapsedPanel.GridPos.H
+						} else if *collapsedPanel.GridPos.Y == maxY && *collapsedPanel.GridPos.H > maxHeight {
+							maxHeight = *collapsedPanel.GridPos.H
+						}
+					}
+				}
+			}
+
+			startY = maxY + maxHeight + 1
+		}
+
+		if isCollapsibleRow {
+			startY = startY + 1
+		}
+
+		// auto layout
+		if len(section.Panels) > 0 {
+			grafanaPanels, err := calculateAutoLayout(section.Panels, startY)
 			if err != nil {
 				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Could not unmarshall json as Panel: %s", err))
 				return
 			}
 
-			height := int(column.Size.Height.ValueInt64())
-			width := int(column.Size.Width.ValueInt64())
+			sectionPanels = append(sectionPanels, grafanaPanels...)
+		} else { // manual layout
+			grafanaPanels, err := calculateManualLayout(section.Rows, startY)
+			if err != nil {
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Could not unmarshall json as Panel: %s", err))
+				return
+			}
 
-			var x int
-			var y int
+			sectionPanels = append(sectionPanels, grafanaPanels...)
+		}
 
-			if columnIdx == 0 {
-				x = 0
+		if isCollapsibleRow {
+			x := 0
+			y := startY - 1
+			height := 1
+			width := 24
+
+			rowPanel := grafana.Panel{
+				CommonPanel: grafana.CommonPanel{
+					OfType: grafana.RowType,
+					Title:  section.Title.ValueString(),
+					Type:   "row",
+					Span:   12,
+					IsNew:  true,
+					GridPos: grafana.GridPos{
+						H: &height,
+						W: &width,
+						X: &x,
+						Y: &y,
+					},
+				},
+				RowPanel: &grafana.RowPanel{Collapsed: section.Collapsed.ValueBool()},
+			}
+
+			if section.Collapsed.ValueBool() {
+				rowPanel.RowPanel.Panels = sectionPanels
+				panels = append(panels, rowPanel)
 			} else {
-				total := 0
-				for _, item := range row.Panels[0:columnIdx] {
-					total += int(item.Size.Width.ValueInt64())
-				}
-				x = total
+				panels = append(panels, rowPanel)
+				panels = append(panels, sectionPanels...)
 			}
-
-			if rowIdx == 0 {
-				y = 0
-			} else {
-				total := 0
-				for _, r := range data.Layout.Rows[0:rowIdx] {
-					max := 0
-					for _, c := range r.Panels {
-						max = int(math.Max(float64(max), float64(c.Size.Height.ValueInt64())))
-					}
-					total += max
-				}
-				y = total + rowIdx
-			}
-
-			panel.GridPos = struct {
-				H *int `json:"h,omitempty"`
-				W *int `json:"w,omitempty"`
-				X *int `json:"x,omitempty"`
-				Y *int `json:"y,omitempty"`
-			}{
-				H: &height,
-				W: &width,
-				X: &x,
-				Y: &y,
-			}
-
-			panels = append(panels, &panel)
+		} else {
+			panels = append(panels, sectionPanels...)
 		}
 	}
 

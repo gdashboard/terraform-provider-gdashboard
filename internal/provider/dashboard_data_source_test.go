@@ -7,6 +7,59 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
+func TestFindFreeBlock(t *testing.T) {
+	type suite struct {
+		matrix    [][]uint8
+		height    int
+		width     int
+		expectedY int
+		expectedX int
+	}
+
+	tests := []suite{
+		suite{[][]uint8{
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		}, 6, 12, 0, 0},
+		suite{[][]uint8{
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		}, 6, 12, 0, 12},
+		suite{[][]uint8{
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		}, 3, 12, 3, 12},
+		/*suite{[][]uint8{
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		}, 8, 12, 0, 12},*/
+	}
+
+	for _, test := range tests {
+		y, x := findFreeBlock(test.matrix, test.height, test.width)
+
+		if x != test.expectedX || y != test.expectedY {
+			t.Errorf("got x=%d,y=%d, wanted x=%d,y=%d", x, y, test.expectedX, test.expectedY)
+		}
+	}
+}
+
 func TestAccDashboardDataSource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -78,6 +131,26 @@ func TestAccDashboardDataSource(t *testing.T) {
 				Config: testAccDashboardDataSourceProvider_Variable_Interval_Valid,
 				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Variable_Interval_Valid_ExpectedJson),
 			},
+			{
+				Config:      testAccDashboardDataSourceProvider_Layout_ClashingFields,
+				ExpectError: regexp.MustCompile("Attribute \"layout.section\\[0]\\.panel\" cannot be specified when"),
+			},
+			{
+				Config: testAccDashboardDataSourceProvider_Layout_Row,
+				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Layout_Row_ExpectedJson),
+			},
+			{
+				Config: testAccDashboardDataSourceProvider_Layout_Panel,
+				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Layout_Panel_ExpectedJson),
+			},
+			{
+				Config: testAccDashboardDataSourceProvider_Layout_Collapsible,
+				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Layout_Collapsible_ExpectedJson),
+			},
+			{
+				Config: testAccDashboardDataSourceProvider_Layout_Multilevel,
+				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Layout_Multilevel_ExpectedJson),
+			},
 		},
 	})
 }
@@ -135,7 +208,7 @@ data "gdashboard_dashboard" "test" {
   }
 
   layout {
-    row {
+    section {
       panel {
         size = {
           height = 8
@@ -153,7 +226,7 @@ data "gdashboard_dashboard" "test" {
       } 
     }
 
-    row {
+    section {
       panel {
         size = {
           height = 4
@@ -211,8 +284,8 @@ const testAccDashboardDataSourceConfigExpectedJson = `{
       "gridPos": {
         "h": 3,
         "w": 24,
-        "x": 10,
-        "y": 0
+        "x": 0,
+        "y": 8
       },
       "id": 0,
       "isNew": false,
@@ -229,7 +302,7 @@ const testAccDashboardDataSourceConfigExpectedJson = `{
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 12
       },
       "id": 0,
       "isNew": false,
@@ -245,8 +318,8 @@ const testAccDashboardDataSourceConfigExpectedJson = `{
       "gridPos": {
         "h": 3,
         "w": 3,
-        "x": 24,
-        "y": 9
+        "x": 0,
+        "y": 16
       },
       "id": 0,
       "isNew": false,
@@ -293,7 +366,7 @@ const testAccDashboardDataSourceConfigExpectedJson = `{
         "type": "constant",
         "name": "var",
         "label": "",
-        "hide": 0,
+        "hide": 2,
         "refresh": false,
         "options": [],
         "includeAll": false,
@@ -632,7 +705,7 @@ data "gdashboard_dashboard" "test" {
       filter {
         key      = "host"
         operator = "=~"
-        value      = "^prod$"
+        value    = "^prod$"
       }
     }
   }
@@ -1062,3 +1135,681 @@ data "gdashboard_dashboard" "test" {
 }`
 
 //// Interval end
+
+//// Layout start
+
+const testAccDashboardDataSourceProvider_Layout_ClashingFields = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+ 
+  layout {
+    section { 
+	  panel { 
+	    size = { 
+	      height = 1
+	  	  width  = 1
+	    } 
+	    source = "{}" 
+	  }
+	  row { }
+    }
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Layout_Row = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+ 
+  layout {
+    section { 
+      row {
+        panel { 
+          size = { 
+            height = 6
+        	width  = 12
+          } 
+          source = "{\"title\": \"Panel 1\"}" 
+        }
+        panel { 
+          size = { 
+            height = 3
+        	width  = 3
+          } 
+          source = "{\"title\": \"Panel 2\"}" 
+        }
+      }
+      row {
+        panel { 
+          size = { 
+            height = 3
+        	width  = 5
+          } 
+          source = "{\"title\": \"Panel 3\"}" 
+        }
+      }
+    }
+    section {
+       row {
+        panel { // total width = 12 + 3 + 5 + 5 = 25 > 24 (width limit). move this panel to a new row 
+          size = { 
+            height = 5
+        	width  = 5
+          } 
+          source = "{\"title\": \"Panel 4\"}" 
+        }
+        panel {
+          size = { 
+            height = 5
+            width  = 20
+          } 
+          source = "{\"title\": \"Panel 5\"}" 
+        }
+      }
+    }
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Layout_Row_ExpectedJson = `{
+  "title": "Test",
+  "style": "dark",
+  "timezone": "",
+  "liveNow": false,
+  "editable": true,
+  "panels": [
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 1",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 1"
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 12,
+        "y": 0
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 2",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 2"
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 3,
+        "w": 5,
+        "x": 0,
+        "y": 7
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 3",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 3"
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 0,
+        "y": 11
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 4",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 4"
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 5,
+        "w": 20,
+        "x": 5,
+        "y": 11
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 5",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 5"
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": null
+  },
+  "schemaVersion": 0,
+  "version": 1,
+  "links": null,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": null,
+    "time_options": null
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Layout_Panel = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+ 
+  layout {
+    section { 
+      panel { 
+        size = { 
+          height = 6
+      	  width  = 12
+        } 
+        source = "{\"title\": \"Panel 1\"}" 
+      }
+      panel { 
+        size = { 
+          height = 3
+          width  = 3
+        } 
+        source = "{\"title\": \"Panel 2\"}" 
+      }
+      panel { 
+        size = { 
+          height = 3
+          width  = 5
+        } 
+        source = "{\"title\": \"Panel 3\"}" 
+      }
+      panel { // total width = 12 + 3 + 5 + 5 = 25 > 24 (width limit). move this panel to a new row 
+        size = { 
+          height = 5
+      	  width  = 5
+        } 
+        source = "{\"title\": \"Panel 4\"}" 
+      }
+      panel {
+        size = { 
+          height = 5
+          width  = 20
+        } 
+        source = "{\"title\": \"Panel 5\"}" 
+      }
+    }
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Layout_Panel_ExpectedJson = `{
+  "title": "Test",
+  "style": "dark",
+  "timezone": "",
+  "liveNow": false,
+  "editable": true,
+  "panels": [
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 1",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 1"
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 12,
+        "y": 0
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 2",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 2"
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 3,
+        "w": 5,
+        "x": 15,
+        "y": 0
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 3",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 3"
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 0,
+        "y": 6
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 4",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 4"
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 5,
+        "w": 20,
+        "x": 0,
+        "y": 11
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 5",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 5"
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": null
+  },
+  "schemaVersion": 0,
+  "version": 1,
+  "links": null,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": null,
+    "time_options": null
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Layout_Collapsible = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+ 
+  layout {
+    section { 
+      title     = "Section 1"
+      collapsed = true
+
+      panel { 
+        size = { 
+          height = 6
+      	  width  = 12
+        } 
+        source = "{\"title\": \"Panel 1\"}" 
+      }
+      panel { 
+        size = { 
+          height = 3
+          width  = 3
+        } 
+        source = "{\"title\": \"Panel 2\"}" 
+      }
+      panel { 
+        size = { 
+          height = 3
+          width  = 5
+        } 
+        source = "{\"title\": \"Panel 3\"}" 
+      }
+    }
+    section {
+      panel {
+        size = { 
+          height = 5
+      	  width  = 5
+        } 
+        source = "{\"title\": \"Panel 4\"}" 
+      }
+    }
+    section {
+      title = "Section 2"
+      
+      row { 
+        panel {
+          size = { 
+            height = 5
+            width  = 20
+          } 
+          source = "{\"title\": \"Panel 5\"}" 
+        }
+      }
+    }
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Layout_Collapsible_ExpectedJson = `{
+  "title": "Test",
+  "style": "dark",
+  "timezone": "",
+  "liveNow": false,
+  "editable": true,
+  "panels": [
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 0,
+      "isNew": true,
+      "span": 12,
+      "title": "Section 1",
+      "transparent": false,
+      "type": "row",
+      "panels": [
+        {
+          "editable": false,
+          "error": false,
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 1
+          },
+          "id": 0,
+          "isNew": false,
+          "span": 0,
+          "title": "Panel 1",
+          "transparent": false,
+          "type": "",
+          "title": "Panel 1"
+        },
+        {
+          "editable": false,
+          "error": false,
+          "gridPos": {
+            "h": 3,
+            "w": 3,
+            "x": 12,
+            "y": 1
+          },
+          "id": 0,
+          "isNew": false,
+          "span": 0,
+          "title": "Panel 2",
+          "transparent": false,
+          "type": "",
+          "title": "Panel 2"
+        },
+        {
+          "editable": false,
+          "error": false,
+          "gridPos": {
+            "h": 3,
+            "w": 5,
+            "x": 15,
+            "y": 1
+          },
+          "id": 0,
+          "isNew": false,
+          "span": 0,
+          "title": "Panel 3",
+          "transparent": false,
+          "type": "",
+          "title": "Panel 3"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 0,
+        "y": 8
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 4",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 4"
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 0,
+      "isNew": true,
+      "span": 12,
+      "title": "Section 2",
+      "transparent": false,
+      "type": "row",
+      "panels": null,
+      "collapsed": false
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 5,
+        "w": 20,
+        "x": 0,
+        "y": 15
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 5",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 5"
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": null
+  },
+  "schemaVersion": 0,
+  "version": 1,
+  "links": null,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": null,
+    "time_options": null
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Layout_Multilevel = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+ 
+  layout {
+    section { 
+      title = "Section 1"
+
+      panel { 
+        size = { 
+          height = 6
+      	  width  = 12
+        } 
+        source = "{\"title\": \"Panel 1\"}" 
+      }
+      panel { 
+        size = { 
+          height = 3
+          width  = 12
+        } 
+        source = "{\"title\": \"Panel 2\"}" 
+      }
+      panel { 
+        size = { 
+          height = 3
+          width  = 12
+        } 
+        source = "{\"title\": \"Panel 3\"}" 
+      }
+    }
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Layout_Multilevel_ExpectedJson = `{
+  "title": "Test",
+  "style": "dark",
+  "timezone": "",
+  "liveNow": false,
+  "editable": true,
+  "panels": [
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 0,
+      "isNew": true,
+      "span": 12,
+      "title": "Section 1",
+      "transparent": false,
+      "type": "row",
+      "panels": null,
+      "collapsed": false
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 1",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 1"
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 3,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 2",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 2"
+    },
+    {
+      "editable": false,
+      "error": false,
+      "gridPos": {
+        "h": 3,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "id": 0,
+      "isNew": false,
+      "span": 0,
+      "title": "Panel 3",
+      "transparent": false,
+      "type": "",
+      "title": "Panel 3"
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": null
+  },
+  "schemaVersion": 0,
+  "version": 1,
+  "links": null,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": null,
+    "time_options": null
+  }
+}`
+
+//// Layout end

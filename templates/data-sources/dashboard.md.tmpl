@@ -1,0 +1,72 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Example Usage
+
+{{ tffile "examples/data-sources/gdashboard_dashboard/data-source.tf" }}
+
+## Layout Explained
+
+The `layout` block is used to define the structure of the dashboard by grouping the panels into sections.
+The layout block can contain one or more section blocks, and each section block can contain one or more panel blocks.
+
+You have the option to include `title` and `collapsed` attributes. If either of these attributes is included,
+the section will be collapsible, appearing as a row that can be expanded or collapsed based on the user's preference.
+
+______
+
+The panels are placed starting from the top-left corner of the section and are positioned in a way that preserves their order.
+In other words, the first panel specified in the configuration will be placed in the top-left corner of the section, followed by the second panel, and so on.
+
+It's important to note that the placement of panels cannot be manually specified, and it is determined by the order in which the panels are defined in the configuration.
+
+______
+
+You can use the `row` block instead of the `panel` block to explicitly mark rows when defining a layout.
+By using `row`, you have greater control over the placement of the panels within the section.
+
+For example, you can place each panel on a new line/row:
+```terraform
+layout {
+  section {
+    title = "HTTP"
+
+    row { // force a new row/line
+      panel {
+        size = {
+          height = 8
+          width  = 10
+        }
+        source = data.gdashboard_timeseries.http_requests.json
+      }
+    }
+
+    row { // force a new row/line
+      panel {
+        size = {
+          height = 8
+          width  = 10
+        }
+        source = data.gdashboard_timeseries.http_status.json
+      }
+    }
+  }
+}
+```
+
+**Note:** the section block cannot have both `panel` and `row` blocks at the same time. You must use either one or the other.
+______
+
+In the example above, the layout block contains two **collapsible** section blocks, one titled "JVM" and the other "HTTP".
+The "JVM" section has a single panel block with dimensions `8x10`, and the data source specified as `data.gdashboard_timeseries.jvm_memory.json`.
+The "HTTP" section has two panel blocks, both with dimensions `8x10` and data sources `data.gdashboard_timeseries.http_requests.json` and `data.gdashboard_timeseries.http_status.json`, respectively.
+
+{{ .SchemaMarkdown | trimspace }}
