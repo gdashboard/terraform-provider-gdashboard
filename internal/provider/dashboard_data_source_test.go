@@ -1256,8 +1256,8 @@ const testAccDashboardDataSourceProvider_Layout_Row_ExpectedJson = `{
       "gridPos": {
         "h": 3,
         "w": 5,
-        "x": 15,
-        "y": 0
+        "x": 0,
+        "y": 7
       },
       "id": 0,
       "isNew": false,
@@ -1274,7 +1274,7 @@ const testAccDashboardDataSourceProvider_Layout_Row_ExpectedJson = `{
         "h": 5,
         "w": 5,
         "x": 0,
-        "y": 7
+        "y": 11
       },
       "id": 0,
       "isNew": false,
@@ -1290,8 +1290,8 @@ const testAccDashboardDataSourceProvider_Layout_Row_ExpectedJson = `{
       "gridPos": {
         "h": 5,
         "w": 20,
-        "x": 0,
-        "y": 12
+        "x": 5,
+        "y": 11
       },
       "id": 0,
       "isNew": false,

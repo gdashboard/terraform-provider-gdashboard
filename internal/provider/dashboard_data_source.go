@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
+	"math"
 	"regexp"
 	"strconv"
 )
@@ -985,6 +986,121 @@ func findFreeBlock(matrix [][]uint8, H int, W int) (int, int) {
 	return -1, -1
 }
 
+// todo add verification of bounds?
+func calculateAutoLayout(panels []Panel, startY int) ([]grafana.Panel, error) {
+	matrix := make([][]uint8, 0)
+	result := make([]grafana.Panel, 0)
+
+	for _, panel := range panels {
+		var grafanaPanel grafana.Panel
+
+		err := json.Unmarshal([]byte(panel.Source.ValueString()), &grafanaPanel)
+		if err != nil {
+			return result, err
+		}
+
+		height := int(panel.Size.Height.ValueInt64())
+		width := int(panel.Size.Width.ValueInt64())
+
+		var y, x = findFreeBlock(matrix, height, width)
+
+		if y == -1 {
+			y = len(matrix)
+			x = 0
+
+			for i := 0; i < height; i++ {
+				matrix = append(matrix, make([]uint8, 24))
+			}
+		}
+
+		for i := 0; i < height; i++ {
+			for j := 0; j < width; j++ {
+				matrix[y+i][x+j] = 1
+			}
+		}
+
+		/*fmt.Println("New matrix:") // Move to the next line after printing each row
+		for i := 0; i < len(matrix); i++ {
+			for j := 0; j < len(matrix[i]); j++ {
+				fmt.Printf("%4d", matrix[i][j]) // Use a fixed width of 4 characters
+			}
+			fmt.Println() // Move to the next line after printing each row
+		}*/
+
+		posX := x
+		posY := startY + y
+		grafanaPanel.GridPos = grafana.GridPos{
+			H: &height,
+			W: &width,
+			X: &posX,
+			Y: &posY,
+		}
+
+		result = append(result, grafanaPanel)
+	}
+
+	return result, nil
+}
+
+func calculateManualLayout(rows []SectionRow, startY int) ([]grafana.Panel, error) {
+	result := make([]grafana.Panel, 0)
+
+	for rowIdx, row := range rows {
+		for columnIdx, panel := range row.Panels {
+			var grafanaPanel grafana.Panel
+
+			err := json.Unmarshal([]byte(panel.Source.ValueString()), &grafanaPanel)
+			if err != nil {
+				return result, err
+			}
+
+			height := int(panel.Size.Height.ValueInt64())
+			width := int(panel.Size.Width.ValueInt64())
+
+			var x int
+			var y int
+
+			if columnIdx == 0 {
+				x = 0
+			} else {
+				total := 0
+				for _, item := range row.Panels[0:columnIdx] {
+					total += int(item.Size.Width.ValueInt64())
+				}
+				x = total
+			}
+
+			if rowIdx == 0 {
+				y = 0
+			} else {
+				total := 0
+				for _, r := range rows[0:rowIdx] {
+					max := 0
+					for _, c := range r.Panels {
+						max = int(math.Max(float64(max), float64(c.Size.Height.ValueInt64())))
+					}
+					total += max
+				}
+				y = total + rowIdx
+			}
+
+			posX := x
+			posY := startY + y
+
+			grafanaPanel.GridPos = grafana.GridPos{
+				H: &height,
+				W: &width,
+				X: &posX,
+				Y: &posY,
+			}
+
+			result = append(result, grafanaPanel)
+		}
+	}
+
+	return result, nil
+}
+
 func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data DashboardDataSourceModel
 
@@ -1317,84 +1433,23 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 			startY = startY + 1
 		}
 
-		rows := make([]SectionRow, 0)
-
 		// auto layout
 		if len(section.Panels) > 0 {
-			for _, panel := range section.Panels {
-				if len(rows) == 0 {
-					rows = append(rows, SectionRow{Panels: []Panel{panel}})
-				} else {
-					last := rows[len(rows)-1]
-					totalWidth := 0
-
-					for _, rowPanel := range last.Panels {
-						totalWidth += int(rowPanel.Size.Width.ValueInt64())
-					}
-
-					if (24 - totalWidth) >= int(panel.Size.Width.ValueInt64()) {
-						rows[len(rows)-1].Panels = append(last.Panels, panel)
-					} else {
-						rows = append(rows, SectionRow{Panels: []Panel{panel}})
-					}
-				}
+			grafanaPanels, err := calculateAutoLayout(section.Panels, startY)
+			if err != nil {
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Could not unmarshall json as Panel: %s", err))
+				return
 			}
-		} else {
-			rows = section.Rows
-		}
 
-		matrix := make([][]uint8, 0)
-
-		// manual layout. todo add verification of bounds?
-		for _, row := range rows {
-			for _, column := range row.Panels {
-				var panel grafana.Panel
-
-				err := json.Unmarshal([]byte(column.Source.ValueString()), &panel)
-				if err != nil {
-					resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Could not unmarshall json as Panel: %s", err))
-					return
-				}
-
-				height := int(column.Size.Height.ValueInt64())
-				width := int(column.Size.Width.ValueInt64())
-
-				var y, x = findFreeBlock(matrix, height, width)
-
-				if y == -1 {
-					y = len(matrix)
-					x = 0
-
-					for i := 0; i < height; i++ {
-						matrix = append(matrix, make([]uint8, 24))
-					}
-				}
-
-				for i := 0; i < height; i++ {
-					for j := 0; j < width; j++ {
-						matrix[y+i][x+j] = 1
-					}
-				}
-
-				/*fmt.Println("New matrix:") // Move to the next line after printing each row
-				for i := 0; i < len(matrix); i++ {
-					for j := 0; j < len(matrix[i]); j++ {
-						fmt.Printf("%4d", matrix[i][j]) // Use a fixed width of 4 characters
-					}
-					fmt.Println() // Move to the next line after printing each row
-				}*/
-
-				posX := x
-				posY := startY + y
-				panel.GridPos = grafana.GridPos{
-					H: &height,
-					W: &width,
-					X: &posX,
-					Y: &posY,
-				}
-
-				sectionPanels = append(sectionPanels, panel)
+			sectionPanels = append(sectionPanels, grafanaPanels...)
+		} else { // manual layout
+			grafanaPanels, err := calculateManualLayout(section.Rows, startY)
+			if err != nil {
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Could not unmarshall json as Panel: %s", err))
+				return
 			}
+
+			sectionPanels = append(sectionPanels, grafanaPanels...)
 		}
 
 		if isCollapsibleRow {
