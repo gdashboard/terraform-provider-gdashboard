@@ -118,3 +118,24 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 make testacc
 ```
 
+## Local Testing
+
+Add a path to the **folder** with the binary to the `dev.tfrc`:
+```hocon
+provider_installation {
+  dev_overrides {
+    "iRevive/gdashboard" = "../terraform-provider-gdashboard"
+  }
+  direct {}
+}
+```
+
+Configure terraform cli:
+```shell
+$ export TF_CLI_CONFIG_FILE=./dev.tfrc
+```
+
+Run changes:
+```shell
+$ terraform plan
+```
