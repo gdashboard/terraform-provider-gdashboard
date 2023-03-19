@@ -23,6 +23,28 @@ data "gdashboard_timeseries" "jvm_memory" {
   }
 }
 
+data "gdashboard_timeseries" "http_requests" {
+  title = "HTTP Requests"
+
+  queries {
+    prometheus {
+      uid  = "prometheus"
+      expr = "sum(increase(http_request_total{container_name='container'}[$__rate_interval]))"
+    }
+  }
+}
+
+data "gdashboard_timeseries" "http_status" {
+  title = "HTTP Status"
+
+  queries {
+    prometheus {
+      uid  = "prometheus"
+      expr = "sum(increase(http_status_total{container_name='container'}[$__rate_interval]))"
+    }
+  }
+}
+
 data "gdashboard_dashboard" "jvm_dashboard" {
   title         = "JVM Dashboard"
   description   = "JVM details"
@@ -70,6 +92,30 @@ data "gdashboard_dashboard" "jvm_dashboard" {
         source = data.gdashboard_timeseries.jvm_memory.json
       }
     }
+
+    section { // each panel is on a new row
+      title = "HTTP"
+
+      row { // force a new row/line
+        panel {
+          size = {
+            height = 8
+            width  = 10
+          }
+          source = data.gdashboard_timeseries.http_requests.json
+        }
+      }
+
+      row { // force a new row/line
+        panel {
+          size = {
+            height = 8
+            width  = 10
+          }
+          source = data.gdashboard_timeseries.http_status.json
+        }
+      }
+    }
   }
 }
 ```
@@ -92,7 +138,36 @@ It's important to note that the placement of panels cannot be manually specified
 ______
 
 You can use the `row` block instead of the `panel` block to explicitly mark rows when defining a layout.
-By using `row`, you have greater control over the placement of the panels within the row.
+By using `row`, you have greater control over the placement of the panels within the section.
+
+For example, you can place each panel on a new line/row:
+```terraform
+layout {
+  section {
+    title = "HTTP"
+
+    row { // force a new row/line
+      panel {
+        size = {
+          height = 8
+          width  = 10
+        }
+        source = data.gdashboard_timeseries.http_requests.json
+      }
+    }
+
+    row { // force a new row/line
+      panel {
+        size = {
+          height = 8
+          width  = 10
+        }
+        source = data.gdashboard_timeseries.http_status.json
+      }
+    }
+  }
+}
+```
 
 **Note:** the section block cannot have both `panel` and `row` blocks at the same time. You must use either one or the other.
 ______
