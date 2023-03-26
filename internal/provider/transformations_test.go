@@ -60,6 +60,12 @@ data "gdashboard_table" "test" {
 		cell   = "c"
 	  }
     }
+
+    step {
+      filter_fields_by_name {
+        names = ["a", "b", "c"]
+      }
+    }
   }
 }
 `
@@ -129,6 +135,18 @@ const testAccTransformationTableDataSourceExpectedJson = `{
         "columnField": "a",
         "rowField": "b",
         "valueField": "c"
+      }
+    },
+    {
+      "id": "filterFieldsByName",
+      "options": {
+        "include": {
+          "names": [
+            "a",
+            "b",
+            "c"
+          ]
+        }
       }
     }
   ],
