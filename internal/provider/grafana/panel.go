@@ -155,13 +155,13 @@ type (
 		Overrides []FieldOverride     `json:"overrides,omitempty"`
 	}
 	TextSize struct {
-		TitleSize *int `json:"titleSize,omitempty"`
-		ValueSize *int `json:"valueSize,omitempty"`
+		TitleSize *int64 `json:"titleSize,omitempty"`
+		ValueSize *int64 `json:"valueSize,omitempty"`
 	}
 	ReduceOptions struct {
 		Values bool     `json:"values"`
 		Fields string   `json:"fields"`
-		Limit  *int     `json:"limit,omitempty"`
+		Limit  *int64   `json:"limit,omitempty"`
 		Calcs  []string `json:"calcs"`
 	}
 	Options struct {
@@ -381,7 +381,7 @@ type (
 	}
 	FieldConfigDefaults struct {
 		Unit       string            `json:"unit"`
-		Decimals   *int              `json:"decimals,omitempty"`
+		Decimals   *int64            `json:"decimals,omitempty"`
 		Min        *float64          `json:"min,omitempty"`
 		Max        *float64          `json:"max,omitempty"`
 		NoValue    *float64          `json:"noValue,omitempty"`
@@ -398,8 +398,8 @@ type (
 	FieldConfigCustom struct {
 		AxisLabel         string `json:"axisLabel,omitempty"`
 		AxisPlacement     string `json:"axisPlacement"`
-		AxisSoftMin       *int   `json:"axisSoftMin,omitempty"`
-		AxisSoftMax       *int   `json:"axisSoftMax,omitempty"`
+		AxisSoftMin       *int64 `json:"axisSoftMin,omitempty"`
+		AxisSoftMax       *int64 `json:"axisSoftMax,omitempty"`
 		BarAlignment      int    `json:"barAlignment"`
 		DrawStyle         string `json:"drawStyle"`
 		FillOpacity       int    `json:"fillOpacity"`
