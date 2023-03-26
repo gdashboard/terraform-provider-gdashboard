@@ -898,11 +898,20 @@ Optional:
 
 Optional:
 
+- `filter_fields_by_name` (Block List) Remove portions of the query results. (see [below for nested schema](#nestedblock--transform--step--filter_fields_by_name))
 - `group_by` (Block List) Group the data by a specified field (column) value and processes calculations on each group. (see [below for nested schema](#nestedblock--transform--step--group_by))
 - `grouping_to_matrix` (Block List) Limit the number of rows displayed. (see [below for nested schema](#nestedblock--transform--step--grouping_to_matrix))
 - `limit` (Block List) Limit the number of rows displayed. (see [below for nested schema](#nestedblock--transform--step--limit))
 - `series_to_rows` (Block List) Create a row for each field and a column for each calculation. (see [below for nested schema](#nestedblock--transform--step--series_to_rows))
 - `sort_by` (Block List) Sort each frame by the configured field. (see [below for nested schema](#nestedblock--transform--step--sort_by))
+
+<a id="nestedblock--transform--step--filter_fields_by_name"></a>
+### Nested Schema for `transform.step.filter_fields_by_name`
+
+Required:
+
+- `names` (List of String) The fields to keep.
+
 
 <a id="nestedblock--transform--step--group_by"></a>
 ### Nested Schema for `transform.step.group_by`

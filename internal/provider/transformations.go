@@ -31,11 +31,12 @@ func transformationsBlock() schema.Block {
 }
 
 type TransformationsStep struct {
-	GroupBy          []TransformationGroupBy          `tfsdk:"group_by"`
-	GroupingToMatrix []TransformationGroupingToMatrix `tfsdk:"grouping_to_matrix"`
-	Limit            []TransformationLimit            `tfsdk:"limit"`
-	SeriesToRows     []TransformationSeriesToRows     `tfsdk:"series_to_rows"`
-	SortBy           []TransformationSortBy           `tfsdk:"sort_by"`
+	FilterByName     []TransformationFilterFieldsByName `tfsdk:"filter_fields_by_name"`
+	GroupBy          []TransformationGroupBy            `tfsdk:"group_by"`
+	GroupingToMatrix []TransformationGroupingToMatrix   `tfsdk:"grouping_to_matrix"`
+	Limit            []TransformationLimit              `tfsdk:"limit"`
+	SeriesToRows     []TransformationSeriesToRows       `tfsdk:"series_to_rows"`
+	SortBy           []TransformationSortBy             `tfsdk:"sort_by"`
 }
 
 func transformationsStepBlock() schema.Block {
@@ -43,15 +44,46 @@ func transformationsStepBlock() schema.Block {
 		Description: "The transform step.",
 		NestedObject: schema.NestedBlockObject{
 			Blocks: map[string]schema.Block{
-				"group_by":           transformationGroupBy(),
-				"grouping_to_matrix": transformationGroupingToMatrixBlock(),
-				"limit":              transformationLimitBlock(),
-				"series_to_rows":     transformationSeriesToRowsBlock(),
-				"sort_by":            transformationSortByBlock(),
+				"filter_fields_by_name": transformationFilterFieldsByNameBlock(),
+				"group_by":              transformationGroupBy(),
+				"grouping_to_matrix":    transformationGroupingToMatrixBlock(),
+				"limit":                 transformationLimitBlock(),
+				"series_to_rows":        transformationSeriesToRowsBlock(),
+				"sort_by":               transformationSortByBlock(),
 			},
 		},
 		Validators: []validator.List{
 			listvalidator.SizeAtMost(20),
+		},
+	}
+}
+
+type TransformationFilterFieldsByName struct {
+	Names []types.String `tfsdk:"names"`
+}
+
+func transformationFilterFieldsByNameBlock() schema.Block {
+	return schema.ListNestedBlock{
+		Description: "Remove portions of the query results.",
+		NestedObject: schema.NestedBlockObject{
+			Attributes: map[string]schema.Attribute{
+				"names": schema.ListAttribute{
+					ElementType: types.StringType,
+					Required:    true,
+					Description: "The fields to keep.",
+					Validators: []validator.List{
+						listvalidator.SizeAtLeast(1),
+					},
+				},
+			},
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
+			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("group_by")),
+			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("grouping_to_matrix")),
+			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("limit")),
+			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("sort_by")),
+			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("series_to_rows")),
 		},
 	}
 }
@@ -88,6 +120,7 @@ func transformationGroupBy() schema.Block {
 		},
 		Validators: []validator.List{
 			listvalidator.SizeAtMost(1),
+			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("filter_fields_by_name")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("grouping_to_matrix")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("limit")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("sort_by")),
@@ -132,6 +165,7 @@ func transformationGroupingToMatrixBlock() schema.Block {
 		},
 		Validators: []validator.List{
 			listvalidator.SizeAtMost(1),
+			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("filter_fields_by_name")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("group_by")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("limit")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("sort_by")),
@@ -160,7 +194,9 @@ func transformationLimitBlock() schema.Block {
 		},
 		Validators: []validator.List{
 			listvalidator.SizeAtMost(1),
+			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("filter_fields_by_name")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("group_by")),
+			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("grouping_to_matrix")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("sort_by")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("series_to_rows")),
 		},
@@ -175,6 +211,7 @@ func transformationSeriesToRowsBlock() schema.Block {
 		Description: "Create a row for each field and a column for each calculation.",
 		Validators: []validator.List{
 			listvalidator.SizeAtMost(1),
+			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("filter_fields_by_name")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("group_by")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("grouping_to_matrix")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("limit")),
@@ -205,6 +242,7 @@ func transformationSortByBlock() schema.Block {
 		},
 		Validators: []validator.List{
 			listvalidator.SizeAtMost(1),
+			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("filter_fields_by_name")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("group_by")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("grouping_to_matrix")),
 			listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("limit")),
@@ -225,6 +263,23 @@ func createTransformations(transformations []Transformations) []grafana.Transfor
 
 	for _, transformation := range transformations {
 		for _, step := range transformation.Steps {
+			for _, byName := range step.FilterByName {
+				names := make([]string, len(byName.Names))
+
+				for i, name := range byName.Names {
+					names[i] = name.ValueString()
+				}
+
+				targets = append(targets, grafana.Transformation{
+					Id: "filterFieldsByName",
+					Options: map[string]interface{}{
+						"include": map[string]interface{}{
+							"names": names,
+						},
+					},
+				})
+			}
+
 			for _, groupBy := range step.GroupBy {
 				fields := make(map[string]interface{})
 
