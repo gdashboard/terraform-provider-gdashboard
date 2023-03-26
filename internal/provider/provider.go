@@ -371,13 +371,11 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 			}
 
 			if !axis.SoftMin.IsNull() {
-				min := int(axis.SoftMin.ValueInt64())
-				defaults.Timeseries.Axis.SoftMin = &min
+				defaults.Timeseries.Axis.SoftMin = axis.SoftMin.ValueInt64Pointer()
 			}
 
 			if !axis.SoftMax.IsNull() {
-				max := int(axis.SoftMax.ValueInt64())
-				defaults.Timeseries.Axis.SoftMax = &max
+				defaults.Timeseries.Axis.SoftMax = axis.SoftMax.ValueInt64Pointer()
 			}
 
 			for _, scale := range axis.Scale {
@@ -485,25 +483,10 @@ func updateFieldDefaults(defaults *FieldDefaults, opts []FieldOptions) {
 			defaults.Unit = field.Unit.ValueString()
 		}
 
-		if !field.Decimals.IsNull() {
-			decimals := int(field.Decimals.ValueInt64())
-			defaults.Decimals = &decimals
-		}
-
-		if !field.Min.IsNull() {
-			min := field.Min.ValueFloat64()
-			defaults.Min = &min
-		}
-
-		if !field.Max.IsNull() {
-			max := field.Max.ValueFloat64()
-			defaults.Max = &max
-		}
-
-		if !field.NoValue.IsNull() {
-			noValue := field.NoValue.ValueFloat64()
-			defaults.NoValue = &noValue
-		}
+		defaults.Decimals = field.Decimals.ValueInt64Pointer()
+		defaults.Min = field.Min.ValueFloat64Pointer()
+		defaults.Max = field.Max.ValueFloat64Pointer()
+		defaults.NoValue = field.NoValue.ValueFloat64Pointer()
 
 		for _, color := range field.Color {
 			if !color.Mode.IsNull() {
@@ -529,11 +512,7 @@ func updateFieldDefaults(defaults *FieldDefaults, opts []FieldOptions) {
 			for i, step := range threshold.Steps {
 				s := ThresholdStepDefaults{
 					Color: step.Color.ValueString(),
-				}
-
-				if !step.Value.IsNull() {
-					value := step.Value.ValueFloat64()
-					s.Value = &value
+					Value: step.Value.ValueFloat64Pointer(),
 				}
 
 				steps[i] = s
@@ -546,15 +525,8 @@ func updateFieldDefaults(defaults *FieldDefaults, opts []FieldOptions) {
 
 func updateTextSizeDefaults(defaults *TextSizeDefaults, opts []TextSizeOptions) {
 	for _, textSize := range opts {
-		if !textSize.Title.IsNull() {
-			size := int(textSize.Title.ValueInt64())
-			defaults.Title = &size
-		}
-
-		if !textSize.Value.IsNull() {
-			size := int(textSize.Value.ValueInt64())
-			defaults.Value = &size
-		}
+		defaults.Title = textSize.Title.ValueInt64Pointer()
+		defaults.Value = textSize.Value.ValueInt64Pointer()
 	}
 }
 
@@ -569,8 +541,7 @@ func updateReduceOptionsDefaults(defaults *ReduceOptionDefaults, opts []ReduceOp
 		}
 
 		if !reducer.Limit.IsNull() {
-			limit := int(reducer.Limit.ValueInt64())
-			defaults.Limit = &limit
+			defaults.Limit = reducer.Limit.ValueInt64Pointer()
 		}
 
 		if !reducer.Calculation.IsNull() {

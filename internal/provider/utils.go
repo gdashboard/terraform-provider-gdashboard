@@ -63,7 +63,7 @@ func CalculationTypesMarkdown() string {
 
 type FieldDefaults struct {
 	Unit       string
-	Decimals   *int
+	Decimals   *int64
 	Min        *float64
 	Max        *float64
 	NoValue    *float64
@@ -113,7 +113,7 @@ type ThresholdStepDefaults struct {
 type ReduceOptionDefaults struct {
 	Values      bool
 	Fields      string
-	Limit       *int
+	Limit       *int64
 	Calculation string
 }
 
@@ -126,15 +126,15 @@ func NewReduceOptionDefaults() ReduceOptionDefaults {
 }
 
 type TextSizeDefaults struct {
-	Title *int
-	Value *int
+	Title *int64
+	Value *int64
 }
 
 type AxisDefaults struct {
 	Label     string
 	Placement string
-	SoftMin   *int
-	SoftMax   *int
+	SoftMin   *int64
+	SoftMax   *int64
 	Scale     ScaleDefaults
 }
 
@@ -995,25 +995,10 @@ func createFieldConfig(defaults FieldDefaults, fieldOptions []FieldOptions) graf
 			fieldConfig.Unit = field.Unit.ValueString()
 		}
 
-		if !field.Decimals.IsNull() {
-			decimals := int(field.Decimals.ValueInt64())
-			fieldConfig.Decimals = &decimals
-		}
-
-		if !field.Min.IsNull() {
-			min := field.Min.ValueFloat64()
-			fieldConfig.Min = &min
-		}
-
-		if !field.Max.IsNull() {
-			max := field.Max.ValueFloat64()
-			fieldConfig.Max = &max
-		}
-
-		if !field.NoValue.IsNull() {
-			noValue := field.NoValue.ValueFloat64()
-			fieldConfig.NoValue = &noValue
-		}
+		fieldConfig.Decimals = field.Decimals.ValueInt64Pointer()
+		fieldConfig.Min = field.Min.ValueFloat64Pointer()
+		fieldConfig.Max = field.Max.ValueFloat64Pointer()
+		fieldConfig.NoValue = field.NoValue.ValueFloat64Pointer()
 
 		for _, color := range field.Color {
 			if !color.Mode.IsNull() {
@@ -1273,8 +1258,7 @@ func updateThresholds(thresholds *grafana.Thresholds, thresholdOptions []Thresho
 			}
 
 			if !step.Value.IsNull() {
-				value := step.Value.ValueFloat64()
-				s.Value = &value
+				s.Value = step.Value.ValueFloat64Pointer()
 			}
 
 			steps[i] = s
@@ -1288,15 +1272,8 @@ func updateThresholds(thresholds *grafana.Thresholds, thresholdOptions []Thresho
 
 func updateTextSize(options *grafana.TextSize, opts []TextSizeOptions) {
 	for _, textSize := range opts {
-		if !textSize.Title.IsNull() {
-			size := int(textSize.Title.ValueInt64())
-			options.TitleSize = &size
-		}
-
-		if !textSize.Value.IsNull() {
-			size := int(textSize.Value.ValueInt64())
-			options.ValueSize = &size
-		}
+		options.TitleSize = textSize.Title.ValueInt64Pointer()
+		options.ValueSize = textSize.Value.ValueInt64Pointer()
 	}
 }
 
@@ -1311,8 +1288,7 @@ func updateReduceOptions(options *grafana.ReduceOptions, opts []ReduceOptions) {
 		}
 
 		if !reducer.Limit.IsNull() {
-			limit := int(reducer.Limit.ValueInt64())
-			options.Limit = &limit
+			options.Limit = reducer.Limit.ValueInt64Pointer()
 		}
 
 		if !reducer.Calculation.IsNull() {

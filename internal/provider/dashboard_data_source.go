@@ -1369,13 +1369,11 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 				v.Auto = auto.Enabled.ValueBool()
 
 				if !auto.StepCount.IsNull() {
-					value := auto.StepCount.ValueInt64()
-					v.AutoCount = &value
+					v.AutoCount = auto.StepCount.ValueInt64Pointer()
 				}
 
 				if !auto.MinInterval.IsNull() {
-					value := auto.MinInterval.ValueString()
-					v.AutoMin = &value
+					v.AutoMin = auto.MinInterval.ValueStringPointer()
 				}
 
 				if v.Auto {
@@ -1552,8 +1550,7 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 
 		for _, picker := range timeOptions.TimePicker {
 			if !picker.Hide.IsNull() {
-				value := picker.Hide.ValueBool()
-				dashboard.Timepicker.Hidden = &value
+				dashboard.Timepicker.Hidden = picker.Hide.ValueBoolPointer()
 			}
 
 			if !picker.NowDelay.IsNull() {

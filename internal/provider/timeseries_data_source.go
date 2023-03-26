@@ -370,13 +370,11 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		}
 
 		if !axis.SoftMin.IsNull() {
-			min := int(axis.SoftMin.ValueInt64())
-			fieldConfig.Custom.AxisSoftMin = &min
+			fieldConfig.Custom.AxisSoftMin = axis.SoftMin.ValueInt64Pointer()
 		}
 
 		if !axis.SoftMax.IsNull() {
-			max := int(axis.SoftMax.ValueInt64())
-			fieldConfig.Custom.AxisSoftMax = &max
+			fieldConfig.Custom.AxisSoftMax = axis.SoftMax.ValueInt64Pointer()
 		}
 
 		for _, scale := range axis.Scale {

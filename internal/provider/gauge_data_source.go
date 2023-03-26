@@ -175,13 +175,11 @@ func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		}
 
 		if !graph.ShowThresholdLabels.IsNull() {
-			show := graph.ShowThresholdLabels.ValueBool()
-			options.ShowThresholdLabels = &show
+			options.ShowThresholdLabels = graph.ShowThresholdLabels.ValueBoolPointer()
 		}
 
 		if !graph.ShowThresholdMarkers.IsNull() {
-			show := graph.ShowThresholdMarkers.ValueBool()
-			options.ShowThresholdMarkers = &show
+			options.ShowThresholdMarkers = graph.ShowThresholdMarkers.ValueBoolPointer()
 		}
 
 		updateTextSize(&options.TextSize, graph.TextSize)
