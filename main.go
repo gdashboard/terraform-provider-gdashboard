@@ -5,8 +5,8 @@ import (
 	"flag"
 	"log"
 
+	"github.com/gdashboard/terraform-provider-gdashboard/internal/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"github.com/iRevive/terraform-provider-gdashboard/internal/provider"
 )
 
 // Run "go generate" to format example terraform files and generate the docs for the registry/website

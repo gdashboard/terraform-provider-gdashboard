@@ -151,6 +151,14 @@ func TestAccDashboardDataSource(t *testing.T) {
 				Config: testAccDashboardDataSourceProvider_Layout_Multilevel,
 				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Layout_Multilevel_ExpectedJson),
 			},
+			{
+				Config: testAccDashboardDataSourceProvider_Annotations_Datasource_Valid,
+				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Annotations_Datasource_Valid_ExpectedJson),
+			},
+			{
+				Config:      testAccDashboardDataSourceProvider_Annotations_Grafana_Clashing_Fields,
+				ExpectError: regexp.MustCompile("Attribute \"annotations\\[0]\\.grafana\\[0]\\.by_tags\" cannot be specified when"),
+			},
 		},
 	})
 }
@@ -1813,3 +1821,161 @@ const testAccDashboardDataSourceProvider_Layout_Multilevel_ExpectedJson = `{
 }`
 
 //// Layout end
+
+//// Annotations start
+
+const testAccDashboardDataSourceProvider_Annotations_Datasource_Valid = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+
+  annotations {
+	grafana {
+      name    = "custom-1"
+      color   = "blue"
+      enabled = true
+      hidden  = true
+
+      by_dashboard {
+        limit = 50
+      }
+    }
+
+    grafana {
+      name    = "custom-2"
+      color   = "red"
+      enabled = false
+      hidden  = false
+
+      by_tags {
+        limit     = 50
+        match_any = true
+        tags      = ["a", "b", "c:d"]
+      }
+    }
+
+    prometheus {
+      name    = "custom-3"
+      color   = "green"
+      enabled = true
+      hidden  = false
+
+      query {
+        datasource_uid         = "prometheus-1"
+        expr                   = "process_cpu_seconds_total{container_name='pod'} * 1000"
+        min_step               = "30s"
+        title_format           = "Restart"
+        text_format            = "Restart of the {{container_name}}"
+        tag_keys               = "a,b,c"
+        use_value_as_timestamp = true
+      }
+    }
+  }
+
+  layout { }
+}`
+
+const testAccDashboardDataSourceProvider_Annotations_Datasource_Valid_ExpectedJson = `{
+  "title": "Test",
+  "style": "dark",
+  "timezone": "",
+  "liveNow": false,
+  "editable": true,
+  "panels": [],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": [
+      {
+        "name": "custom-1",
+        "datasource": {
+          "uid": "-- Grafana --",
+          "type": "prometheus"
+        },
+        "iconColor": "blue",
+        "enable": true,
+        "hide": true,
+        "target": {
+          "limit": 50,
+          "matchAny": false,
+          "tags": null,
+          "type": "dashboard"
+        }
+      },
+      {
+        "name": "custom-2",
+        "datasource": {
+          "uid": "-- Grafana --",
+          "type": "prometheus"
+        },
+        "iconColor": "red",
+        "hide": true,
+        "target": {
+          "limit": 50,
+          "matchAny": true,
+          "tags": [
+            "a",
+            "b",
+            "c:d"
+          ],
+          "type": "tags"
+        }
+      },
+      {
+        "name": "custom-3",
+        "datasource": {
+          "uid": "prometheus-1",
+          "type": "prometheus"
+        },
+        "iconColor": "green",
+        "enable": true,
+        "hide": false,
+        "expr": "process_cpu_seconds_total{container_name='pod'} * 1000",
+        "step": "30s",
+        "useValueForTime": true,
+        "titleFormat": "Restart",
+        "textFormat": "Restart of the {{container_name}}",
+        "tagKeys": "a,b,c"
+      }
+    ]
+  },
+  "schemaVersion": 0,
+  "version": 1,
+  "links": null,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": null,
+    "time_options": null
+  }
+}`
+
+const testAccDashboardDataSourceProvider_Annotations_Grafana_Clashing_Fields = `
+data "gdashboard_dashboard" "test" {
+  title = "Test"
+
+  annotations {
+	grafana {
+      name    = "custom-1"
+      color   = "blue"
+      enabled = true
+      hidden  = true
+
+      by_dashboard {
+        limit = 50
+      }
+
+      by_tags {
+        limit     = 50
+        match_any = true
+        tags      = ["a", "b", "c:d"]
+      }
+    }
+  }
+
+  layout { }
+}`
+
+//// Annotations end

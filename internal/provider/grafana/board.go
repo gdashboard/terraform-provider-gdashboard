@@ -20,10 +20,8 @@ type (
 		Editable    bool     `json:"editable"`
 		Panels      []Panel  `json:"panels"`
 		//		Rows            []*Row     `json:"rows"`
-		Templating  Templating `json:"templating"`
-		Annotations struct {
-			List []Annotation `json:"list"`
-		} `json:"annotations"`
+		Templating    Templating  `json:"templating"`
+		Annotations   Annotations `json:"annotations"`
 		Refresh       *BoolString `json:"refresh,omitempty"`
 		SchemaVersion uint        `json:"schemaVersion"`
 		Version       int64       `json:"version"`
@@ -41,6 +39,9 @@ type (
 		NowDelay         string   `json:"now_delay,omitempty"`
 		RefreshIntervals []string `json:"refresh_intervals"`
 		TimeOptions      []string `json:"time_options"`
+	}
+	Annotations struct {
+		List []Annotation `json:"list"`
 	}
 	Templating struct {
 		List []TemplateVar `json:"list"`
@@ -88,23 +89,31 @@ type (
 		Selected bool    `json:"selected"`
 	}
 	Annotation struct {
-		Name        string      `json:"name"`
-		Datasource  interface{} `json:"datasource"`
-		ShowLine    bool        `json:"showLine"`
-		IconColor   string      `json:"iconColor"`
-		LineColor   string      `json:"lineColor"`
-		IconSize    uint        `json:"iconSize"`
-		Enable      bool        `json:"enable"`
-		Query       string      `json:"query"`
-		Expr        string      `json:"expr"`
-		Step        string      `json:"step"`
-		TextField   string      `json:"textField"`
-		TextFormat  string      `json:"textFormat"`
-		TitleFormat string      `json:"titleFormat"`
-		TagsField   string      `json:"tagsField"`
-		Tags        []string    `json:"tags"`
-		TagKeys     string      `json:"tagKeys"`
-		Type        string      `json:"type"`
+		Name       string               `json:"name"`
+		Datasource AnnotationDataSource `json:"datasource"`
+		IconColor  string               `json:"iconColor"`
+		Enable     bool                 `json:"enable,omitempty"`
+		Hide       *bool                `json:"hide,omitempty"`
+		Type       *string              `json:"type,omitempty"`
+		// Grafana
+		Target *AnnotationGrafanaTarget `json:"target,omitempty"`
+		// Prometheus
+		Expr            *string `json:"expr,omitempty"`
+		Step            *string `json:"step,omitempty"`
+		UseValueForTime *bool   `json:"useValueForTime,omitempty"`
+		TitleFormat     *string `json:"titleFormat,omitempty"`
+		TextFormat      *string `json:"textFormat,omitempty"`
+		TagKeys         *string `json:"tagKeys,omitempty"`
+	}
+	AnnotationDataSource struct {
+		UID  string `json:"uid"`
+		Type string `json:"type"`
+	}
+	AnnotationGrafanaTarget struct {
+		Limit    int64    `json:"limit"`
+		MatchAny bool     `json:"matchAny"`
+		Tags     []string `json:"tags"`
+		Type     string   `json:"type"`
 	}
 	// Link represents link to another dashboard or external weblink
 	Link struct {
