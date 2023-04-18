@@ -152,12 +152,12 @@ func TestAccDashboardDataSource(t *testing.T) {
 				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Layout_Multilevel_ExpectedJson),
 			},
 			{
-				Config: testAccDashboardDataSourceProvider_Annotations_Datasource_Valid,
-				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Annotations_Datasource_Valid_ExpectedJson),
-			},
-			{
 				Config:      testAccDashboardDataSourceProvider_Annotations_Grafana_Clashing_Fields,
 				ExpectError: regexp.MustCompile("Attribute \"annotations\\[0]\\.grafana\\[0]\\.by_tags\" cannot be specified when"),
+			},
+			{
+				Config: testAccDashboardDataSourceProvider_Annotations_Datasource_Valid,
+				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Annotations_Datasource_Valid_ExpectedJson),
 			},
 		},
 	})
