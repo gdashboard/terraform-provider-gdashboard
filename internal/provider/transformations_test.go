@@ -90,7 +90,7 @@ const testAccTransformationTableDataSourceExpectedJson = `{
       "options": {
         "sort": [
           {
-            "desk": false,
+            "desc": false,
             "field": "test 2"
           }
         ]

@@ -342,7 +342,7 @@ func createTransformations(transformations []Transformations) []grafana.Transfor
 					Options: map[string]interface{}{
 						"sort": []map[string]interface{}{
 							{
-								"desk":  sortBy.Reverse.ValueBool(),
+								"desc":  sortBy.Reverse.ValueBool(),
 								"field": sortBy.Field.ValueString(),
 							},
 						},
