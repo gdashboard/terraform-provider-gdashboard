@@ -1,4 +1,4 @@
-module github.com/iRevive/terraform-provider-gdashboard
+module github.com/gdashboard/terraform-provider-gdashboard
 
 go 1.18
 

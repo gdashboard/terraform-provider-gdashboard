@@ -185,6 +185,7 @@ The "HTTP" section has two panel blocks, both with dimensions `8x10` and data so
 
 ### Optional
 
+- `annotations` (Block List) The annotations to add to the dashboard. (see [below for nested schema](#nestedblock--annotations))
 - `description` (String) The description of the dashboard.
 - `editable` (Boolean) Whether to make the dashboard editable or not.
 - `graph_tooltip` (String) Controls tooltip and hover highlight behavior across different panels: `default`, `shared-crosshair`, `shared-tooltip`.
@@ -200,6 +201,84 @@ The "HTTP" section has two panel blocks, both with dimensions `8x10` and data so
 
 - `id` (String) The ID of this resource.
 - `json` (String) The Grafana-API-compatible JSON of this panel.
+
+<a id="nestedblock--annotations"></a>
+### Nested Schema for `annotations`
+
+Optional:
+
+- `grafana` (Block List) The Grafana annotation query. (see [below for nested schema](#nestedblock--annotations--grafana))
+- `prometheus` (Block List) The Prometheus annotation query. (see [below for nested schema](#nestedblock--annotations--prometheus))
+
+<a id="nestedblock--annotations--grafana"></a>
+### Nested Schema for `annotations.grafana`
+
+Required:
+
+- `name` (String) The name of the annotation.
+
+Optional:
+
+- `by_dashboard` (Block List) Query for events created on this dashboard and show them in the panels where they were created. (see [below for nested schema](#nestedblock--annotations--grafana--by_dashboard))
+- `by_tags` (Block List) This will fetch any annotation events that match the tags filter. (see [below for nested schema](#nestedblock--annotations--grafana--by_tags))
+- `color` (String) The color to use for the annotation event markers.
+- `enabled` (Boolean) When enabled the annotation query is issued every dashboard refresh.
+- `hidden` (Boolean) Whether the annotation can be toggled on or off at the top of the dashboard. With this option checked this toggle will be hidden.
+
+<a id="nestedblock--annotations--grafana--by_dashboard"></a>
+### Nested Schema for `annotations.grafana.by_dashboard`
+
+Required:
+
+- `limit` (Number) The limit of events.
+
+
+<a id="nestedblock--annotations--grafana--by_tags"></a>
+### Nested Schema for `annotations.grafana.by_tags`
+
+Required:
+
+- `limit` (Number) The limit of events.
+
+Optional:
+
+- `match_any` (Boolean) Enabling this returns annotations that match any of the tags specified below.
+- `tags` (List of String) Specify a list of tags to match. To specify a key and value tag use `key:value` syntax.
+
+
+
+<a id="nestedblock--annotations--prometheus"></a>
+### Nested Schema for `annotations.prometheus`
+
+Required:
+
+- `name` (String) The name of the annotation.
+
+Optional:
+
+- `color` (String) The color to use for the annotation event markers.
+- `enabled` (Boolean) When enabled the annotation query is issued every dashboard refresh.
+- `hidden` (Boolean) Whether the annotation can be toggled on or off at the top of the dashboard. With this option checked this toggle will be hidden.
+- `query` (Block, Optional) (see [below for nested schema](#nestedblock--annotations--prometheus--query))
+
+<a id="nestedblock--annotations--prometheus--query"></a>
+### Nested Schema for `annotations.prometheus.query`
+
+Required:
+
+- `datasource_uid` (String) The uid of the datasource.
+- `expr` (String) The query expression.
+
+Optional:
+
+- `min_step` (String) The minimum step interval to use when evaluating the query.
+- `tag_keys` (String) The tags to use.
+- `text_format` (String) Use either the name or a pattern. For example, `{{instance}}` is replaced with the label value for the label instance.
+- `title_format` (String) Use either the name or a pattern. For example, `{{instance}}` is replaced with the label value for the label instance.
+- `use_value_as_timestamp` (Boolean) Treat the value of the series as a timestamp.
+
+
+
 
 <a id="nestedblock--layout"></a>
 ### Nested Schema for `layout`

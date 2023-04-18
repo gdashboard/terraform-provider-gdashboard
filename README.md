@@ -4,7 +4,7 @@ The provider offers a handy syntax to define Grafana dashboards: time series, ga
 
 ## Using the provider
 
-Please, see [provider documentation](https://registry.terraform.io/providers/iRevive/gdashboard/latest/docs).
+Please, see [provider documentation](https://registry.terraform.io/providers/gdashboard/gdashboard/latest/docs).
 
 The provider defines only data sources. Each data source computes a JSON that is compatible with Grafana API.
 Therefore, this provider is not particularly useful on its own, but it can be
@@ -120,11 +120,16 @@ make testacc
 
 ## Local Testing
 
+Build the provider locally:
+```shell
+$ go build -o terraform-provider-gdashboard
+```
+
 Add a path to the **folder** with the binary to the `dev.tfrc`:
 ```hocon
 provider_installation {
   dev_overrides {
-    "iRevive/gdashboard" = "../terraform-provider-gdashboard"
+    "gdashboard/gdashboard" = "../terraform-provider-gdashboard"
   }
   direct {}
 }

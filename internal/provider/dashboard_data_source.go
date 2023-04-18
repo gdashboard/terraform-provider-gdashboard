@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gdashboard/terraform-provider-gdashboard/internal/provider/grafana"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
@@ -13,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 	"math"
 	"regexp"
 	"strconv"
@@ -58,6 +58,7 @@ type DashboardDataSourceModel struct {
 	TimeOptions  []DashboardTimeOptions `tfsdk:"time"`
 	Layout       Layout                 `tfsdk:"layout"`
 	Variables    []Variable             `tfsdk:"variables"`
+	Annotations  []Annotation           `tfsdk:"annotations"`
 }
 
 type DashboardTimeOptions struct {
@@ -224,6 +225,48 @@ type VariableIntervalAuto struct {
 	MinInterval types.String `tfsdk:"min_interval"`
 }
 
+type Annotation struct {
+	Grafana    []AnnotationGrafana    `tfsdk:"grafana"`
+	Prometheus []AnnotationPrometheus `tfsdk:"prometheus"`
+}
+
+type AnnotationGrafana struct {
+	Name        types.String                        `tfsdk:"name"`
+	Enabled     types.Bool                          `tfsdk:"enabled"`
+	Hidden      types.Bool                          `tfsdk:"hidden"`
+	Color       types.String                        `tfsdk:"color"`
+	ByDashboard []AnnotationGrafanaQueryByDashboard `tfsdk:"by_dashboard"`
+	ByTags      []AnnotationGrafanaQueryByTags      `tfsdk:"by_tags"`
+}
+
+type AnnotationGrafanaQueryByDashboard struct {
+	Limit types.Int64 `tfsdk:"limit"`
+}
+
+type AnnotationGrafanaQueryByTags struct {
+	Limit    types.Int64    `tfsdk:"limit"`
+	MatchAny types.Bool     `tfsdk:"match_any"`
+	Tags     []types.String `tfsdk:"tags"`
+}
+
+type AnnotationPrometheus struct {
+	Name    types.String              `tfsdk:"name"`
+	Enabled types.Bool                `tfsdk:"enabled"`
+	Hidden  types.Bool                `tfsdk:"hidden"`
+	Color   types.String              `tfsdk:"color"`
+	Query   AnnotationPrometheusQuery `tfsdk:"query"`
+}
+
+type AnnotationPrometheusQuery struct {
+	UID                 types.String `tfsdk:"datasource_uid"`
+	Expr                types.String `tfsdk:"expr"`
+	Step                types.String `tfsdk:"min_step"`
+	Title               types.String `tfsdk:"title_format"`
+	Text                types.String `tfsdk:"text_format"`
+	UseValueAsTimestamp types.Bool   `tfsdk:"use_value_as_timestamp"`
+	TagKeys             types.String `tfsdk:"tag_keys"`
+}
+
 func (d *DashboardDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_dashboard"
 }
@@ -320,6 +363,27 @@ func variableHideAttribute() schema.Attribute {
 		MarkdownDescription: "Which variable information to hide from the dashboard. The choices are: `label`, `variable`.",
 		Validators: []validator.String{
 			stringvalidator.OneOf("label", "variable"),
+		},
+	}
+}
+
+func annotationCommonAttributes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"name": schema.StringAttribute{
+			Required:    true,
+			Description: "The name of the annotation.",
+		},
+		"enabled": schema.BoolAttribute{
+			Optional:    true,
+			Description: "When enabled the annotation query is issued every dashboard refresh.",
+		},
+		"hidden": schema.BoolAttribute{
+			Optional:    true,
+			Description: "Whether the annotation can be toggled on or off at the top of the dashboard. With this option checked this toggle will be hidden.",
+		},
+		"color": schema.StringAttribute{
+			Optional:    true,
+			Description: "The color to use for the annotation event markers.",
 		},
 	}
 }
@@ -844,6 +908,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 					listvalidator.SizeAtMost(10),
 				},
 			},
+
 			"layout": schema.SingleNestedBlock{
 				Description: "The layout of the dashboard.",
 				Blocks: map[string]schema.Block{
@@ -881,6 +946,111 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 					objectvalidator.AtLeastOneOf(
 						path.MatchRoot("layout"),
 					),
+				},
+			},
+
+			"annotations": schema.ListNestedBlock{
+				Description: "The annotations to add to the dashboard.",
+
+				NestedObject: schema.NestedBlockObject{
+					Blocks: map[string]schema.Block{
+						"grafana": schema.ListNestedBlock{
+							Description: "The Grafana annotation query.",
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"by_dashboard": schema.ListNestedBlock{
+										Description: "Query for events created on this dashboard and show them in the panels where they were created.",
+										NestedObject: schema.NestedBlockObject{
+											Attributes: map[string]schema.Attribute{
+												"limit": schema.Int64Attribute{
+													Required:    true,
+													Description: "The limit of events.",
+												},
+											},
+										},
+										Validators: []validator.List{
+											listvalidator.SizeAtMost(1),
+											listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("by_tags")),
+										},
+									},
+									"by_tags": schema.ListNestedBlock{
+										Description: "This will fetch any annotation events that match the tags filter.",
+										NestedObject: schema.NestedBlockObject{
+											Attributes: map[string]schema.Attribute{
+												"limit": schema.Int64Attribute{
+													Required:    true,
+													Description: "The limit of events.",
+												},
+												"match_any": schema.BoolAttribute{
+													Optional:    true,
+													Description: "Enabling this returns annotations that match any of the tags specified below.",
+												},
+												"tags": schema.ListAttribute{
+													ElementType: types.StringType,
+													Optional:    true,
+													Description: "Specify a list of tags to match. To specify a key and value tag use `key:value` syntax.",
+												},
+											},
+										},
+										Validators: []validator.List{
+											listvalidator.SizeAtMost(1),
+											listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("by_dashboard")),
+										},
+									},
+								},
+								Attributes: annotationCommonAttributes(),
+							},
+						},
+
+						"prometheus": schema.ListNestedBlock{
+							Description: "The Prometheus annotation query.",
+							NestedObject: schema.NestedBlockObject{
+								Blocks: map[string]schema.Block{
+									"query": schema.SingleNestedBlock{
+										Attributes: map[string]schema.Attribute{
+											"datasource_uid": schema.StringAttribute{
+												Required:    true,
+												Description: "The uid of the datasource.",
+											},
+											"expr": schema.StringAttribute{
+												Required:    true,
+												Description: "The query expression.",
+											},
+											"min_step": schema.StringAttribute{
+												Optional:    true,
+												Description: "The minimum step interval to use when evaluating the query. ",
+											},
+											"title_format": schema.StringAttribute{
+												Optional:            true,
+												Description:         "Use either the name or a pattern. For example, {{instance}} is replaced with the label value for the label instance.",
+												MarkdownDescription: "Use either the name or a pattern. For example, `{{instance}}` is replaced with the label value for the label instance.",
+											},
+											"text_format": schema.StringAttribute{
+												Optional:            true,
+												MarkdownDescription: "Use either the name or a pattern. For example, `{{instance}}` is replaced with the label value for the label instance.",
+											},
+											"tag_keys": schema.StringAttribute{
+												Optional:            true,
+												MarkdownDescription: "The tags to use.",
+											},
+											"use_value_as_timestamp": schema.BoolAttribute{
+												Optional:    true,
+												Description: "Treat the value of the series as a timestamp.",
+											},
+										},
+									},
+								},
+								Attributes: annotationCommonAttributes(),
+							},
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(20),
+							},
+						},
+					},
+				},
+
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(50),
 				},
 			},
 		},
@@ -1390,6 +1560,96 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		}
 	}
 
+	annotations := make([]grafana.Annotation, 0)
+	for _, annotation := range data.Annotations {
+		for _, grafanaQuery := range annotation.Grafana {
+			hide := true
+			result := grafana.Annotation{
+				Name:      grafanaQuery.Name.ValueString(),
+				Enable:    true,
+				Hide:      &hide,
+				IconColor: "rgba(0, 211, 255, 1)",
+				Datasource: grafana.AnnotationDataSource{
+					UID:  "-- Grafana --",
+					Type: "prometheus",
+				},
+			}
+
+			if !grafanaQuery.Enabled.IsNull() {
+				result.Enable = grafanaQuery.Enabled.ValueBool()
+			}
+
+			if !grafanaQuery.Hidden.IsNull() {
+				result.Enable = grafanaQuery.Enabled.ValueBool()
+			}
+
+			if !grafanaQuery.Color.IsNull() {
+				result.IconColor = grafanaQuery.Color.ValueString()
+			}
+
+			for _, byDashboard := range grafanaQuery.ByDashboard {
+				result.Target = &grafana.AnnotationGrafanaTarget{
+					Limit: 100,
+					Type:  "dashboard",
+				}
+
+				if !byDashboard.Limit.IsNull() {
+					result.Target.Limit = byDashboard.Limit.ValueInt64()
+				}
+			}
+
+			for _, byTags := range grafanaQuery.ByTags {
+				tags := make([]string, 0)
+
+				for _, tag := range byTags.Tags {
+					tags = append(tags, tag.ValueString())
+				}
+
+				result.Target = &grafana.AnnotationGrafanaTarget{
+					Limit:    100,
+					MatchAny: byTags.MatchAny.ValueBool(),
+					Tags:     tags,
+					Type:     "tags",
+				}
+
+				if !byTags.Limit.IsNull() {
+					result.Target.Limit = byTags.Limit.ValueInt64()
+				}
+			}
+
+			annotations = append(annotations, result)
+		}
+
+		for _, prometheus := range annotation.Prometheus {
+			result := grafana.Annotation{
+				Name:      prometheus.Name.ValueString(),
+				Enable:    true,
+				Hide:      prometheus.Hidden.ValueBoolPointer(),
+				IconColor: "red",
+				Datasource: grafana.AnnotationDataSource{
+					UID:  prometheus.Query.UID.ValueString(),
+					Type: "prometheus",
+				},
+				Expr:            prometheus.Query.Expr.ValueStringPointer(),
+				Step:            prometheus.Query.Step.ValueStringPointer(),
+				UseValueForTime: prometheus.Query.UseValueAsTimestamp.ValueBoolPointer(),
+				TitleFormat:     prometheus.Query.Title.ValueStringPointer(),
+				TextFormat:      prometheus.Query.Text.ValueStringPointer(),
+				TagKeys:         prometheus.Query.TagKeys.ValueStringPointer(),
+			}
+
+			if !prometheus.Enabled.IsNull() {
+				result.Enable = prometheus.Enabled.ValueBool()
+			}
+
+			if !prometheus.Color.IsNull() {
+				result.IconColor = prometheus.Color.ValueString()
+			}
+
+			annotations = append(annotations, result)
+		}
+	}
+
 	panels := make([]grafana.Panel, 0)
 
 	for _, section := range data.Layout.Sections {
@@ -1528,6 +1788,12 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		}
 
 		dashboard.Tags = tags
+	}
+
+	if len(annotations) > 0 {
+		dashboard.Annotations = grafana.Annotations{
+			List: annotations,
+		}
 	}
 
 	for _, timeOptions := range data.TimeOptions {

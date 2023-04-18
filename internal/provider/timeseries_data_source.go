@@ -9,11 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"strconv"
 
+	"github.com/gdashboard/terraform-provider-gdashboard/internal/provider/grafana"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/iRevive/terraform-provider-gdashboard/internal/provider/grafana"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
