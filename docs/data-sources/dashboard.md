@@ -190,6 +190,7 @@ The "HTTP" section has two panel blocks, both with dimensions `8x10` and data so
 - `editable` (Boolean) Whether to make the dashboard editable or not.
 - `graph_tooltip` (String) Controls tooltip and hover highlight behavior across different panels: `default`, `shared-crosshair`, `shared-tooltip`.
 - `layout` (Block, Optional) The layout of the dashboard. (see [below for nested schema](#nestedblock--layout))
+- `links` (Block List) The links to add to the dashboard. (see [below for nested schema](#nestedblock--links))
 - `style` (String) The dashboard style. The choices are: `dark`, `light`.
 - `tags` (List of String) The set of tags to associate with the dashboard.
 - `time` (Block List) The time-specific options. (see [below for nested schema](#nestedblock--time))
@@ -340,6 +341,42 @@ Required:
 
 
 
+
+
+
+<a id="nestedblock--links"></a>
+### Nested Schema for `links`
+
+Optional:
+
+- `dashboards` (Block List) The dashboards link. (see [below for nested schema](#nestedblock--links--dashboards))
+- `external` (Block List) The external link. (see [below for nested schema](#nestedblock--links--external))
+
+<a id="nestedblock--links--dashboards"></a>
+### Nested Schema for `links.dashboards`
+
+Optional:
+
+- `as_dropdown` (Boolean) Whether to show links as a dropdown. Otherwise, Grafana displays the dashboard links side by side across the top of your dashboard.
+- `include_template_variables` (Boolean) Whether to include the dashboard's template variables in the link.
+- `include_time_range` (Boolean) Whether to include the dashboard's time range in the link.
+- `new_tab` (Boolean) Whether to open a link in a new tab or window.
+- `tags` (List of String) Include dashboards only with these tags. Otherwise, Grafana includes links to all other dashboards.
+- `title` (String) The title you want the link to display.
+
+
+<a id="nestedblock--links--external"></a>
+### Nested Schema for `links.external`
+
+Optional:
+
+- `icon` (String) The icon you want displayed with the link. The choices are: `external link`, `dashboard`, `question`, `info`, `bolt`, `doc`, `cloud`.
+- `include_template_variables` (Boolean) Whether to include the dashboard's template variables in the link.
+- `include_time_range` (Boolean) Whether to include the dashboard's time range in the link.
+- `new_tab` (Boolean) Whether to open a link in a new tab or window.
+- `title` (String) The title you want the link to display.
+- `tooltip` (String) The tooltip to display when the user hovers their mouse over the link.
+- `url` (String) The url you want to link to.
 
 
 
