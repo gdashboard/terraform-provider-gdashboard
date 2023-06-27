@@ -59,6 +59,7 @@ type DashboardDataSourceModel struct {
 	Layout       Layout                 `tfsdk:"layout"`
 	Variables    []Variable             `tfsdk:"variables"`
 	Annotations  []Annotation           `tfsdk:"annotations"`
+	Links        []Link                 `tfsdk:"links"`
 }
 
 type DashboardTimeOptions struct {
@@ -265,6 +266,30 @@ type AnnotationPrometheusQuery struct {
 	Text                types.String `tfsdk:"text_format"`
 	UseValueAsTimestamp types.Bool   `tfsdk:"use_value_as_timestamp"`
 	TagKeys             types.String `tfsdk:"tag_keys"`
+}
+
+type Link struct {
+	Dashboards []LinkDashboards `tfsdk:"dashboards"`
+	External   []LinkExternal   `tfsdk:"external"`
+}
+
+type LinkDashboards struct {
+	Title                    types.String   `tfsdk:"title"`
+	Tags                     []types.String `tfsdk:"tags"`
+	AsDropdown               types.Bool     `tfsdk:"as_dropdown"`
+	IncludeTimeRange         types.Bool     `tfsdk:"include_time_range"`
+	IncludeTemplateVariables types.Bool     `tfsdk:"include_template_variables"`
+	NewTab                   types.Bool     `tfsdk:"new_tab"`
+}
+
+type LinkExternal struct {
+	Title                    types.String `tfsdk:"title"`
+	Url                      types.String `tfsdk:"url"`
+	Tooltip                  types.String `tfsdk:"tooltip"`
+	Icon                     types.String `tfsdk:"icon"`
+	IncludeTimeRange         types.Bool   `tfsdk:"include_time_range"`
+	IncludeTemplateVariables types.Bool   `tfsdk:"include_template_variables"`
+	NewTab                   types.Bool   `tfsdk:"new_tab"`
 }
 
 func (d *DashboardDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -477,7 +502,7 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 						},
 						"week_start": schema.StringAttribute{
 							Optional:            true,
-							Description:         "The custom week start. The choices are: `saturday`, `sunday`, `monday`.",
+							Description:         "The custom week start. The choices are: saturday, sunday, monday.",
 							MarkdownDescription: "The custom week start. The choices are: `saturday`, `sunday`, `monday`.",
 							Validators: []validator.String{
 								stringvalidator.OneOf("saturday", "sunday", "monday"),
@@ -1044,6 +1069,93 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 							},
 							Validators: []validator.List{
 								listvalidator.SizeAtMost(20),
+							},
+						},
+					},
+				},
+
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(50),
+				},
+			},
+
+			"links": schema.ListNestedBlock{
+				Description: "The links to add to the dashboard.",
+
+				NestedObject: schema.NestedBlockObject{
+					Blocks: map[string]schema.Block{
+						"dashboards": schema.ListNestedBlock{
+							Description: "The dashboards link.",
+
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									"title": schema.StringAttribute{
+										Optional:    true,
+										Description: "The title you want the link to display.",
+									},
+									"as_dropdown": schema.BoolAttribute{
+										Optional:    true,
+										Description: "Whether to show links as a dropdown. Otherwise, Grafana displays the dashboard links side by side across the top of your dashboard.",
+									},
+									"tags": schema.ListAttribute{
+										ElementType: types.StringType,
+										Optional:    true,
+										Description: "Include dashboards only with these tags. Otherwise, Grafana includes links to all other dashboards.",
+									},
+									"include_time_range": schema.BoolAttribute{
+										Optional:    true,
+										Description: "Whether to include the dashboard's time range in the link.",
+									},
+									"include_template_variables": schema.BoolAttribute{
+										Optional:    true,
+										Description: "Whether to include the dashboard's template variables in the link.",
+									},
+									"new_tab": schema.BoolAttribute{
+										Optional:    true,
+										Description: "Whether to open a link in a new tab or window.",
+									},
+								},
+							},
+						},
+
+						"external": schema.ListNestedBlock{
+							Description: "The external link.",
+
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									"title": schema.StringAttribute{
+										Optional:    true,
+										Description: "The title you want the link to display.",
+									},
+									"url": schema.StringAttribute{
+										Optional:    true,
+										Description: "The url you want to link to.",
+									},
+									"tooltip": schema.StringAttribute{
+										Optional:    true,
+										Description: "The tooltip to display when the user hovers their mouse over the link.",
+									},
+									"icon": schema.StringAttribute{
+										Optional:            true,
+										Description:         "The icon you want displayed with the link. The choices are: external link, dashboard, question, info, bolt, doc, cloud.",
+										MarkdownDescription: "The icon you want displayed with the link. The choices are: `external link`, `dashboard`, `question`, `info`, `bolt`, `doc`, `cloud`.",
+										Validators: []validator.String{
+											stringvalidator.OneOf("external link", "dashboard", "question", "info", "bolt", "doc", "cloud"),
+										},
+									},
+									"include_time_range": schema.BoolAttribute{
+										Optional:    true,
+										Description: "Whether to include the dashboard's time range in the link.",
+									},
+									"include_template_variables": schema.BoolAttribute{
+										Optional:    true,
+										Description: "Whether to include the dashboard's template variables in the link.",
+									},
+									"new_tab": schema.BoolAttribute{
+										Optional:    true,
+										Description: "Whether to open a link in a new tab or window.",
+									},
+								},
 							},
 						},
 					},
@@ -1650,6 +1762,45 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		}
 	}
 
+	links := make([]grafana.Link, 0)
+	for _, link := range data.Links {
+		for _, dashboards := range link.Dashboards {
+			tags := make([]string, 0)
+			for _, tag := range dashboards.Tags {
+				if !tag.IsNull() {
+					tags = append(tags, tag.ValueString())
+				}
+			}
+
+			result := grafana.Link{
+				Title:       dashboards.Title.ValueString(),
+				Type:        "dashboards",
+				AsDropdown:  dashboards.AsDropdown.ValueBoolPointer(),
+				Tags:        tags,
+				IncludeVars: dashboards.IncludeTemplateVariables.ValueBool(),
+				KeepTime:    dashboards.IncludeTimeRange.ValueBoolPointer(),
+				TargetBlank: dashboards.NewTab.ValueBoolPointer(),
+			}
+
+			links = append(links, result)
+		}
+
+		for _, external := range link.External {
+			result := grafana.Link{
+				Title:       external.Title.ValueString(),
+				Type:        "link",
+				URL:         external.Url.ValueStringPointer(),
+				Tooltip:     external.Tooltip.ValueStringPointer(),
+				Icon:        external.Icon.ValueStringPointer(),
+				IncludeVars: external.IncludeTemplateVariables.ValueBool(),
+				KeepTime:    external.IncludeTimeRange.ValueBoolPointer(),
+				TargetBlank: external.NewTab.ValueBoolPointer(),
+			}
+
+			links = append(links, result)
+		}
+	}
+
 	panels := make([]grafana.Panel, 0)
 
 	for _, section := range data.Layout.Sections {
@@ -1794,6 +1945,10 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		dashboard.Annotations = grafana.Annotations{
 			List: annotations,
 		}
+	}
+
+	if len(links) > 0 {
+		dashboard.Links = links
 	}
 
 	for _, timeOptions := range data.TimeOptions {

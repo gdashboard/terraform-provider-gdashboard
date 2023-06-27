@@ -120,12 +120,9 @@ type (
 		Title       string   `json:"title"`
 		Type        string   `json:"type"`
 		AsDropdown  *bool    `json:"asDropdown,omitempty"`
-		DashURI     *string  `json:"dashUri,omitempty"`
-		Dashboard   *string  `json:"dashboard,omitempty"`
 		Icon        *string  `json:"icon,omitempty"`
 		IncludeVars bool     `json:"includeVars"`
 		KeepTime    *bool    `json:"keepTime,omitempty"`
-		Params      *string  `json:"params,omitempty"`
 		Tags        []string `json:"tags,omitempty"`
 		TargetBlank *bool    `json:"targetBlank,omitempty"`
 		Tooltip     *string  `json:"tooltip,omitempty"`
