@@ -122,6 +122,7 @@ data "gdashboard_timeseries" "override_defaults" {
 
 ### Optional
 
+- `compact_json` (Boolean) Whether to use compat JSON encoding or not.
 - `defaults` (Block List) The default values to use with when an attribute is missing in the data source definition. (see [below for nested schema](#nestedblock--defaults))
 
 <a id="nestedblock--defaults"></a>

@@ -186,6 +186,7 @@ The "HTTP" section has two panel blocks, both with dimensions `8x10` and data so
 ### Optional
 
 - `annotations` (Block List) The annotations to add to the dashboard. (see [below for nested schema](#nestedblock--annotations))
+- `compact_json` (Boolean) Whether to use compat JSON encoding or not.
 - `description` (String) The description of the dashboard.
 - `editable` (Boolean) Whether to make the dashboard editable or not.
 - `graph_tooltip` (String) Controls tooltip and hover highlight behavior across different panels: `default`, `shared-crosshair`, `shared-tooltip`.

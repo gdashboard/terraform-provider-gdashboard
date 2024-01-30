@@ -23,23 +23,25 @@ type GrafanaDashboardBuilderProvider struct {
 }
 
 type Defaults struct {
-	Dashboard  DashboardDefaults
-	Timeseries TimeseriesDefaults
-	BarGauge   BarGaugeDefaults
-	Stat       StatDefaults
-	Gauge      GaugeDefaults
-	Table      TableDefaults
+	CompactJson bool
+	Dashboard   DashboardDefaults
+	Timeseries  TimeseriesDefaults
+	BarGauge    BarGaugeDefaults
+	Stat        StatDefaults
+	Gauge       GaugeDefaults
+	Table       TableDefaults
 }
 
 // GrafanaDashboardBuilderProviderModel describes the provider data model.
 type GrafanaDashboardBuilderProviderModel struct {
-	Defaults []DefaultsModel `tfsdk:"defaults"`
+	CompactJson types.Bool      `tfsdk:"compact_json"`
+	Defaults    []DefaultsModel `tfsdk:"defaults"`
 }
 
 type DefaultsModel struct {
 	Dashboard  []DashboardDefaultsModel  `tfsdk:"dashboard"`
 	Timeseries []TimeseriesDefaultsModel `tfsdk:"timeseries"`
-	BarGuage   []BarGaugeDefaultsModel   `tfsdk:"bar_gauge"`
+	BarGauge   []BarGaugeDefaultsModel   `tfsdk:"bar_gauge"`
 	Stat       []StatDefaultsModel       `tfsdk:"stat"`
 	Gauge      []GaugeDefaultsModel      `tfsdk:"gauge"`
 	Table      []TableDefaultsModel      `tfsdk:"table"`
@@ -92,6 +94,9 @@ func (p *GrafanaDashboardBuilderProvider) Metadata(_ context.Context, req provid
 func (p *GrafanaDashboardBuilderProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "The provider offers a handy syntax to define Grafana dashboards: time series, gauge, bar gauge, stat, etc.",
+		Attributes: map[string]schema.Attribute{
+			"compact_json": compactJsonAttribute(),
+		},
 		Blocks: map[string]schema.Block{
 			"defaults": schema.ListNestedBlock{
 				Description: "The default values to use with when an attribute is missing in the data source definition.",
@@ -195,6 +200,7 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 	}
 
 	defaults := Defaults{
+		CompactJson: data.CompactJson.ValueBool(),
 		Dashboard: DashboardDefaults{
 			Editable:     true,
 			Style:        "dark",
@@ -390,8 +396,8 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 		}
 	}
 
-	if len(data.Defaults) > 0 && len(data.Defaults[0].BarGuage) > 0 {
-		opts := data.Defaults[0].BarGuage[0]
+	if len(data.Defaults) > 0 && len(data.Defaults[0].BarGauge) > 0 {
+		opts := data.Defaults[0].BarGauge[0]
 
 		updateFieldDefaults(&defaults.BarGauge.Field, opts.Field)
 

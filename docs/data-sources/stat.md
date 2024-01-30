@@ -166,6 +166,7 @@ data "gdashboard_stat" "status_2" {
 
 ### Optional
 
+- `compact_json` (Boolean) Whether to use compat JSON encoding or not.
 - `description` (String) The description of this panel.
 - `field` (Block List) The customization of field options. (see [below for nested schema](#nestedblock--field))
 - `graph` (Block List) The visualization options. (see [below for nested schema](#nestedblock--graph))

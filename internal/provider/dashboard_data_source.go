@@ -28,7 +28,8 @@ func NewDashboardDataSource() datasource.DataSource {
 
 // DashboardDataSource defines the data source implementation.
 type DashboardDataSource struct {
-	Defaults DashboardDefaults
+	CompactJson bool
+	Defaults    DashboardDefaults
 }
 
 type DashboardDefaults struct {
@@ -47,6 +48,7 @@ type Time struct {
 type DashboardDataSourceModel struct {
 	Id           types.String           `tfsdk:"id"`
 	Json         types.String           `tfsdk:"json"`
+	CompactJson  types.Bool             `tfsdk:"compact_json"`
 	Title        types.String           `tfsdk:"title"`
 	Description  types.String           `tfsdk:"description"`
 	Version      types.Int64            `tfsdk:"version"`
@@ -1171,10 +1173,8 @@ func (d *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 			"id": schema.StringAttribute{
 				Computed: true,
 			},
-			"json": schema.StringAttribute{
-				Computed:    true,
-				Description: "The Grafana-API-compatible JSON of this panel.",
-			},
+			"json":         jsonAttribute(),
+			"compact_json": compactJsonAttribute(),
 			"title": schema.StringAttribute{
 				Required:    true,
 				Description: "The title of the dashboard.",
@@ -1221,6 +1221,7 @@ func (d *DashboardDataSource) Configure(_ context.Context, req datasource.Config
 		)
 	}
 
+	d.CompactJson = defaults.CompactJson
 	d.Defaults = defaults.Dashboard
 }
 
@@ -2009,7 +2010,15 @@ func (d *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		dashboard.GraphTooltip = 2
 	}
 
-	jsonData, err := json.MarshalIndent(dashboard, "", "  ")
+	var jsonData []byte
+	var err error
+
+	if data.CompactJson.ValueBool() || d.CompactJson {
+		jsonData, err = json.Marshal(dashboard)
+	} else {
+		jsonData, err = json.MarshalIndent(dashboard, "", "  ")
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Could not marshal json: %s", err))
 		return

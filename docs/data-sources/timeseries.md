@@ -177,6 +177,7 @@ data "gdashboard_timeseries" "native_memory" {
 ### Optional
 
 - `axis` (Block List) Axis display options. (see [below for nested schema](#nestedblock--axis))
+- `compact_json` (Boolean) Whether to use compat JSON encoding or not.
 - `description` (String) The description of this panel.
 - `field` (Block List) The customization of field options. (see [below for nested schema](#nestedblock--field))
 - `graph` (Block List) The visualization options. (see [below for nested schema](#nestedblock--graph))

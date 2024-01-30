@@ -24,12 +24,14 @@ func NewTextDataSource() datasource.DataSource {
 
 // TextDataSource defines the data source implementation.
 type TextDataSource struct {
+	CompactJson bool
 }
 
 // TextDataSourceModel describes the data source data model.
 type TextDataSourceModel struct {
 	Id          types.String  `tfsdk:"id"`
 	Json        types.String  `tfsdk:"json"`
+	CompactJson types.Bool    `tfsdk:"compact_json"`
 	Title       types.String  `tfsdk:"title"`
 	Description types.String  `tfsdk:"description"`
 	Graph       []TextOptions `tfsdk:"graph"`
@@ -119,10 +121,11 @@ func (d *TextDataSource) Schema(ctx context.Context, req datasource.SchemaReques
 		},
 
 		Attributes: map[string]schema.Attribute{
-			"id":          idAttribute(),
-			"json":        jsonAttribute(),
-			"title":       titleAttribute(),
-			"description": descriptionAttribute(),
+			"id":           idAttribute(),
+			"json":         jsonAttribute(),
+			"compact_json": compactJsonAttribute(),
+			"title":        titleAttribute(),
+			"description":  descriptionAttribute(),
 		},
 	}
 }
@@ -132,6 +135,17 @@ func (d *TextDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 	if req.ProviderData == nil {
 		return
 	}
+
+	defaults, ok := req.ProviderData.(Defaults)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Data Source Configure Type",
+			fmt.Sprintf("Expected Defaults, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+	}
+
+	d.CompactJson = defaults.CompactJson
 }
 
 func (d *TextDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -199,12 +213,19 @@ func (d *TextDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		panel.CommonPanel.Description = &description
 	}
 
-	jsonData, err := json.MarshalIndent(panel, "", "  ")
+	var jsonData []byte
+	var err error
+
+	if data.CompactJson.ValueBool() || d.CompactJson {
+		jsonData, err = json.Marshal(panel)
+	} else {
+		jsonData, err = json.MarshalIndent(panel, "", "  ")
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Could not marshal json: %s", err))
 		return
 	}
-
 	data.Json = types.StringValue(string(jsonData))
 	data.Id = types.StringValue(strconv.Itoa(hashcode(jsonData)))
 
