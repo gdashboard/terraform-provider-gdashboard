@@ -12,6 +12,7 @@
       inherit self nixpkgs;
       name = "gdashboard";
       overlay = hestia.overlays.default;
+      config = { allowUnfree = true; };
       shell = ./shell-impl.nix;
     };
 }
