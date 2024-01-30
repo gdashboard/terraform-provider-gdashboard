@@ -24,7 +24,8 @@ func NewBarGaugeDataSource() datasource.DataSource {
 
 // BarGaugeDataSource defines the data source implementation.
 type BarGaugeDataSource struct {
-	Defaults BarGaugeDefaults
+	CompactJson bool
+	Defaults    BarGaugeDefaults
 }
 
 type BarGaugeDefaults struct {
@@ -44,6 +45,7 @@ type BarGaugeGraphDefault struct {
 type BarGaugeDataSourceModel struct {
 	Id              types.String           `tfsdk:"id"`
 	Json            types.String           `tfsdk:"json"`
+	CompactJson     types.Bool             `tfsdk:"compact_json"`
 	Title           types.String           `tfsdk:"title"`
 	Description     types.String           `tfsdk:"description"`
 	Queries         []Query                `tfsdk:"queries"`
@@ -121,10 +123,11 @@ func (d *BarGaugeDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 		},
 
 		Attributes: map[string]schema.Attribute{
-			"id":          idAttribute(),
-			"json":        jsonAttribute(),
-			"title":       titleAttribute(),
-			"description": descriptionAttribute(),
+			"id":           idAttribute(),
+			"json":         jsonAttribute(),
+			"compact_json": compactJsonAttribute(),
+			"title":        titleAttribute(),
+			"description":  descriptionAttribute(),
 		},
 	}
 }
@@ -144,6 +147,7 @@ func (d *BarGaugeDataSource) Configure(_ context.Context, req datasource.Configu
 		)
 	}
 
+	d.CompactJson = defaults.CompactJson
 	d.Defaults = defaults.BarGauge
 }
 
@@ -218,7 +222,15 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 		panel.CommonPanel.Description = &description
 	}
 
-	jsonData, err := json.MarshalIndent(panel, "", "  ")
+	var jsonData []byte
+	var err error
+
+	if data.CompactJson.ValueBool() || d.CompactJson {
+		jsonData, err = json.Marshal(panel)
+	} else {
+		jsonData, err = json.MarshalIndent(panel, "", "  ")
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Could not marshal json: %s", err))
 		return

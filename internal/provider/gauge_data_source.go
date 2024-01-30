@@ -24,7 +24,8 @@ func NewGaugeDataSource() datasource.DataSource {
 
 // GaugeDataSource defines the data source implementation.
 type GaugeDataSource struct {
-	Defaults GaugeDefaults
+	CompactJson bool
+	Defaults    GaugeDefaults
 }
 
 type GaugeDefaults struct {
@@ -44,6 +45,7 @@ type GaugeGraphDefault struct {
 type GaugeDataSourceModel struct {
 	Id              types.String           `tfsdk:"id"`
 	Json            types.String           `tfsdk:"json"`
+	CompactJson     types.Bool             `tfsdk:"compact_json"`
 	Title           types.String           `tfsdk:"title"`
 	Description     types.String           `tfsdk:"description"`
 	Queries         []Query                `tfsdk:"queries"`
@@ -113,10 +115,11 @@ func (d *GaugeDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 		},
 
 		Attributes: map[string]schema.Attribute{
-			"id":          idAttribute(),
-			"json":        jsonAttribute(),
-			"title":       titleAttribute(),
-			"description": descriptionAttribute(),
+			"id":           idAttribute(),
+			"json":         jsonAttribute(),
+			"compact_json": compactJsonAttribute(),
+			"title":        titleAttribute(),
+			"description":  descriptionAttribute(),
 		},
 	}
 }
@@ -136,6 +139,7 @@ func (d *GaugeDataSource) Configure(_ context.Context, req datasource.ConfigureR
 		)
 	}
 
+	d.CompactJson = defaults.CompactJson
 	d.Defaults = defaults.Gauge
 }
 
@@ -210,7 +214,15 @@ func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		panel.CommonPanel.Description = &description
 	}
 
-	jsonData, err := json.MarshalIndent(panel, "", "  ")
+	var jsonData []byte
+	var err error
+
+	if data.CompactJson.ValueBool() || d.CompactJson {
+		jsonData, err = json.Marshal(panel)
+	} else {
+		jsonData, err = json.MarshalIndent(panel, "", "  ")
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Could not marshal json: %s", err))
 		return

@@ -25,7 +25,8 @@ func NewTimeseriesDataSource() datasource.DataSource {
 
 // TimeseriesDataSource defines the data source implementation.
 type TimeseriesDataSource struct {
-	Defaults TimeseriesDefaults
+	CompactJson bool
+	Defaults    TimeseriesDefaults
 }
 
 type TimeseriesDefaults struct {
@@ -63,6 +64,7 @@ type TimeseriesLegendDefault struct {
 type TimeseriesDataSourceModel struct {
 	Id              types.String               `tfsdk:"id"`
 	Json            types.String               `tfsdk:"json"`
+	CompactJson     types.Bool                 `tfsdk:"compact_json"`
 	Title           types.String               `tfsdk:"title"`
 	Description     types.String               `tfsdk:"description"`
 	Queries         []Query                    `tfsdk:"queries"`
@@ -264,10 +266,11 @@ func (d *TimeseriesDataSource) Schema(ctx context.Context, req datasource.Schema
 		},
 
 		Attributes: map[string]schema.Attribute{
-			"id":          idAttribute(),
-			"json":        jsonAttribute(),
-			"title":       titleAttribute(),
-			"description": descriptionAttribute(),
+			"id":           idAttribute(),
+			"json":         jsonAttribute(),
+			"compact_json": compactJsonAttribute(),
+			"title":        titleAttribute(),
+			"description":  descriptionAttribute(),
 		},
 	}
 }
@@ -287,6 +290,7 @@ func (d *TimeseriesDataSource) Configure(_ context.Context, req datasource.Confi
 		)
 	}
 
+	d.CompactJson = defaults.CompactJson
 	d.Defaults = defaults.Timeseries
 }
 
@@ -457,7 +461,15 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		panel.CommonPanel.Description = &description
 	}
 
-	jsonData, err := json.MarshalIndent(panel, "", "  ")
+	var jsonData []byte
+	var err error
+
+	if data.CompactJson.ValueBool() || d.CompactJson {
+		jsonData, err = json.Marshal(panel)
+	} else {
+		jsonData, err = json.MarshalIndent(panel, "", "  ")
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Could not marshal json: %s", err))
 		return

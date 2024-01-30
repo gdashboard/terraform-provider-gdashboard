@@ -163,6 +163,10 @@ func TestAccDashboardDataSource(t *testing.T) {
 				Config: testAccDashboardDataSourceProvider_Links_Datasource_Valid,
 				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Links_Datasource_Valid_ExpectedJson),
 			},
+			{
+				Config: testAccDashboardDataSourceProvider_Compact_Json,
+				Check:  resource.TestCheckResourceAttr("data.gdashboard_dashboard.test", "json", testAccDashboardDataSourceProvider_Compact_Json_ExpectedJson),
+			},
 		},
 	})
 }
@@ -2064,3 +2068,34 @@ const testAccDashboardDataSourceProvider_Links_Datasource_Valid_ExpectedJson = `
 }`
 
 ////
+
+const testAccDashboardDataSourceProvider_Compact_Json = `
+data "gdashboard_dashboard" "test" {
+  title 	   = "Test"
+  compact_json = true
+
+  links {
+    dashboards {
+      title                      = "My dashboards"
+      tags                       = ["tag 1", "tag-2"]
+      as_dropdown                = true
+      include_time_range         = true
+      include_template_variables = true
+      new_tab                    = true
+    }
+
+    external {
+      title                      = "My dashboards"
+      url                        = "https://grafana.com"
+      tooltip                    = "Some tooltip"
+      icon                       = "cloud"
+      include_time_range         = true
+      include_template_variables = true
+      new_tab                    = true
+    }
+  }
+
+  layout { }
+}`
+
+const testAccDashboardDataSourceProvider_Compact_Json_ExpectedJson = `{"title":"Test","style":"dark","timezone":"","liveNow":false,"editable":true,"panels":[],"templating":{"list":[]},"annotations":{"list":null},"schemaVersion":0,"version":1,"links":[{"title":"My dashboards","type":"dashboards","asDropdown":true,"includeVars":true,"keepTime":true,"tags":["tag 1","tag-2"],"targetBlank":true},{"title":"My dashboards","type":"link","icon":"cloud","includeVars":true,"keepTime":true,"targetBlank":true,"tooltip":"Some tooltip","url":"https://grafana.com"}],"time":{"from":"now-6h","to":"now"},"timepicker":{"refresh_intervals":null,"time_options":null}}`

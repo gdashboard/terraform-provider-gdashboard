@@ -892,6 +892,13 @@ func jsonAttribute() schema.StringAttribute {
 	}
 }
 
+func compactJsonAttribute() schema.BoolAttribute {
+	return schema.BoolAttribute{
+		Optional:    true,
+		Description: "Whether to use compat JSON encoding or not.",
+	}
+}
+
 func titleAttribute() schema.StringAttribute {
 	return schema.StringAttribute{
 		Required:    true,
