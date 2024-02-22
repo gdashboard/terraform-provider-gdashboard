@@ -101,8 +101,9 @@ type ColorDefaults struct {
 }
 
 type ThresholdDefaults struct {
-	Mode  string
-	Steps []ThresholdStepDefaults
+	Mode   string
+	ShowAs string
+	Steps  []ThresholdStepDefaults
 }
 
 type ThresholdStepDefaults struct {
@@ -209,8 +210,9 @@ type ColorOptions struct {
 }
 
 type ThresholdOptions struct {
-	Mode  types.String    `tfsdk:"mode"`
-	Steps []ThresholdStep `tfsdk:"step"`
+	Mode   types.String    `tfsdk:"mode"`
+	ShowAs types.String    `tfsdk:"show_as"`
+	Steps  []ThresholdStep `tfsdk:"step"`
 }
 
 type ThresholdStep struct {
@@ -375,7 +377,25 @@ func axisBlock() schema.Block {
 	}
 }
 
-func fieldBlock() schema.Block {
+func fieldBlock(includeThresholdsShowsAs bool) schema.Block {
+	var showAsAttribute schema.StringAttribute
+	if !includeThresholdsShowsAs {
+		showAsAttribute = schema.StringAttribute{
+			Optional:    true,
+			Computed:    true,
+			Description: "Unused by this panel type. Ignore, please.",
+		}
+	} else {
+		showAsAttribute = schema.StringAttribute{
+			Optional:            true,
+			Description:         "How the thresholds must be shown. The choices are: line, dashed, area, line+area, dashed+area.",
+			MarkdownDescription: "How the thresholds must be shown. The choices are: `line`, `dashed`, `area`, `line+area`, `dashed+area`.",
+			Validators: []validator.String{
+				stringvalidator.OneOf("line", "dashed", "area", "line+area", "dashed+area"),
+			},
+		}
+	}
+
 	return schema.ListNestedBlock{
 		Description: "The customization of field options.",
 		NestedObject: schema.NestedBlockObject{
@@ -456,6 +476,7 @@ func fieldBlock() schema.Block {
 									stringvalidator.OneOf("absolute", "percentage"),
 								},
 							},
+							"show_as": showAsAttribute,
 						},
 					},
 					Validators: []validator.List{
@@ -797,7 +818,7 @@ func mappingsBlock() schema.Block {
 	}
 }
 
-func fieldOverrideBlock() schema.Block {
+func fieldOverrideBlock(includeThresholdsShowsAs bool) schema.Block {
 	return schema.ListNestedBlock{
 		Description: "The set of rules that override attributes of a field.",
 		NestedObject: schema.NestedBlockObject{
@@ -806,7 +827,7 @@ func fieldOverrideBlock() schema.Block {
 					Description: "Override properties for a field with a specific name.",
 					NestedObject: schema.NestedBlockObject{
 						Blocks: map[string]schema.Block{
-							"field": fieldBlock(),
+							"field": fieldBlock(includeThresholdsShowsAs),
 						},
 						Attributes: map[string]schema.Attribute{
 							"name": schema.StringAttribute{
@@ -823,7 +844,7 @@ func fieldOverrideBlock() schema.Block {
 					Description: "Override properties for a field with a matching name.",
 					NestedObject: schema.NestedBlockObject{
 						Blocks: map[string]schema.Block{
-							"field": fieldBlock(),
+							"field": fieldBlock(includeThresholdsShowsAs),
 						},
 						Attributes: map[string]schema.Attribute{
 							"regex": schema.StringAttribute{
@@ -840,7 +861,7 @@ func fieldOverrideBlock() schema.Block {
 					Description: "Override properties for a field with a specific type.",
 					NestedObject: schema.NestedBlockObject{
 						Blocks: map[string]schema.Block{
-							"field": fieldBlock(),
+							"field": fieldBlock(includeThresholdsShowsAs),
 						},
 						Attributes: map[string]schema.Attribute{
 							"type": schema.StringAttribute{
@@ -857,7 +878,7 @@ func fieldOverrideBlock() schema.Block {
 					Description: "Override properties for a field returned by a specific query.",
 					NestedObject: schema.NestedBlockObject{
 						Blocks: map[string]schema.Block{
-							"field": fieldBlock(),
+							"field": fieldBlock(includeThresholdsShowsAs),
 						},
 						Attributes: map[string]schema.Attribute{
 							"query_id": schema.StringAttribute{

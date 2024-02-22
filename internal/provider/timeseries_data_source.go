@@ -258,10 +258,10 @@ func (d *TimeseriesDataSource) Schema(ctx context.Context, req datasource.Schema
 			"queries":   queryBlock(),
 			"legend":    timeseriesLegendBlock(),
 			"tooltip":   timeseriesTooltipBlock(),
-			"field":     fieldBlock(),
+			"field":     fieldBlock(true),
 			"axis":      axisBlock(),
 			"graph":     timeseriesGraphBlock(),
-			"overrides": fieldOverrideBlock(),
+			"overrides": fieldOverrideBlock(true),
 			"transform": transformationsBlock(),
 		},
 
@@ -363,6 +363,7 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	fieldConfig.Custom.Stacking.Mode = d.Defaults.Graph.StackSeries
 	fieldConfig.Custom.ScaleDistribution.Type = d.Defaults.Axis.Scale.Type
 	fieldConfig.Custom.ScaleDistribution.Log = d.Defaults.Axis.Scale.Log
+	fieldConfig.Custom.ThresholdsStyle.Mode = d.Defaults.Field.Thresholds.ShowAs
 
 	for _, axis := range data.Axis {
 		if !axis.Label.IsNull() {
@@ -431,6 +432,14 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 
 		if !graph.StackSeries.IsNull() {
 			fieldConfig.Custom.Stacking.Mode = graph.StackSeries.ValueString()
+		}
+	}
+
+	for _, field := range data.Field {
+		for _, threshold := range field.Thresholds {
+			if !threshold.ShowAs.IsNull() {
+				fieldConfig.Custom.ThresholdsStyle.Mode = threshold.ShowAs.ValueString()
+			}
 		}
 	}
 

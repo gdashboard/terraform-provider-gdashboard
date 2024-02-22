@@ -241,6 +241,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
+- `show_as` (String) Unused by this panel type. Ignore, please.
 - `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--defaults--bar_gauge--field--thresholds--step))
 
 <a id="nestedblock--defaults--bar_gauge--field--thresholds--step"></a>
@@ -414,6 +415,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
+- `show_as` (String) Unused by this panel type. Ignore, please.
 - `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--defaults--gauge--field--thresholds--step))
 
 <a id="nestedblock--defaults--gauge--field--thresholds--step"></a>
@@ -567,6 +569,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
+- `show_as` (String) Unused by this panel type. Ignore, please.
 - `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--defaults--stat--field--thresholds--step))
 
 <a id="nestedblock--defaults--stat--field--thresholds--step"></a>
@@ -721,6 +724,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
+- `show_as` (String) Unused by this panel type. Ignore, please.
 - `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--defaults--table--field--thresholds--step))
 
 <a id="nestedblock--defaults--table--field--thresholds--step"></a>
@@ -869,6 +873,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
+- `show_as` (String) How the thresholds must be shown. The choices are: `line`, `dashed`, `area`, `line+area`, `dashed+area`.
 - `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--defaults--timeseries--field--thresholds--step))
 
 <a id="nestedblock--defaults--timeseries--field--thresholds--step"></a>

@@ -108,9 +108,9 @@ func (d *GaugeDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 
 		Blocks: map[string]schema.Block{
 			"queries":   queryBlock(),
-			"field":     fieldBlock(),
+			"field":     fieldBlock(false),
 			"graph":     gaugeGraphBlock(),
-			"overrides": fieldOverrideBlock(),
+			"overrides": fieldOverrideBlock(false),
 			"transform": transformationsBlock(),
 		},
 

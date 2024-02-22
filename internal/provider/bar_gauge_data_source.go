@@ -116,9 +116,9 @@ func (d *BarGaugeDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 
 		Blocks: map[string]schema.Block{
 			"queries":   queryBlock(),
-			"field":     fieldBlock(),
+			"field":     fieldBlock(false),
 			"graph":     barGaugeGraphBlock(),
-			"overrides": fieldOverrideBlock(),
+			"overrides": fieldOverrideBlock(false),
 			"transform": transformationsBlock(),
 		},
 
