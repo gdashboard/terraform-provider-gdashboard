@@ -377,11 +377,11 @@ func (p *GrafanaDashboardBuilderProvider) Configure(ctx context.Context, req pro
 			}
 
 			if !axis.SoftMin.IsNull() {
-				defaults.Timeseries.Axis.SoftMin = axis.SoftMin.ValueInt64Pointer()
+				defaults.Timeseries.Axis.SoftMin = axis.SoftMin.ValueFloat64Pointer()
 			}
 
 			if !axis.SoftMax.IsNull() {
-				defaults.Timeseries.Axis.SoftMax = axis.SoftMax.ValueInt64Pointer()
+				defaults.Timeseries.Axis.SoftMax = axis.SoftMax.ValueFloat64Pointer()
 			}
 
 			for _, scale := range axis.Scale {

@@ -396,19 +396,19 @@ type (
 		Options map[string]interface{} `json:"options"`
 	}
 	FieldConfigCustom struct {
-		AxisLabel         string `json:"axisLabel,omitempty"`
-		AxisPlacement     string `json:"axisPlacement"`
-		AxisSoftMin       *int64 `json:"axisSoftMin,omitempty"`
-		AxisSoftMax       *int64 `json:"axisSoftMax,omitempty"`
-		BarAlignment      int    `json:"barAlignment"`
-		DrawStyle         string `json:"drawStyle"`
-		FillOpacity       int    `json:"fillOpacity"`
-		GradientMode      string `json:"gradientMode"`
-		LineInterpolation string `json:"lineInterpolation"`
-		LineWidth         int    `json:"lineWidth"`
-		PointSize         int    `json:"pointSize"`
-		ShowPoints        string `json:"showPoints"`
-		SpanNulls         bool   `json:"spanNulls"`
+		AxisLabel         string   `json:"axisLabel,omitempty"`
+		AxisPlacement     string   `json:"axisPlacement"`
+		AxisSoftMin       *float64 `json:"axisSoftMin,omitempty"`
+		AxisSoftMax       *float64 `json:"axisSoftMax,omitempty"`
+		BarAlignment      int      `json:"barAlignment"`
+		DrawStyle         string   `json:"drawStyle"`
+		FillOpacity       int      `json:"fillOpacity"`
+		GradientMode      string   `json:"gradientMode"`
+		LineInterpolation string   `json:"lineInterpolation"`
+		LineWidth         int      `json:"lineWidth"`
+		PointSize         int      `json:"pointSize"`
+		ShowPoints        string   `json:"showPoints"`
+		SpanNulls         bool     `json:"spanNulls"`
 		HideFrom          struct {
 			Legend  bool `json:"legend"`
 			Tooltip bool `json:"tooltip"`
