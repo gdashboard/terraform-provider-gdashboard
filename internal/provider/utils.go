@@ -964,19 +964,25 @@ func createTargets(queries []Query) []grafana.Target {
 				dimensions[dim.Name.ValueString()] = dim.Value.ValueString()
 			}
 
+			zero := 0
+
 			t := grafana.Target{
 				Datasource: grafana.Datasource{
 					UID:  target.UID.ValueString(),
 					Type: "cloudwatch",
 				},
-				RefID:      target.RefId.ValueString(),
-				Namespace:  target.Namespace.ValueString(),
-				MetricName: target.MetricName.ValueString(),
-				Statistics: []string{target.Statistic.ValueString()},
-				Dimensions: dimensions,
-				Period:     target.Period.ValueString(),
-				Region:     target.Region.ValueString(),
-				Label:      target.Label.ValueString(),
+				RefID:            target.RefId.ValueString(),
+				QueryMode:        "Metrics",
+				MetricQueryType:  &zero,
+				MetricEditorMode: &zero,
+				Namespace:        target.Namespace.ValueString(),
+				MetricName:       target.MetricName.ValueString(),
+				Statistic:        target.Statistic.ValueString(),
+				Dimensions:       dimensions,
+				MatchExact:       target.MatchExact.ValueBool(),
+				Period:           target.Period.ValueString(),
+				Region:           target.Region.ValueString(),
+				Label:            target.Label.ValueString(),
 			}
 
 			targets = append(targets, t)

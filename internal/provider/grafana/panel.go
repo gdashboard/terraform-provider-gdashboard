@@ -580,13 +580,17 @@ type Target struct {
 	Target string `json:"target,omitempty"`
 
 	// For CloudWatch
-	Namespace  string            `json:"namespace,omitempty"`
-	MetricName string            `json:"metricName,omitempty"`
-	Statistics []string          `json:"statistics,omitempty"`
-	Dimensions map[string]string `json:"dimensions,omitempty"`
-	Period     string            `json:"period,omitempty"`
-	Region     string            `json:"region,omitempty"`
-	Label      string            `json:"label,omitempty"`
+	QueryMode        string            `json:"queryMode,omitempty"`
+	MetricQueryType  *int              `json:"metricQueryType,omitempty"`
+	MetricEditorMode *int              `json:"metricEditorMode,omitempty"`
+	Namespace        string            `json:"namespace,omitempty"`
+	MetricName       string            `json:"metricName,omitempty"`
+	Statistic        string            `json:"statistic,omitempty"`
+	Dimensions       map[string]string `json:"dimensions,omitempty"`
+	MatchExact       bool              `json:"matchExact,omitempty"`
+	Period           string            `json:"period,omitempty"`
+	Region           string            `json:"region,omitempty"`
+	Label            string            `json:"label,omitempty"`
 }
 
 type MapType struct {
