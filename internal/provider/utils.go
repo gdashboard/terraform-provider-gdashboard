@@ -133,8 +133,8 @@ type TextSizeDefaults struct {
 type AxisDefaults struct {
 	Label     string
 	Placement string
-	SoftMin   *int64
-	SoftMax   *int64
+	SoftMin   *float64
+	SoftMax   *float64
 	Scale     ScaleDefaults
 }
 
@@ -148,8 +148,8 @@ type ScaleDefaults struct {
 type AxisOptions struct {
 	Label     types.String   `tfsdk:"label"`
 	Placement types.String   `tfsdk:"placement"`
-	SoftMin   types.Int64    `tfsdk:"soft_min"`
-	SoftMax   types.Int64    `tfsdk:"soft_max"`
+	SoftMin   types.Float64  `tfsdk:"soft_min"`
+	SoftMax   types.Float64  `tfsdk:"soft_max"`
 	Scale     []ScaleOptions `tfsdk:"scale"`
 }
 
@@ -341,7 +341,7 @@ func axisBlock() schema.Block {
 						stringvalidator.OneOf("auto", "left", "right", "hidden"),
 					},
 				},
-				"soft_min": schema.Int64Attribute{
+				"soft_min": schema.Float64Attribute{
 					Optional:    true,
 					Description: "The soft minimum of y-axis.",
 					MarkdownDescription: "The soft minimum of y-axis. " +
@@ -350,7 +350,7 @@ func axisBlock() schema.Block {
 						"and hard min or max derived from standard min and max field options can prevent intermittent spikes " +
 						"from flattening useful detail by clipping the spikes past a defined point.",
 				},
-				"soft_max": schema.Int64Attribute{
+				"soft_max": schema.Float64Attribute{
 					Optional:    true,
 					Description: "The soft maximum of y-axis.",
 					MarkdownDescription: "The soft maximum of y-axis. " +
