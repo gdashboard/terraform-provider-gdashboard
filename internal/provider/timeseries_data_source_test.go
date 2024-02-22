@@ -158,15 +158,17 @@ const testAccTimeseriesDataSourceConfigExpectedJson = `{
         "jsonData": null,
         "secureJsonData": null
       },
+      "queryMode": "Metrics",
+      "metricQueryType": 0,
+      "metricEditorMode": 0,
       "namespace": "AWS/ApplicationELB",
       "metricName": "HTTPCode_Target_2XX_Count",
-      "statistics": [
-        "Sum"
-      ],
+      "statistic": "Sum",
       "dimensions": {
         "LoadBalancer": "lb_arn_suffix",
         "TargetGroup": "target_group"
       },
+      "matchExact": true,
       "period": "30",
       "region": "af-south-1",
       "label": "Request Count"
