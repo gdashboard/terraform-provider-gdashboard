@@ -124,7 +124,7 @@ func (p *GrafanaDashboardBuilderProvider) Schema(ctx context.Context, req provid
 								Blocks: map[string]schema.Block{
 									"legend":  timeseriesLegendBlock(),
 									"tooltip": timeseriesTooltipBlock(),
-									"field":   fieldBlock(),
+									"field":   fieldBlock(true),
 									"axis":    axisBlock(),
 									"graph":   timeseriesGraphBlock(),
 								},
@@ -137,7 +137,7 @@ func (p *GrafanaDashboardBuilderProvider) Schema(ctx context.Context, req provid
 							Description: "Bar gauge defaults.",
 							NestedObject: schema.NestedBlockObject{
 								Blocks: map[string]schema.Block{
-									"field": fieldBlock(),
+									"field": fieldBlock(false),
 									"graph": barGaugeGraphBlock(),
 								},
 							},
@@ -149,7 +149,7 @@ func (p *GrafanaDashboardBuilderProvider) Schema(ctx context.Context, req provid
 							Description: "Stat defaults.",
 							NestedObject: schema.NestedBlockObject{
 								Blocks: map[string]schema.Block{
-									"field": fieldBlock(),
+									"field": fieldBlock(false),
 									"graph": statGraphBlock(),
 								},
 							},
@@ -161,7 +161,7 @@ func (p *GrafanaDashboardBuilderProvider) Schema(ctx context.Context, req provid
 							Description: "Gauge defaults.",
 							NestedObject: schema.NestedBlockObject{
 								Blocks: map[string]schema.Block{
-									"field": fieldBlock(),
+									"field": fieldBlock(false),
 									"graph": gaugeGraphBlock(),
 								},
 							},
@@ -173,7 +173,7 @@ func (p *GrafanaDashboardBuilderProvider) Schema(ctx context.Context, req provid
 							Description: "Table defaults.",
 							NestedObject: schema.NestedBlockObject{
 								Blocks: map[string]schema.Block{
-									"field": fieldBlock(),
+									"field": fieldBlock(false),
 								},
 							},
 							Validators: []validator.List{
@@ -513,6 +513,10 @@ func updateFieldDefaults(defaults *FieldDefaults, opts []FieldOptions) {
 
 			if !threshold.Mode.IsNull() {
 				defaults.Thresholds.Mode = threshold.Mode.ValueString()
+			}
+
+			if !threshold.ShowAs.IsNull() {
+				defaults.Thresholds.ShowAs = threshold.ShowAs.ValueString()
 			}
 
 			for i, step := range threshold.Steps {

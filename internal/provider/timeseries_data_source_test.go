@@ -63,6 +63,10 @@ data "gdashboard_timeseries" "test" {
       fixed_color = "green"
       series_by   = "last"
     }
+
+	thresholds {
+      show_as = "line"
+    }
   }
 
   graph {
@@ -229,7 +233,7 @@ const testAccTimeseriesDataSourceConfigExpectedJson = `{
           "mode": "none"
         },
         "thresholdsStyle": {
-          "mode": ""
+          "mode": "line"
         }
       }
     }

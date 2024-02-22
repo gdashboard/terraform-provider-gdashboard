@@ -280,6 +280,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
+- `show_as` (String) Unused by this panel type. Ignore, please.
 - `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--field--thresholds--step))
 
 <a id="nestedblock--field--thresholds--step"></a>
@@ -445,6 +446,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
+- `show_as` (String) Unused by this panel type. Ignore, please.
 - `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--overrides--by_name--field--thresholds--step))
 
 <a id="nestedblock--overrides--by_name--field--thresholds--step"></a>
@@ -569,6 +571,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
+- `show_as` (String) Unused by this panel type. Ignore, please.
 - `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--overrides--by_query_id--field--thresholds--step))
 
 <a id="nestedblock--overrides--by_query_id--field--thresholds--step"></a>
@@ -693,6 +696,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
+- `show_as` (String) Unused by this panel type. Ignore, please.
 - `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--overrides--by_regex--field--thresholds--step))
 
 <a id="nestedblock--overrides--by_regex--field--thresholds--step"></a>
@@ -817,6 +821,7 @@ Optional:
 - `mode` (String) The threshold mode. The choices are:
 1) `absolute` - defined based on a number; for example, 80 on a scale of 1 to 150. 
 2) `percentage` - defined relative to minimum or maximum; for example, 80 percent.
+- `show_as` (String) Unused by this panel type. Ignore, please.
 - `step` (Block List) The threshold steps. (see [below for nested schema](#nestedblock--overrides--by_type--field--thresholds--step))
 
 <a id="nestedblock--overrides--by_type--field--thresholds--step"></a>

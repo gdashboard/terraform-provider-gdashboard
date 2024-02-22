@@ -136,9 +136,9 @@ func (d *StatDataSource) Schema(ctx context.Context, req datasource.SchemaReques
 
 		Blocks: map[string]schema.Block{
 			"queries":   queryBlock(),
-			"field":     fieldBlock(),
+			"field":     fieldBlock(false),
 			"graph":     statGraphBlock(),
-			"overrides": fieldOverrideBlock(),
+			"overrides": fieldOverrideBlock(false),
 			"transform": transformationsBlock(),
 		},
 
