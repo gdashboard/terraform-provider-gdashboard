@@ -466,8 +466,7 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 
 	if !data.Description.IsNull() {
-		description := data.Description.ValueString()
-		panel.CommonPanel.Description = &description
+		panel.CommonPanel.Description = data.Description.ValueStringPointer()
 	}
 
 	var jsonData []byte

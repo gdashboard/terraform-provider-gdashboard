@@ -2,12 +2,12 @@
 page_title: "gdashboard_gauge Data Source - terraform-provider-gdashboard"
 subcategory: ""
 description: |-
-  Gauge panel data source. See Grafana documentation https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/. for more details
+  Gauge panel data source. See Grafana documentation https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/ for more details.
 ---
 
 # gdashboard_gauge (Data Source)
 
-Gauge panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/). for more details
+Gauge panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/) for more details.
 
 ## Minimal Example
 
