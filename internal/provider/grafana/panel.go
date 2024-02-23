@@ -596,17 +596,25 @@ type Target struct {
 	Target string `json:"target,omitempty"`
 
 	// For CloudWatch
-	QueryMode        string            `json:"queryMode,omitempty"`
-	MetricQueryType  *int              `json:"metricQueryType,omitempty"`
-	MetricEditorMode *int              `json:"metricEditorMode,omitempty"`
-	Namespace        string            `json:"namespace,omitempty"`
-	MetricName       string            `json:"metricName,omitempty"`
-	Statistic        string            `json:"statistic,omitempty"`
-	Dimensions       map[string]string `json:"dimensions,omitempty"`
-	MatchExact       bool              `json:"matchExact,omitempty"`
-	Period           string            `json:"period,omitempty"`
-	Region           string            `json:"region,omitempty"`
-	Label            string            `json:"label,omitempty"`
+	QueryMode        string               `json:"queryMode,omitempty"`
+	MetricQueryType  *int                 `json:"metricQueryType,omitempty"`
+	MetricEditorMode *int                 `json:"metricEditorMode,omitempty"`
+	Expression       *string              `json:"expression,omitempty"`
+	Namespace        string               `json:"namespace,omitempty"`
+	MetricName       string               `json:"metricName,omitempty"`
+	Statistic        string               `json:"statistic,omitempty"`
+	Dimensions       map[string]string    `json:"dimensions,omitempty"`
+	LogGroups        []CloudWatchLogGroup `json:"logGroups,omitempty"`
+	MatchExact       bool                 `json:"matchExact,omitempty"`
+	Period           string               `json:"period,omitempty"`
+	Region           string               `json:"region,omitempty"`
+	Label            string               `json:"label,omitempty"`
+}
+
+type CloudWatchLogGroup struct {
+	Arn       string `json:"arn,omitempty"`
+	Name      string `json:"name,omitempty"`
+	AccountId string `json:"accountId,omitempty"`
 }
 
 type MapType struct {
@@ -703,6 +711,12 @@ func (p *Panel) UnmarshalJSON(b []byte) (err error) {
 		p.OfType = RowType
 		if err = json.Unmarshal(b, &rowpanel); err == nil {
 			p.RowPanel = &rowpanel
+		}
+	case "logs":
+		var logs LogsPanel
+		p.OfType = LogsType
+		if err = json.Unmarshal(b, &logs); err == nil {
+			p.LogsPanel = &logs
 		}
 	default:
 		var custom = make(CustomPanel)

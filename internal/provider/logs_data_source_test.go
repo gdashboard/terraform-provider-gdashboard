@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -13,6 +14,10 @@ func TestAccLogsDataSource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Read testing
 			{
+				Config:      testAccLogsDataSourceCloudWatchConflictConfig,
+				ExpectError: regexp.MustCompile("Attribute \"queries\\[0]\\.cloudwatch\\[0]\\.metrics\" cannot be specified when"),
+			},
+			{
 				Config: testAccLogsDataSourceConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.gdashboard_logs.test", "title", "Test"),
@@ -20,10 +25,10 @@ func TestAccLogsDataSource(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccLogsDataSourceProviderDefaultsConfig,
+				Config: testAccLogsDataSourceEmptyConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.gdashboard_logs.test", "title", "Test"),
-					resource.TestCheckResourceAttr("data.gdashboard_logs.test", "json", testAccLogsDataSourceProviderDefaultsConfigExpectedJson),
+					resource.TestCheckResourceAttr("data.gdashboard_logs.test", "json", testAccLogsDataSourceEmptyConfigExpectedJson),
 				),
 			},
 		},
@@ -47,11 +52,22 @@ data "gdashboard_logs" "test" {
   }
 
   queries {
-    prometheus {
-      uid          = "prometheus"
-      expr         = "sum (jvm_memory_bytes_used{container_name='container', area='heap'}) / sum (jvm_memory_bytes_max{container_name='container', area='heap'}) * 100"
-      min_interval = "30"
-      instant      = true
+    cloudwatch {
+      logs {
+        uid        = "cloudwatch"
+        expression = "fields @timestamp, @message |\n sort @timestamp desc |\n limit 20"
+        region     = "eu-west-2"
+
+        log_group {
+          arn  = "arn:aws:logs:eu-west-2:123456789012:log-group:/ecs/production/service-1:*"
+          name = "/ecs/production/service-1"
+        }
+
+        log_group {
+          arn  = "arn:aws:logs:eu-west-2:123456789012:log-group:/ecs/production/service-2:*"
+          name = "/ecs/production/service-2"
+        }
+      }
     }
   }
 }
@@ -84,9 +100,9 @@ const testAccLogsDataSourceConfigExpectedJson = `{
       "datasource": {
         "id": 0,
         "orgId": 0,
-        "uid": "prometheus",
+        "uid": "cloudwatch",
         "name": "",
-        "type": "prometheus",
+        "type": "cloudwatch",
         "typeLogoUrl": "",
         "access": "",
         "url": "",
@@ -94,20 +110,32 @@ const testAccLogsDataSourceConfigExpectedJson = `{
         "jsonData": null,
         "secureJsonData": null
       },
-      "expr": "sum (jvm_memory_bytes_used{container_name='container', area='heap'}) / sum (jvm_memory_bytes_max{container_name='container', area='heap'}) * 100",
-      "interval": "30",
-      "instant": true
+      "queryMode": "Logs",
+      "metricQueryType": 0,
+      "metricEditorMode": 0,
+      "expression": "fields @timestamp, @message |\n sort @timestamp desc |\n limit 20",
+      "logGroups": [
+        {
+          "arn": "arn:aws:logs:eu-west-2:123456789012:log-group:/ecs/production/service-1:*",
+          "name": "/ecs/production/service-1"
+        },
+        {
+          "arn": "arn:aws:logs:eu-west-2:123456789012:log-group:/ecs/production/service-2:*",
+          "name": "/ecs/production/service-2"
+        }
+      ],
+      "region": "eu-west-2"
     }
   ]
 }`
 
-const testAccLogsDataSourceProviderDefaultsConfig = `
+const testAccLogsDataSourceEmptyConfig = `
 data "gdashboard_logs" "test" {
   title = "Test"
 }
 `
 
-const testAccLogsDataSourceProviderDefaultsConfigExpectedJson = `{
+const testAccLogsDataSourceEmptyConfigExpectedJson = `{
   "editable": false,
   "error": false,
   "gridPos": {},
@@ -128,3 +156,25 @@ const testAccLogsDataSourceProviderDefaultsConfigExpectedJson = `{
     "sortOrder": "Descending"
   }
 }`
+
+const testAccLogsDataSourceCloudWatchConflictConfig = `
+data "gdashboard_logs" "test" {
+  title = "Test"
+
+  queries {
+    cloudwatch {
+      logs {
+        uid        = "cloudwatch"
+        expression = ""
+      }
+
+      metrics {
+        uid = "cloudwatch"
+        statistic = "Sum"
+        metric_name = "Name"
+        namespace = "Namespace"
+      }
+    }
+  }
+}
+`
