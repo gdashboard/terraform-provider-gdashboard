@@ -218,8 +218,7 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 	}
 
 	if !data.Description.IsNull() {
-		description := data.Description.ValueString()
-		panel.CommonPanel.Description = &description
+		panel.CommonPanel.Description = data.Description.ValueStringPointer()
 	}
 
 	var jsonData []byte

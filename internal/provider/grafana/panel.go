@@ -24,6 +24,7 @@ const (
 	GaugeType
 	HeatmapType
 	TimeseriesType
+	LogsType
 )
 
 type (
@@ -46,6 +47,7 @@ type (
 		*HeatmapPanel
 		*TimeseriesPanel
 		*CustomPanel
+		*LogsPanel
 	}
 	panelType int8
 	GridPos   struct {
@@ -180,6 +182,16 @@ type (
 		TextSize      TextSize      `json:"text"`
 		ReduceOptions ReduceOptions `json:"reduceOptions"`
 	}
+	LogsOptions struct {
+		ShowTime           *bool   `json:"showTime,omitempty"`
+		ShowLabels         *bool   `json:"showLabels,omitempty"`
+		ShowCommonLabels   *bool   `json:"showCommonLabels,omitempty"`
+		WrapLogMessage     *bool   `json:"wrapLogMessage,omitempty"`
+		PrettifyLogMessage *bool   `json:"prettifyLogMessage,omitempty"`
+		EnableLogDetails   *bool   `json:"enableLogDetails,omitempty"`
+		DedupStrategy      *string `json:"dedupStrategy,omitempty"`
+		SortOrder          *string `json:"sortOrder,omitempty"`
+	}
 	Threshold struct {
 		// the alert threshold value, we do not omitempty, since 0 is a valid
 		// threshold
@@ -259,6 +271,10 @@ type (
 		Options     Options     `json:"options"`
 		Targets     []Target    `json:"targets,omitempty"`
 		FieldConfig FieldConfig `json:"fieldConfig"`
+	}
+	LogsPanel struct {
+		Options LogsOptions `json:"options"`
+		Targets []Target    `json:"targets,omitempty"`
 	}
 	StatPanel struct {
 		Colors          []string   `json:"colors"`
@@ -789,6 +805,12 @@ func (p *Panel) MarshalJSON() ([]byte, error) {
 			*p.CustomPanel,
 		}
 		return json.Marshal(outCustom)
+	case LogsType:
+		var outLogs = struct {
+			CommonPanel
+			LogsPanel
+		}{p.CommonPanel, *p.LogsPanel}
+		return json.Marshal(outLogs)
 	}
 	return nil, errors.New("can't marshal unknown panel type")
 }

@@ -104,7 +104,7 @@ func (d *GaugeDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		Description:         "Gauge panel data source.",
-		MarkdownDescription: "Gauge panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/). for more details",
+		MarkdownDescription: "Gauge panel data source. See Grafana [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/visualizations/gauge/) for more details.",
 
 		Blocks: map[string]schema.Block{
 			"queries":   queryBlock(),
@@ -210,8 +210,7 @@ func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	}
 
 	if !data.Description.IsNull() {
-		description := data.Description.ValueString()
-		panel.CommonPanel.Description = &description
+		panel.CommonPanel.Description = data.Description.ValueStringPointer()
 	}
 
 	var jsonData []byte
