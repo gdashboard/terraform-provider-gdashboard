@@ -86,26 +86,28 @@ data "gdashboard_timeseries" "test" {
     }
 
 	cloudwatch {
-	  uid         = "cloudwatch"
-	  namespace   = "AWS/ApplicationELB"
-	  metric_name = "HTTPCode_Target_2XX_Count"
-      statistic   = "Sum"
-      match_exact = true
-	  region      = "af-south-1"
-	  
-	  dimension {
-	    name = "LoadBalancer"
-	    value = "lb_arn_suffix"
-	  }
-	  
-	  dimension {
-	    name = "TargetGroup"
-	    value = "target_group"
-	  }	
-
-	  ref_id = "CW_Query"
-	  period = "30"
-      label  = "Request Count"
+      metrics {
+	    uid         = "cloudwatch"
+	    namespace   = "AWS/ApplicationELB"
+	    metric_name = "HTTPCode_Target_2XX_Count"
+        statistic   = "Sum"
+        match_exact = true
+	    region      = "af-south-1"
+	    
+	    dimension {
+	      name = "LoadBalancer"
+	      value = "lb_arn_suffix"
+	    }
+	    
+	    dimension {
+	      name = "TargetGroup"
+	      value = "target_group"
+	    }	
+  
+	    ref_id = "CW_Query"
+	    period = "30"
+        label  = "Request Count"
+      }
 	}
   }
 	

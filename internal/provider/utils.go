@@ -276,6 +276,11 @@ type PrometheusTarget struct {
 }
 
 type CloudWatchTarget struct {
+	Metrics []CloudWatchMetricsTarget `tfsdk:"metrics"`
+	Logs    []CloudWatchLogsTarget    `tfsdk:"logs"`
+}
+
+type CloudWatchMetricsTarget struct {
 	UID        types.String          `tfsdk:"uid"`
 	Namespace  types.String          `tfsdk:"namespace"`
 	MetricName types.String          `tfsdk:"metric_name"`
@@ -287,6 +292,19 @@ type CloudWatchTarget struct {
 	RefId  types.String `tfsdk:"ref_id"`
 	Period types.String `tfsdk:"period"`
 	Label  types.String `tfsdk:"label"`
+}
+
+type CloudWatchLogGroup struct {
+	Name types.String `tfsdk:"name"`
+	Arn  types.String `tfsdk:"arn"`
+}
+
+type CloudWatchLogsTarget struct {
+	UID        types.String         `tfsdk:"uid"`
+	Expression types.String         `tfsdk:"expression"`
+	LogGroups  []CloudWatchLogGroup `tfsdk:"log_group"`
+	Region     types.String         `tfsdk:"region"`
+	RefId      types.String         `tfsdk:"ref_id"`
 }
 
 type CloudWatchDimension struct {
@@ -637,68 +655,126 @@ func queryBlock() schema.Block {
 					Description: "The CloudWatch query.",
 					NestedObject: schema.NestedBlockObject{
 						Blocks: map[string]schema.Block{
-							"dimension": schema.ListNestedBlock{
-								Description: "The dimension to filter the metric with.",
+							"metrics": schema.ListNestedBlock{
+								Description: "The metrics query.",
 								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										"name": schema.StringAttribute{
-											Required:    true,
-											Description: "The name of the dimension.",
+									Blocks: map[string]schema.Block{
+										"dimension": schema.ListNestedBlock{
+											Description: "The dimension to filter the metric with.",
+											NestedObject: schema.NestedBlockObject{
+												Attributes: map[string]schema.Attribute{
+													"name": schema.StringAttribute{
+														Required:    true,
+														Description: "The name of the dimension.",
+													},
+													"value": schema.StringAttribute{
+														Required:    true,
+														Description: "The value of the dimension.",
+													},
+												},
+											},
+											Validators: []validator.List{
+												listvalidator.SizeAtMost(5),
+											},
 										},
-										"value": schema.StringAttribute{
+									},
+									Attributes: map[string]schema.Attribute{
+										"uid": schema.StringAttribute{
+											Description: "The UID of a CloudWatch DataSource to use in this query.",
 											Required:    true,
-											Description: "The value of the dimension.",
+										},
+										"namespace": schema.StringAttribute{
+											Required:    true,
+											Description: "The namespace to query the metrics from.",
+										},
+										"metric_name": schema.StringAttribute{
+											Required:            true,
+											Description:         "The name of the metric to query.",
+											MarkdownDescription: "The name of the metric to query. Example: `CPUUtilization`",
+										},
+										"statistic": schema.StringAttribute{
+											Required:    true,
+											Description: "The calculation to apply to the time series.",
+										},
+										"match_exact": schema.BoolAttribute{
+											Optional:            true,
+											Description:         "If enabled you also need to specify all the dimensions of the metric you’re querying.",
+											MarkdownDescription: "If enabled you also need to specify **all** the dimensions of the metric you’re querying.",
+										},
+										"region": schema.StringAttribute{
+											Optional:    true,
+											Description: "The AWS region to query the metrics from.",
+										},
+										"ref_id": schema.StringAttribute{
+											Optional:    true,
+											Description: "The ID of the query. The ID can be used to reference queries in math expressions.",
+										},
+										"period": schema.StringAttribute{
+											Optional:    true,
+											Description: "The minimum interval between points in seconds.",
+										},
+										"label": schema.StringAttribute{
+											Optional:    true,
+											Description: "The legend name.",
 										},
 									},
 								},
 								Validators: []validator.List{
-									listvalidator.SizeAtMost(5),
+									listvalidator.SizeAtMost(26),
+									listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("logs")),
 								},
 							},
-						},
-						Attributes: map[string]schema.Attribute{
-							"uid": schema.StringAttribute{
-								Description: "The UID of a CloudWatch DataSource to use in this query.",
-								Required:    true,
-							},
-							"namespace": schema.StringAttribute{
-								Required:    true,
-								Description: "The namespace to query the metrics from.",
-							},
-							"metric_name": schema.StringAttribute{
-								Required:            true,
-								Description:         "The name of the metric to query.",
-								MarkdownDescription: "The name of the metric to query. Example: `CPUUtilization`",
-							},
-							"statistic": schema.StringAttribute{
-								Required:    true,
-								Description: "The calculation to apply to the time series.",
-							},
-							"match_exact": schema.BoolAttribute{
-								Optional:            true,
-								Description:         "If enabled you also need to specify all the dimensions of the metric you’re querying.",
-								MarkdownDescription: "If enabled you also need to specify **all** the dimensions of the metric you’re querying.",
-							},
-							"region": schema.StringAttribute{
-								Optional:    true,
-								Description: "The AWS region to query the metrics from.",
-							},
-							"ref_id": schema.StringAttribute{
-								Optional:    true,
-								Description: "The ID of the query. The ID can be used to reference queries in math expressions.",
-							},
-							"period": schema.StringAttribute{
-								Optional:    true,
-								Description: "The minimum interval between points in seconds.",
-							},
-							"label": schema.StringAttribute{
-								Optional:    true,
-								Description: "The legend name.",
+							"logs": schema.ListNestedBlock{
+								Description: "The logs query.",
+								NestedObject: schema.NestedBlockObject{
+									Blocks: map[string]schema.Block{
+										"log_group": schema.ListNestedBlock{
+											Description: "The log group to query logs from.",
+											NestedObject: schema.NestedBlockObject{
+												Attributes: map[string]schema.Attribute{
+													"arn": schema.StringAttribute{
+														Required:    true,
+														Description: "The ARN of the log group to query logs from.",
+													},
+													"name": schema.StringAttribute{
+														Optional:    true,
+														Description: "The name of log group to show in the query builder.",
+													},
+												},
+											},
+											Validators: []validator.List{
+												listvalidator.SizeAtMost(5),
+											},
+										},
+									},
+									Attributes: map[string]schema.Attribute{
+										"uid": schema.StringAttribute{
+											Required:    true,
+											Description: "The UID of a CloudWatch DataSource to use in this query.",
+										},
+										"expression": schema.StringAttribute{
+											Required:    true,
+											Description: "The expression to use to query the logs.",
+										},
+										"region": schema.StringAttribute{
+											Optional:    true,
+											Description: "The AWS region to query the logs from.",
+										},
+										"ref_id": schema.StringAttribute{
+											Optional:    true,
+											Description: "The ID of the query. The ID can be used to reference queries in math expressions.",
+										},
+									},
+								},
+								Validators: []validator.List{
+									listvalidator.SizeAtMost(26),
+									listvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("metrics")),
+								},
 							},
 						},
 					},
 					Validators: []validator.List{
-						listvalidator.SizeAtMost(26),
+						listvalidator.SizeAtLeast(1),
 					},
 				},
 			},
@@ -958,34 +1034,64 @@ func createTargets(queries []Query) []grafana.Target {
 		}
 
 		for _, target := range group.CloudWatch {
-			dimensions := make(map[string]string)
-
-			for _, dim := range target.Dimensions {
-				dimensions[dim.Name.ValueString()] = dim.Value.ValueString()
-			}
-
 			zero := 0
 
-			t := grafana.Target{
-				Datasource: grafana.Datasource{
-					UID:  target.UID.ValueString(),
-					Type: "cloudwatch",
-				},
-				RefID:            target.RefId.ValueString(),
-				QueryMode:        "Metrics",
-				MetricQueryType:  &zero,
-				MetricEditorMode: &zero,
-				Namespace:        target.Namespace.ValueString(),
-				MetricName:       target.MetricName.ValueString(),
-				Statistic:        target.Statistic.ValueString(),
-				Dimensions:       dimensions,
-				MatchExact:       target.MatchExact.ValueBool(),
-				Period:           target.Period.ValueString(),
-				Region:           target.Region.ValueString(),
-				Label:            target.Label.ValueString(),
+			for _, metrics := range target.Metrics {
+				dimensions := make(map[string]string)
+
+				for _, dim := range metrics.Dimensions {
+					dimensions[dim.Name.ValueString()] = dim.Value.ValueString()
+				}
+
+				t := grafana.Target{
+					Datasource: grafana.Datasource{
+						UID:  metrics.UID.ValueString(),
+						Type: "cloudwatch",
+					},
+					RefID:            metrics.RefId.ValueString(),
+					QueryMode:        "Metrics",
+					MetricQueryType:  &zero,
+					MetricEditorMode: &zero,
+					Namespace:        metrics.Namespace.ValueString(),
+					MetricName:       metrics.MetricName.ValueString(),
+					Statistic:        metrics.Statistic.ValueString(),
+					Dimensions:       dimensions,
+					MatchExact:       metrics.MatchExact.ValueBool(),
+					Period:           metrics.Period.ValueString(),
+					Region:           metrics.Region.ValueString(),
+					Label:            metrics.Label.ValueString(),
+				}
+
+				targets = append(targets, t)
 			}
 
-			targets = append(targets, t)
+			for _, logs := range target.Logs {
+				logGroups := make([]grafana.CloudWatchLogGroup, len(logs.LogGroups))
+
+				for idx, logGroup := range logs.LogGroups {
+					cwLogGroup := grafana.CloudWatchLogGroup{
+						Arn:  logGroup.Arn.ValueString(),
+						Name: logGroup.Name.ValueString(),
+					}
+					logGroups[idx] = cwLogGroup
+				}
+
+				t := grafana.Target{
+					Datasource: grafana.Datasource{
+						UID:  logs.UID.ValueString(),
+						Type: "cloudwatch",
+					},
+					RefID:            logs.RefId.ValueString(),
+					QueryMode:        "Logs",
+					MetricQueryType:  &zero,
+					MetricEditorMode: &zero,
+					Region:           logs.Region.ValueString(),
+					Expression:       logs.Expression.ValueStringPointer(),
+					LogGroups:        logGroups,
+				}
+
+				targets = append(targets, t)
+			}
 		}
 	}
 

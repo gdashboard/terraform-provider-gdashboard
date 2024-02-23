@@ -851,6 +851,41 @@ Optional:
 <a id="nestedblock--queries--cloudwatch"></a>
 ### Nested Schema for `queries.cloudwatch`
 
+Optional:
+
+- `logs` (Block List) The logs query. (see [below for nested schema](#nestedblock--queries--cloudwatch--logs))
+- `metrics` (Block List) The metrics query. (see [below for nested schema](#nestedblock--queries--cloudwatch--metrics))
+
+<a id="nestedblock--queries--cloudwatch--logs"></a>
+### Nested Schema for `queries.cloudwatch.logs`
+
+Required:
+
+- `expression` (String) The expression to use to query the logs.
+- `uid` (String) The UID of a CloudWatch DataSource to use in this query.
+
+Optional:
+
+- `log_group` (Block List) The log group to query logs from. (see [below for nested schema](#nestedblock--queries--cloudwatch--logs--log_group))
+- `ref_id` (String) The ID of the query. The ID can be used to reference queries in math expressions.
+- `region` (String) The AWS region to query the logs from.
+
+<a id="nestedblock--queries--cloudwatch--logs--log_group"></a>
+### Nested Schema for `queries.cloudwatch.logs.log_group`
+
+Required:
+
+- `arn` (String) The ARN of the log group to query logs from.
+
+Optional:
+
+- `name` (String) The name of log group to show in the query builder.
+
+
+
+<a id="nestedblock--queries--cloudwatch--metrics"></a>
+### Nested Schema for `queries.cloudwatch.metrics`
+
 Required:
 
 - `metric_name` (String) The name of the metric to query. Example: `CPUUtilization`
@@ -860,20 +895,21 @@ Required:
 
 Optional:
 
-- `dimension` (Block List) The dimension to filter the metric with. (see [below for nested schema](#nestedblock--queries--cloudwatch--dimension))
+- `dimension` (Block List) The dimension to filter the metric with. (see [below for nested schema](#nestedblock--queries--cloudwatch--metrics--dimension))
 - `label` (String) The legend name.
 - `match_exact` (Boolean) If enabled you also need to specify **all** the dimensions of the metric you’re querying.
 - `period` (String) The minimum interval between points in seconds.
 - `ref_id` (String) The ID of the query. The ID can be used to reference queries in math expressions.
 - `region` (String) The AWS region to query the metrics from.
 
-<a id="nestedblock--queries--cloudwatch--dimension"></a>
-### Nested Schema for `queries.cloudwatch.dimension`
+<a id="nestedblock--queries--cloudwatch--metrics--dimension"></a>
+### Nested Schema for `queries.cloudwatch.metrics.dimension`
 
 Required:
 
 - `name` (String) The name of the dimension.
 - `value` (String) The value of the dimension.
+
 
 
 
