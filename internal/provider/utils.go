@@ -266,6 +266,7 @@ type Query struct {
 
 type PrometheusTarget struct {
 	UID     types.String `tfsdk:"uid"`
+	Hide    types.Bool   `tfsdk:"hide"`
 	Expr    types.String `tfsdk:"expr"`
 	Instant types.Bool   `tfsdk:"instant"`
 	Format  types.String `tfsdk:"format"`
@@ -282,6 +283,7 @@ type CloudWatchTarget struct {
 
 type CloudWatchMetricsTarget struct {
 	UID        types.String          `tfsdk:"uid"`
+	Hide       types.Bool            `tfsdk:"hide"`
 	Namespace  types.String          `tfsdk:"namespace"`
 	MetricName types.String          `tfsdk:"metric_name"`
 	Statistic  types.String          `tfsdk:"statistic"`
@@ -301,6 +303,7 @@ type CloudWatchLogGroup struct {
 
 type CloudWatchLogsTarget struct {
 	UID        types.String         `tfsdk:"uid"`
+	Hide       types.Bool           `tfsdk:"hide"`
 	Expression types.String         `tfsdk:"expression"`
 	LogGroups  []CloudWatchLogGroup `tfsdk:"log_group"`
 	Region     types.String         `tfsdk:"region"`
@@ -617,6 +620,10 @@ func queryBlock() schema.Block {
 								Description: "The UID of a Prometheus DataSource to use in this query.",
 								Required:    true,
 							},
+							"hide": schema.BoolAttribute{
+								Description: "Whether to hide query result from the panel or not.",
+								Optional:    true,
+							},
 							"expr": schema.StringAttribute{
 								Required:    true,
 								Description: "The query expression.",
@@ -682,6 +689,10 @@ func queryBlock() schema.Block {
 										"uid": schema.StringAttribute{
 											Description: "The UID of a CloudWatch DataSource to use in this query.",
 											Required:    true,
+										},
+										"hide": schema.BoolAttribute{
+											Description: "Whether to hide query result from the panel or not.",
+											Optional:    true,
 										},
 										"namespace": schema.StringAttribute{
 											Required:    true,
@@ -751,6 +762,10 @@ func queryBlock() schema.Block {
 										"uid": schema.StringAttribute{
 											Required:    true,
 											Description: "The UID of a CloudWatch DataSource to use in this query.",
+										},
+										"hide": schema.BoolAttribute{
+											Description: "Whether to hide query result from the panel or not.",
+											Optional:    true,
 										},
 										"expression": schema.StringAttribute{
 											Required:    true,
@@ -1023,6 +1038,7 @@ func createTargets(queries []Query) []grafana.Target {
 					Type: "prometheus",
 				},
 				RefID:        target.RefId.ValueString(),
+				Hide:         target.Hide.ValueBool(),
 				Expr:         target.Expr.ValueString(),
 				Interval:     target.MinInterval.ValueString(),
 				LegendFormat: target.LegendFormat.ValueString(),
@@ -1049,6 +1065,7 @@ func createTargets(queries []Query) []grafana.Target {
 						Type: "cloudwatch",
 					},
 					RefID:            metrics.RefId.ValueString(),
+					Hide:             metrics.Hide.ValueBool(),
 					QueryMode:        "Metrics",
 					MetricQueryType:  &zero,
 					MetricEditorMode: &zero,
@@ -1082,6 +1099,7 @@ func createTargets(queries []Query) []grafana.Target {
 						Type: "cloudwatch",
 					},
 					RefID:            logs.RefId.ValueString(),
+					Hide:             logs.Hide.ValueBool(),
 					QueryMode:        "Logs",
 					MetricQueryType:  &zero,
 					MetricEditorMode: &zero,

@@ -828,6 +828,7 @@ Required:
 
 Optional:
 
+- `hide` (Boolean) Whether to hide query result from the panel or not.
 - `log_group` (Block List) The log group to query logs from. (see [below for nested schema](#nestedblock--queries--cloudwatch--logs--log_group))
 - `ref_id` (String) The ID of the query. The ID can be used to reference queries in math expressions.
 - `region` (String) The AWS region to query the logs from.
@@ -858,6 +859,7 @@ Required:
 Optional:
 
 - `dimension` (Block List) The dimension to filter the metric with. (see [below for nested schema](#nestedblock--queries--cloudwatch--metrics--dimension))
+- `hide` (Boolean) Whether to hide query result from the panel or not.
 - `label` (String) The legend name.
 - `match_exact` (Boolean) If enabled you also need to specify **all** the dimensions of the metric you’re querying.
 - `period` (String) The minimum interval between points in seconds.
@@ -886,6 +888,7 @@ Required:
 Optional:
 
 - `format` (String) The query format. The choices are: `time_series`, `table`, `heatmap`.
+- `hide` (Boolean) Whether to hide query result from the panel or not.
 - `instant` (Boolean) Whether to return the latest value from the time series or not.
 - `legend_format` (String) The legend name.
 - `min_interval` (String) The lower bounds on the interval between data points.
