@@ -291,9 +291,10 @@ type CloudWatchMetricsTarget struct {
 	MatchExact types.Bool            `tfsdk:"match_exact"`
 	Region     types.String          `tfsdk:"region"`
 	// etc
-	RefId  types.String `tfsdk:"ref_id"`
-	Period types.String `tfsdk:"period"`
-	Label  types.String `tfsdk:"label"`
+	RefId       types.String `tfsdk:"ref_id"`
+	MinInterval types.String `tfsdk:"min_interval"`
+	Period      types.String `tfsdk:"period"`
+	Label       types.String `tfsdk:"label"`
 }
 
 type CloudWatchLogGroup struct {
@@ -720,6 +721,10 @@ func queryBlock() schema.Block {
 											Optional:    true,
 											Description: "The ID of the query. The ID can be used to reference queries in math expressions.",
 										},
+										"min_interval": schema.StringAttribute{
+											Optional:    true,
+											Description: "The lower bounds on the interval between data points.",
+										},
 										"period": schema.StringAttribute{
 											Optional:    true,
 											Description: "The minimum interval between points in seconds.",
@@ -1066,6 +1071,7 @@ func createTargets(queries []Query) []grafana.Target {
 					},
 					RefID:            metrics.RefId.ValueString(),
 					Hide:             metrics.Hide.ValueBool(),
+					Interval:         metrics.MinInterval.ValueString(),
 					QueryMode:        "Metrics",
 					MetricQueryType:  &zero,
 					MetricEditorMode: &zero,

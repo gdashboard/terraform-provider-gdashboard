@@ -900,6 +900,7 @@ Optional:
 - `hide` (Boolean) Whether to hide query result from the panel or not.
 - `label` (String) The legend name.
 - `match_exact` (Boolean) If enabled you also need to specify **all** the dimensions of the metric you’re querying.
+- `min_interval` (String) The lower bounds on the interval between data points.
 - `period` (String) The minimum interval between points in seconds.
 - `ref_id` (String) The ID of the query. The ID can be used to reference queries in math expressions.
 - `region` (String) The AWS region to query the metrics from.
