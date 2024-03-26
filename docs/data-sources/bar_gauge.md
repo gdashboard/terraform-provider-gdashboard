@@ -808,6 +808,7 @@ Optional:
 Optional:
 
 - `cloudwatch` (Block List) The CloudWatch query. (see [below for nested schema](#nestedblock--queries--cloudwatch))
+- `expression` (Block List) The expression query. (see [below for nested schema](#nestedblock--queries--expression))
 - `prometheus` (Block List) The Prometheus query. (see [below for nested schema](#nestedblock--queries--prometheus))
 
 <a id="nestedblock--queries--cloudwatch"></a>
@@ -875,6 +876,54 @@ Required:
 - `name` (String) The name of the dimension.
 - `value` (String) The value of the dimension.
 
+
+
+
+<a id="nestedblock--queries--expression"></a>
+### Nested Schema for `queries.expression`
+
+Optional:
+
+- `hide` (Boolean) Whether to hide query result from the panel or not.
+- `math` (Block List) Math is for free-form math formulas on time series or number data. See the [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/expression-queries/#math). (see [below for nested schema](#nestedblock--queries--expression--math))
+- `reduce` (Block List) Reduce takes one or more time series returned from a query or an expression and turns each series into a single number. See the [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/expression-queries/#reduce). (see [below for nested schema](#nestedblock--queries--expression--reduce))
+- `ref_id` (String) The ID of the query. The ID can be used to reference queries in other expressions.
+- `resample` (Block List) Resample changes the time stamps in each time series to have a consistent time interval. See the [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/expression-queries/#resample). (see [below for nested schema](#nestedblock--queries--expression--resample))
+
+<a id="nestedblock--queries--expression--math"></a>
+### Nested Schema for `queries.expression.math`
+
+Required:
+
+- `expression` (String) The math expression to evaluate.
+
+
+<a id="nestedblock--queries--expression--reduce"></a>
+### Nested Schema for `queries.expression.reduce`
+
+Required:
+
+- `function` (String) The reduction function to use. The choices are: `min`, `max`, `mean`, `sum`, `count`, `last`.
+- `input` (String) The variable (refID (such as `A`)) to resample.
+
+Optional:
+
+- `mode` (String) Allows control behavior of reduction function when a series contains non-numerical values. The choices are: `strict`, `drop`, `replace`.
+- `replace_with` (Number) Effective when mode=replace. Replaces null, -inf, and +inf with the given value.
+
+
+<a id="nestedblock--queries--expression--resample"></a>
+### Nested Schema for `queries.expression.resample`
+
+Required:
+
+- `input` (String) The variable (refID (such as `A`)) to resample.
+- `to` (String) The duration of time to resample to, for example `10s`. Units may be `s` seconds, `m` for minutes, `h` for hours, `d` for days, `w` for weeks, and `y` of years.
+
+Optional:
+
+- `downsample` (String) The reduction function to use when there are more than one data point per window sample. The choices are: `min`, `max`, `mean`, `sum`, `last`.
+- `upsample` (String) The method to use to fill a window sample that has no data points. The choices are: `pad`, `backfilling`, `fillna`.
 
 
 
