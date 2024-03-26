@@ -181,7 +181,7 @@ func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	targets := createTargets(data.Queries)
+	targets, minInterval := createTargets(data.Queries)
 	fieldConfig := createFieldConfig(d.Defaults.Field, data.Field)
 	transformations := createTransformations(data.Transformations)
 
@@ -236,6 +236,7 @@ func (d *StatDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 			Span:            12,
 			IsNew:           true,
 			Transformations: transformations,
+			Interval:        minInterval,
 		},
 		StatPanel: &grafana.StatPanel{
 			Targets: targets,

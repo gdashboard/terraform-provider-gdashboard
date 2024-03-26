@@ -161,7 +161,7 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 
-	targets := createTargets(data.Queries)
+	targets, minInterval := createTargets(data.Queries)
 	fieldConfig := createFieldConfig(d.Defaults.Field, data.Field)
 	transformations := createTransformations(data.Transformations)
 
@@ -206,6 +206,7 @@ func (d *BarGaugeDataSource) Read(ctx context.Context, req datasource.ReadReques
 			Span:            12,
 			IsNew:           true,
 			Transformations: transformations,
+			Interval:        minInterval,
 		},
 		BarGaugePanel: &grafana.BarGaugePanel{
 			Targets: targets,

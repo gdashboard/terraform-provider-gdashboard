@@ -153,7 +153,7 @@ func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		return
 	}
 
-	targets := createTargets(data.Queries)
+	targets, minInterval := createTargets(data.Queries)
 	fieldConfig := createFieldConfig(d.Defaults.Field, data.Field)
 	transformations := createTransformations(data.Transformations)
 
@@ -198,6 +198,7 @@ func (d *GaugeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 			Span:            12,
 			IsNew:           true,
 			Transformations: transformations,
+			Interval:        minInterval,
 		},
 		GaugePanel: &grafana.GaugePanel{
 			Targets: targets,

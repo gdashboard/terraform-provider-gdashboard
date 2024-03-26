@@ -48,7 +48,7 @@ data "gdashboard_timeseries" "jvm_memory" {
       expr          = "sum(increase(jvm_memory_total{container_name='container'}[$__rate_interval]))"
       instant       = false
       ref_id        = "Prometheus_Query"
-      min_interval  = "30"
+      min_step      = "30"
       legend_format = "Memory total"
     }
   }

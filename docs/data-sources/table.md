@@ -879,6 +879,7 @@ Optional:
 
 - `cloudwatch` (Block List) The CloudWatch query. (see [below for nested schema](#nestedblock--queries--cloudwatch))
 - `expression` (Block List) The expression query. (see [below for nested schema](#nestedblock--queries--expression))
+- `min_interval` (String) The lower bounds on the interval between data points.
 - `prometheus` (Block List) The Prometheus query. (see [below for nested schema](#nestedblock--queries--prometheus))
 
 <a id="nestedblock--queries--cloudwatch"></a>
@@ -933,7 +934,6 @@ Optional:
 - `hide` (Boolean) Whether to hide query result from the panel or not.
 - `label` (String) The legend name.
 - `match_exact` (Boolean) If enabled you also need to specify **all** the dimensions of the metric you’re querying.
-- `min_interval` (String) The lower bounds on the interval between data points.
 - `period` (String) The minimum interval between points in seconds.
 - `ref_id` (String) The ID of the query. The ID can be used to reference queries in math expressions.
 - `region` (String) The AWS region to query the metrics from.
@@ -1011,7 +1011,7 @@ Optional:
 - `hide` (Boolean) Whether to hide query result from the panel or not.
 - `instant` (Boolean) Whether to return the latest value from the time series or not.
 - `legend_format` (String) The legend name.
-- `min_interval` (String) The lower bounds on the interval between data points.
+- `min_step` (String) The lower bounds on the interval between data points.
 - `ref_id` (String) The ID of the query. The ID can be used to reference queries in math expressions.
 
 

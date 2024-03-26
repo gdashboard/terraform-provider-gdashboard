@@ -84,6 +84,7 @@ type (
 		Type            string           `json:"type"`
 		Alert           *Alert           `json:"alert,omitempty"`
 		Transformations []Transformation `json:"transformations,omitempty"`
+		Interval        *string          `json:"interval,omitempty"`
 	}
 	AlertEvaluator struct {
 		Params []float64 `json:"params,omitempty"`

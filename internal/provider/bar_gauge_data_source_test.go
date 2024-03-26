@@ -96,7 +96,7 @@ data "gdashboard_bar_gauge" "test" {
     prometheus {
       uid           = "prometheus"
       expr          = "sort_desc(sum(increase(data[$__range])) by (job_type))"
-      min_interval  = "30"
+      min_step      = "30"
       legend_format = "{{job_type}}"
       instant       = true
 	  ref_id		= "Prometheus_Query"
