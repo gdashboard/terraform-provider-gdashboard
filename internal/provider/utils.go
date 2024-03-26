@@ -262,6 +262,7 @@ type ByQueryIDOverrideOptions struct {
 type Query struct {
 	Prometheus []PrometheusTarget `tfsdk:"prometheus"`
 	CloudWatch []CloudWatchTarget `tfsdk:"cloudwatch"`
+	Expression []ExpressionTarget `tfsdk:"expression"`
 }
 
 type PrometheusTarget struct {
@@ -314,6 +315,32 @@ type CloudWatchLogsTarget struct {
 type CloudWatchDimension struct {
 	Name  types.String `tfsdk:"name"`
 	Value types.String `tfsdk:"value"`
+}
+
+type ExpressionTarget struct {
+	RefId    types.String               `tfsdk:"ref_id"`
+	Hide     types.Bool                 `tfsdk:"hide"`
+	Math     []ExpressionMathTarget     `tfsdk:"math"`
+	Reduce   []ExpressionReduceTarget   `tfsdk:"reduce"`
+	Resample []ExpressionResampleTarget `tfsdk:"resample"`
+}
+
+type ExpressionMathTarget struct {
+	Expression types.String `tfsdk:"expression"`
+}
+
+type ExpressionReduceTarget struct {
+	Function    types.String  `tfsdk:"function"`
+	Input       types.String  `tfsdk:"input"`
+	Mode        types.String  `tfsdk:"mode"`
+	ReplaceWith types.Float64 `tfsdk:"replace_with"`
+}
+
+type ExpressionResampleTarget struct {
+	Input      types.String `tfsdk:"input"`
+	To         types.String `tfsdk:"to"`
+	Downsample types.String `tfsdk:"downsample"`
+	Upsample   types.String `tfsdk:"upsample"`
 }
 
 func axisBlock() schema.Block {
@@ -797,6 +824,132 @@ func queryBlock() schema.Block {
 						listvalidator.SizeAtLeast(1),
 					},
 				},
+				"expression": schema.ListNestedBlock{
+					Description: "The expression query.",
+					NestedObject: schema.NestedBlockObject{
+						Blocks: map[string]schema.Block{
+							"math": schema.ListNestedBlock{
+								Description: "Math is for free-form math formulas on time series or number data. " +
+									"See the documentation https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/expression-queries/#math.",
+								MarkdownDescription: "Math is for free-form math formulas on time series or number data. " +
+									"See the [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/expression-queries/#math).",
+								NestedObject: schema.NestedBlockObject{
+									Attributes: map[string]schema.Attribute{
+										"expression": schema.StringAttribute{
+											Description: "The math expression to evaluate.",
+											Required:    true,
+										},
+									},
+								},
+								Validators: []validator.List{
+									listvalidator.SizeAtMost(26),
+									listvalidator.ConflictsWith(
+										path.MatchRelative().AtParent().AtName("reduce"),
+										path.MatchRelative().AtParent().AtName("resample"),
+									),
+								},
+							},
+							"reduce": schema.ListNestedBlock{
+								Description: "Reduce takes one or more time series returned from a query or an expression and turns each series into a single number. " +
+									"See the documentation https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/expression-queries/#reduce.",
+								MarkdownDescription: "Reduce takes one or more time series returned from a query or an expression and turns each series into a single number. " +
+									"See the [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/expression-queries/#reduce).",
+								NestedObject: schema.NestedBlockObject{
+									Attributes: map[string]schema.Attribute{
+										"function": schema.StringAttribute{
+											Required:            true,
+											Description:         "The reduction function to use. The choices are: min, max, mean, sum, count, last.",
+											MarkdownDescription: "The reduction function to use. The choices are: `min`, `max`, `mean`, `sum`, `count`, `last`.",
+											Validators: []validator.String{
+												stringvalidator.OneOf("min", "max", "mean", "sum", "count", "last"),
+											},
+										},
+										"input": schema.StringAttribute{
+											Required:            true,
+											Description:         "The variable (refID (such as A)) to resample.",
+											MarkdownDescription: "The variable (refID (such as `A`)) to resample.",
+										},
+										"mode": schema.StringAttribute{
+											Optional:            true,
+											Description:         "Allows control behavior of reduction function when a series contains non-numerical values. The choices are: strict, drop, replace.",
+											MarkdownDescription: "Allows control behavior of reduction function when a series contains non-numerical values. The choices are: `strict`, `drop`, `replace`.",
+											Validators: []validator.String{
+												stringvalidator.OneOf("strict", "drop", "replace"),
+											},
+										},
+										"replace_with": schema.Float64Attribute{
+											Optional:    true,
+											Description: "Effective when mode=replace. Replaces null, -inf, and +inf with the given value.",
+										},
+									},
+								},
+								Validators: []validator.List{
+									listvalidator.SizeAtMost(26),
+									listvalidator.ConflictsWith(
+										path.MatchRelative().AtParent().AtName("math"),
+										path.MatchRelative().AtParent().AtName("resample"),
+									),
+								},
+							},
+							"resample": schema.ListNestedBlock{
+								Description: "Resample changes the time stamps in each time series to have a consistent time interval. " +
+									"See the documentation https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/expression-queries/#resample.",
+								MarkdownDescription: "Resample changes the time stamps in each time series to have a consistent time interval. " +
+									"See the [documentation](https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/expression-queries/#resample).",
+								NestedObject: schema.NestedBlockObject{
+									Attributes: map[string]schema.Attribute{
+										"input": schema.StringAttribute{
+											Required:            true,
+											Description:         "The variable (refID (such as A)) to resample.",
+											MarkdownDescription: "The variable (refID (such as `A`)) to resample.",
+										},
+										"to": schema.StringAttribute{
+											Required:            true,
+											Description:         "The duration of time to resample to, for example 10s. Units may be s seconds, m for minutes, h for hours, d for days, w for weeks, and y of years.",
+											MarkdownDescription: "The duration of time to resample to, for example `10s`. Units may be `s` seconds, `m` for minutes, `h` for hours, `d` for days, `w` for weeks, and `y` of years.",
+										},
+										"downsample": schema.StringAttribute{
+											Optional:            true,
+											Description:         "The reduction function to use when there are more than one data point per window sample. The choices are: min, max, mean, sum, last.",
+											MarkdownDescription: "The reduction function to use when there are more than one data point per window sample. The choices are: `min`, `max`, `mean`, `sum`, `last`.",
+											Validators: []validator.String{
+												stringvalidator.OneOf("min", "max", "mean", "sum", "last"),
+											},
+										},
+										"upsample": schema.StringAttribute{
+											Optional:            true,
+											Description:         "The method to use to fill a window sample that has no data points. The choices are: pad, backfilling, fillna.",
+											MarkdownDescription: "The method to use to fill a window sample that has no data points. The choices are: `pad`, `backfilling`, `fillna`.",
+											Validators: []validator.String{
+												stringvalidator.OneOf("pad", "backfilling", "fillna"),
+											},
+										},
+									},
+								},
+								Validators: []validator.List{
+									listvalidator.SizeAtMost(26),
+									listvalidator.ConflictsWith(
+										path.MatchRelative().AtParent().AtName("math"),
+										path.MatchRelative().AtParent().AtName("reduce"),
+									),
+								},
+							},
+						},
+						Attributes: map[string]schema.Attribute{
+							"ref_id": schema.StringAttribute{
+								Optional:    true,
+								Description: "The ID of the query. The ID can be used to reference queries in other expressions.",
+							},
+							"hide": schema.BoolAttribute{
+								Description: "Whether to hide query result from the panel or not.",
+								Optional:    true,
+							},
+						},
+					},
+					Validators: []validator.List{
+						listvalidator.SizeAtLeast(1),
+					},
+				},
 			},
 		},
 		Validators: []validator.List{
@@ -1116,6 +1269,50 @@ func createTargets(queries []Query) []grafana.Target {
 
 				targets = append(targets, t)
 			}
+		}
+
+		for _, expression := range group.Expression {
+			t := grafana.Target{
+				Datasource: grafana.Datasource{
+					UID:  "__expr__",
+					Type: "__expr__",
+					Name: "Expression",
+				},
+				RefID: expression.RefId.ValueString(),
+				Hide:  expression.Hide.ValueBool(),
+			}
+
+			for _, math := range expression.Math {
+				t.Type = "math"
+				t.Expression = math.Expression.ValueStringPointer()
+			}
+
+			for _, reduce := range expression.Reduce {
+				t.Type = "reduce"
+				t.Reducer = reduce.Function.ValueStringPointer()
+				t.Expression = reduce.Input.ValueStringPointer()
+
+				if !reduce.Mode.IsNull() {
+					if reduce.Mode.ValueString() == "drop" {
+						t.Settings.Mode = "dropNN"
+					}
+
+					if reduce.Mode.ValueString() == "replace" {
+						t.Settings.Mode = "replaceNN"
+						t.Settings.ReplaceWithValue = reduce.ReplaceWith.ValueFloat64Pointer()
+					}
+				}
+			}
+
+			for _, resample := range expression.Resample {
+				t.Type = "resample"
+				t.Expression = resample.Input.ValueStringPointer()
+				t.Window = resample.To.ValueStringPointer()
+				t.Downsampler = resample.Downsample.ValueStringPointer()
+				t.Upsampler = resample.Upsample.ValueStringPointer()
+			}
+
+			targets = append(targets, t)
 		}
 	}
 

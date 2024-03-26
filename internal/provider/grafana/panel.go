@@ -582,6 +582,7 @@ type Target struct {
 	RefID      string      `json:"refId"`
 	Datasource interface{} `json:"datasource,omitempty"`
 	Hide       bool        `json:"hide,omitempty"`
+	Type       string      `json:"type,omitempty"`
 
 	// For Prometheus
 	Expr           string `json:"expr,omitempty"`
@@ -609,6 +610,18 @@ type Target struct {
 	Period           string               `json:"period,omitempty"`
 	Region           string               `json:"region,omitempty"`
 	Label            string               `json:"label,omitempty"`
+
+	// For Expression
+	Reducer     *string                   `json:"reducer,omitempty"`
+	Downsampler *string                   `json:"downsampler,omitempty"`
+	Upsampler   *string                   `json:"upsampler,omitempty"`
+	Window      *string                   `json:"window,omitempty"`
+	Settings    *ReduceExpressionSettings `json:"settings,omitempty"`
+}
+
+type ReduceExpressionSettings struct {
+	Mode             string   `json:"mode,omitempty"`
+	ReplaceWithValue *float64 `json:"replaceWithValue,omitempty"`
 }
 
 type CloudWatchLogGroup struct {
