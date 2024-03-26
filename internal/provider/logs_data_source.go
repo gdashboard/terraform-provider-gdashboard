@@ -151,7 +151,7 @@ func (d *LogsDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	targets := createTargets(data.Queries)
+	targets, minInterval := createTargets(data.Queries)
 
 	falseVal := false
 	trueVal := true
@@ -210,11 +210,12 @@ func (d *LogsDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	panel := &grafana.Panel{
 		CommonPanel: grafana.CommonPanel{
-			OfType: grafana.LogsType,
-			Title:  data.Title.ValueString(),
-			Type:   "logs",
-			Span:   12,
-			IsNew:  true,
+			OfType:   grafana.LogsType,
+			Title:    data.Title.ValueString(),
+			Type:     "logs",
+			Span:     12,
+			IsNew:    true,
+			Interval: minInterval,
 		},
 		LogsPanel: &grafana.LogsPanel{
 			Targets: targets,

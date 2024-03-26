@@ -304,7 +304,7 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		return
 	}
 
-	targets := createTargets(data.Queries)
+	targets, minInterval := createTargets(data.Queries)
 	transformations := createTransformations(data.Transformations)
 
 	legendOptions := grafana.TimeseriesLegendOptions{
@@ -451,6 +451,7 @@ func (d *TimeseriesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 			Span:            12,
 			IsNew:           true,
 			Transformations: transformations,
+			Interval:        minInterval,
 		},
 		TimeseriesPanel: &grafana.TimeseriesPanel{
 			Targets: targets,

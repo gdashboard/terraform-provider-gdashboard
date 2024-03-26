@@ -260,8 +260,9 @@ type ByQueryIDOverrideOptions struct {
 }
 
 type Query struct {
-	Prometheus []PrometheusTarget `tfsdk:"prometheus"`
-	CloudWatch []CloudWatchTarget `tfsdk:"cloudwatch"`
+	MinInterval types.String       `tfsdk:"min_interval"`
+	Prometheus  []PrometheusTarget `tfsdk:"prometheus"`
+	CloudWatch  []CloudWatchTarget `tfsdk:"cloudwatch"`
 	Expression []ExpressionTarget `tfsdk:"expression"`
 }
 
@@ -273,7 +274,7 @@ type PrometheusTarget struct {
 	Format  types.String `tfsdk:"format"`
 	// etc
 	RefId        types.String `tfsdk:"ref_id"`
-	MinInterval  types.String `tfsdk:"min_interval"`
+	MinStep      types.String `tfsdk:"min_step"`
 	LegendFormat types.String `tfsdk:"legend_format"`
 }
 
@@ -292,10 +293,9 @@ type CloudWatchMetricsTarget struct {
 	MatchExact types.Bool            `tfsdk:"match_exact"`
 	Region     types.String          `tfsdk:"region"`
 	// etc
-	RefId       types.String `tfsdk:"ref_id"`
-	MinInterval types.String `tfsdk:"min_interval"`
-	Period      types.String `tfsdk:"period"`
-	Label       types.String `tfsdk:"label"`
+	RefId  types.String `tfsdk:"ref_id"`
+	Period types.String `tfsdk:"period"`
+	Label  types.String `tfsdk:"label"`
 }
 
 type CloudWatchLogGroup struct {
@@ -672,7 +672,7 @@ func queryBlock() schema.Block {
 									stringvalidator.OneOf("time_series", "table", "heatmap"),
 								},
 							},
-							"min_interval": schema.StringAttribute{
+							"min_step": schema.StringAttribute{
 								Optional:    true,
 								Description: "The lower bounds on the interval between data points.",
 							},
@@ -747,10 +747,6 @@ func queryBlock() schema.Block {
 										"ref_id": schema.StringAttribute{
 											Optional:    true,
 											Description: "The ID of the query. The ID can be used to reference queries in math expressions.",
-										},
-										"min_interval": schema.StringAttribute{
-											Optional:    true,
-											Description: "The lower bounds on the interval between data points.",
 										},
 										"period": schema.StringAttribute{
 											Optional:    true,
@@ -949,6 +945,12 @@ func queryBlock() schema.Block {
 					Validators: []validator.List{
 						listvalidator.SizeAtLeast(1),
 					},
+				},
+			},
+			Attributes: map[string]schema.Attribute{
+				"min_interval": schema.StringAttribute{
+					Optional:    true,
+					Description: "The lower bounds on the interval between data points.",
 				},
 			},
 		},
@@ -1185,10 +1187,13 @@ func descriptionAttribute() schema.StringAttribute {
 
 // creators
 
-func createTargets(queries []Query) []grafana.Target {
+func createTargets(queries []Query) ([]grafana.Target, *string) {
 	targets := make([]grafana.Target, 0)
+	var minInterval *string
 
 	for _, group := range queries {
+		minInterval = group.MinInterval.ValueStringPointer()
+
 		for _, target := range group.Prometheus {
 			t := grafana.Target{
 				Datasource: grafana.Datasource{
@@ -1198,7 +1203,7 @@ func createTargets(queries []Query) []grafana.Target {
 				RefID:        target.RefId.ValueString(),
 				Hide:         target.Hide.ValueBool(),
 				Expr:         target.Expr.ValueString(),
-				Interval:     target.MinInterval.ValueString(),
+				Interval:     target.MinStep.ValueString(),
 				LegendFormat: target.LegendFormat.ValueString(),
 				Instant:      target.Instant.ValueBool(),
 				Format:       target.Format.ValueString(),
@@ -1224,7 +1229,6 @@ func createTargets(queries []Query) []grafana.Target {
 					},
 					RefID:            metrics.RefId.ValueString(),
 					Hide:             metrics.Hide.ValueBool(),
-					Interval:         metrics.MinInterval.ValueString(),
 					QueryMode:        "Metrics",
 					MetricQueryType:  &zero,
 					MetricEditorMode: &zero,
@@ -1316,7 +1320,7 @@ func createTargets(queries []Query) []grafana.Target {
 		}
 	}
 
-	return targets
+	return targets, minInterval
 }
 
 type ValueMappingResult struct {

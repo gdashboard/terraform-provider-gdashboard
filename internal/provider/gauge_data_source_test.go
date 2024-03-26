@@ -89,10 +89,10 @@ data "gdashboard_gauge" "test" {
 
   queries {
     prometheus {
-      uid          = "prometheus"
-      expr         = "sum (jvm_memory_bytes_used{container_name='container', area='heap'}) / sum (jvm_memory_bytes_max{container_name='container', area='heap'}) * 100"
-      min_interval = "30"
-      instant      = true
+      uid      = "prometheus"
+      expr     = "sum (jvm_memory_bytes_used{container_name='container', area='heap'}) / sum (jvm_memory_bytes_max{container_name='container', area='heap'}) * 100"
+      min_step = "30"
+      instant  = true
     }
   }
 }
